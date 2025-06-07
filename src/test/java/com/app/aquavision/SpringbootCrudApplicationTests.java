@@ -1,10 +1,10 @@
-package com.app.springbootcrud;
+package com.app.aquavision;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class SpringbootCrudApplicationTests {
+class SpringbootAquaVisionApplicationTest {
 
 	@Test
 	void contextLoads() {
