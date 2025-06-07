@@ -12,7 +12,7 @@ import jakarta.validation.Payload;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExistsByUsername {
-    String message() default "Username already exist in the database.";
+    String message() default "Username already exists in the database.";
 
     Class<?>[] groups() default {};
 
