@@ -18,8 +18,10 @@ import com.app.aquavision.repositories.UserRepository;
 
 import jakarta.transaction.Transactional;
 
+
+
 @Component
-@Order(3)
+@Order(2)
 public class UserInitializer implements CommandLineRunner {
 
     @Autowired
@@ -34,33 +36,36 @@ public class UserInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        createUserIfNotExists("testuser", "test123", List.of("ROLE_USER"));
-        createUserIfNotExists("testuseradmin", "admin123", List.of("ROLE_USER", "ROLE_ADMIN"));
+        createTestUserIfNotExists();
     }
 
-    private void createUserIfNotExists(String username, String password, List<String> roleNames) {
+    private void createTestUserIfNotExists() {
+        String username = "testuser";
+        String password = "test123";
+
         if (userRepository.findByUsername(username).isPresent()) {
-            System.out.println("User already exists: " + username);
+            System.out.println("Test user already exists: " + username);
             return;
         }
 
-        List<Role> roles = new ArrayList<>();
-        for (String roleName : roleNames) {
-            Optional<Role> optionalRole = roleRepository.findByName(roleName);
-            if (optionalRole.isEmpty()) {
-                System.out.println("Role not found: " + roleName + ". Skipping user creation.");
-                return;
-            }
-            roles.add(optionalRole.get());
+        Optional<Role> optionalRole = roleRepository.findByName("ROLE_USER");
+        if (optionalRole.isEmpty()) {
+            System.out.println("ROLE_USER not found. Skipping user creation.");
+            return;
         }
+
+        Role roleUser = optionalRole.get();
 
         User user = new User();
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
         user.setEnabled(true);
+        
+        List<Role> roles = new ArrayList<>();
+        roles.add(roleUser);
         user.setRoles(roles);
 
         userRepository.save(user);
-        System.out.println("User created: " + username);
+        System.out.println("Test user created: " + username);
     }
 }

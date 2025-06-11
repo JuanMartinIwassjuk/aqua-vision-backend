@@ -2,12 +2,14 @@ package com.app.aquavision.boostrap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.app.aquavision.entities.Role;
 import com.app.aquavision.repositories.RoleRepository;
 
 @Component
+@Order(1)
 public class RoleInitializer implements CommandLineRunner {
 
     @Autowired

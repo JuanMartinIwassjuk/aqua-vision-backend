@@ -24,56 +24,56 @@ import com.app.aquavision.security.filter.JwtValidationFilter;
 
 import java.util.Arrays;
 
-@Configuration
-@EnableMethodSecurity(prePostEnabled=true)
-public class SpringSecurityConfig {
-    
-    @Autowired
-    private AuthenticationConfiguration authenticationConfiguration;
+    @Configuration
+    @EnableMethodSecurity(prePostEnabled=true)
+    public class SpringSecurityConfig {
+        
+        @Autowired
+        private AuthenticationConfiguration authenticationConfiguration;
 
-    @Bean
-    AuthenticationManager authenticationManager() throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
+        @Bean
+        AuthenticationManager authenticationManager() throws Exception {
+            return authenticationConfiguration.getAuthenticationManager();
+        }
 
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        PasswordEncoder passwordEncoder() {
+            return new BCryptPasswordEncoder();
+        }
 
-    @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http.authorizeHttpRequests((authz) -> authz
-                .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                .requestMatchers(HttpMethod.POST, "/users").permitAll()
-                // .requestMatchers(HttpMethod.POST, "/users").hasRole("ADMIN"))
-                .anyRequest().authenticated())
-                .addFilter(new JwtAuthenticationFilter(authenticationManager()))
-                .addFilter(new JwtValidationFilter(authenticationManager()))
-                .csrf(config -> config.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .build();
-    }
-    
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(Arrays.asList("*"));
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT"));
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-        config.setAllowCredentials(true);
+        @Bean
+        SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            return http.authorizeHttpRequests((authz) -> authz
+                    .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                    // .requestMatchers(HttpMethod.POST, "/users").hasRole("ADMIN"))
+                    .anyRequest().authenticated())
+                    .addFilter(new JwtAuthenticationFilter(authenticationManager()))
+                    .addFilter(new JwtValidationFilter(authenticationManager()))
+                    .csrf(config -> config.disable())
+                    .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                    .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                    .build();
+        }
+        
+        @Bean
+        CorsConfigurationSource corsConfigurationSource() {
+            CorsConfiguration config = new CorsConfiguration();
+            config.setAllowedOriginPatterns(Arrays.asList("*"));
+            config.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT"));
+            config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+            config.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
+            UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+            source.registerCorsConfiguration("/**", config);
+            return source;
+        }
 
-    @Bean
-    FilterRegistrationBean<CorsFilter> corsFilter() {
-        FilterRegistrationBean<CorsFilter> corsBean = new FilterRegistrationBean<>(
-                new CorsFilter(corsConfigurationSource()));
-        corsBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-        return corsBean;
+        @Bean
+        FilterRegistrationBean<CorsFilter> corsFilter() {
+            FilterRegistrationBean<CorsFilter> corsBean = new FilterRegistrationBean<>(
+                    new CorsFilter(corsConfigurationSource()));
+            corsBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+            return corsBean;
+        }
     }
-}

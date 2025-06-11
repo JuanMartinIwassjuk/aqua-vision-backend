@@ -73,7 +73,7 @@ public class UserController {
 @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 @PutMapping("/{id}")
 public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody User userDetails, BindingResult result) {
-    userDetails.setPassword("asd"); // No debe ser nulo para la validacion pero igual el update no actualiza password
+    userDetails.setPassword("asd");
     try {
         User updatedUser = service.update(id, userDetails);
         return ResponseEntity.ok(updatedUser);
