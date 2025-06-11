@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,7 +101,7 @@ public class UserServiceImpl implements UserService{
 
         existingUser.setUsername(userDetails.getUsername());
         
-        // se asigna siempre el rol: ROLE_USER
+
         Optional<Role> optionalRoleUser = roleRepository.findByName("ROLE_USER");
         List<Role> roles = new ArrayList<>();
         optionalRoleUser.ifPresent(roles::add);
@@ -109,6 +110,14 @@ public class UserServiceImpl implements UserService{
   
     
         return repository.save(existingUser);
+    }
+
+        public User getAuthenticatedUser() {
+        
+    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+    return repository.findByUsername(username).
+             orElseThrow(() -> new RuntimeException("User do not found with Username: " + username));
     }
     
     
