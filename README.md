@@ -1,11 +1,11 @@
-## 🛠️ How to Run the Application
+## How to Run the Application
 
 To run the entire application (backend, frontend, and database setup) with a single command, use the provided script:
 
 ```bash
 ./start.sh
 
-Before running the script, make sure to configure the environment variables at the top of the run.sh (or start.sh) file:
+Before running the script, make sure to configure the environment variables at the top of the start.sh file:
 
 # Database configuration
 DB_NAME="notesdb"
