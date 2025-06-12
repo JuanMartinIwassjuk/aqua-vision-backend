@@ -75,6 +75,8 @@ public class UserServiceImpl implements UserService{
     @Override
     @Transactional
     public void deleteById(Long id) {
+
+
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("ID must be a valid positive number");
         }
@@ -114,11 +116,11 @@ public class UserServiceImpl implements UserService{
 
         public User getAuthenticatedUser() {
         
-    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-    return repository.findByUsername(username).
-             orElseThrow(() -> new RuntimeException("User do not found with Username: " + username));
-    }
+        return repository.findByUsername(username).
+                orElseThrow(() -> new RuntimeException("User do not found with Username: " + username));
+        }
     
     
 }
