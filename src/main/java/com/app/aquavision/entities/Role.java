@@ -11,7 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="roles")
+@Table(name="Role_")
 public class Role {
     
     @Id

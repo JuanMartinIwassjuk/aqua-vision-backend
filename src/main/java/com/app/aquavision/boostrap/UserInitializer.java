@@ -1,25 +1,7 @@
 package com.app.aquavision.boostrap;
 
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.core.annotation.Order;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-
-import com.app.aquavision.entities.Role;
-import com.app.aquavision.entities.User;
-import com.app.aquavision.repositories.RoleRepository;
-import com.app.aquavision.repositories.UserRepository;
-
-import jakarta.transaction.Transactional;
-
-
-
+//TODO: Borrar una vez unificado con demas inserts (por codigo java como ahora o por script...)
+/*
 @Component
 @Order(2)
 public class UserInitializer implements CommandLineRunner {
@@ -69,3 +51,5 @@ public class UserInitializer implements CommandLineRunner {
         System.out.println("Test user created: " + username);
     }
 }
+
+*/

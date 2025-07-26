@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import com.app.aquavision.entities.Role;
 import com.app.aquavision.repositories.RoleRepository;
 
+//TODO: Borrar una vez unificado con demas inserts (por codigo java como ahora o por script...)
+/*
 @Component
 @Order(1)
 public class RoleInitializer implements CommandLineRunner {
@@ -29,3 +31,5 @@ public class RoleInitializer implements CommandLineRunner {
         }
     }
 }
+
+*/

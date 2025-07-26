@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "sectores")
+@Table(name = "Sector")
 public class Sector {
 
     @Id
@@ -16,6 +16,7 @@ public class Sector {
     @Column
     private String nombre;
     @Column
+    @Enumerated(EnumType.STRING)
     private Categoria categoria;
 
     @OneToMany
