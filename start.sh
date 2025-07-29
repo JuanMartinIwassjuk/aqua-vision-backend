@@ -1,14 +1,15 @@
-DB_NAME="notesdb"
-DB_USER="root"
-DB_PASS="123456"
-DB_HOST="localhost"
-DB_PORT="3306"
+#!/bin/bash
 
+# Cargar las variables de entorno
+if [ -f .env.local ]; then
+    source .env.local
+else
+    echo "❌ Archivo .env.local no encontrado. Abortando."
+    exit 1
+fi
 
-BACKEND_DIR="./backend"
-FRONTEND_DIR="./frontend"
-
-MYSQL_CMD="/c/Program Files/MySQL/MySQL Server 8.0/bin/mysql.exe"
+BACKEND_DIR="./aqua-vision-backend"
+FRONTEND_DIR="./aqua-vision-frontend"
 
 echo "🔧 Checking if database '$DB_NAME' exists..."
 "$MYSQL_CMD" -u"$DB_USER" -p"$DB_PASS" -e "CREATE DATABASE IF NOT EXISTS \`$DB_NAME\`;"
