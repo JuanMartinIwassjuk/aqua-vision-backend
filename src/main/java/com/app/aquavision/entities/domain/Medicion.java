@@ -1,5 +1,6 @@
 package com.app.aquavision.entities.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -12,11 +13,17 @@ public class Medicion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "sector_id")
+    private Sector sector;
+
     @Column
     private int flow;
 
     @Column
+    @JsonFormat(pattern = "yyyy:MM:dd:HH:mm")
     private LocalDateTime timestamp;
+
 
     public Medicion() {
         // Constructor por defecto

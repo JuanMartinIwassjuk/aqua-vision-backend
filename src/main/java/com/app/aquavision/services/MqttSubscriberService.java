@@ -1,17 +1,26 @@
 package com.app.aquavision.services;
 
+import com.app.aquavision.entities.domain.Medicion;
+import com.app.aquavision.repositories.MedicionRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.eclipse.paho.client.mqttv3.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MqttSubscriberService {
+    @Autowired
+    private MedicionRepository medicionRepository;
 
-    private static final String BROKER = "ssl://seb99e1e.ala.us-east-1.emqxsl.com:8883";
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private static final String BROKER = "ssl://m171d340.ala.us-east-1.emqxsl.com:8883";
     private static final String CLIENT_ID = "spring-backend-listener";
-    private static final String USERNAME = "prueba-aquavision";
-    private static final String PASSWORD = "123456"; //habria que moverlo tambien al .env.local estas credenciales
-    private static final String TOPIC = "casa1/agua";
+    private static final String USERNAME = "test";
+    private static final String PASSWORD = "test123"; //habria que moverlo tambien al .env.local estas credenciales
+    private static final String TOPIC = "mediciones";
 
     @PostConstruct
     public void start() {
@@ -23,15 +32,20 @@ public class MqttSubscriberService {
             options.setPassword(PASSWORD.toCharArray());
             options.setCleanSession(true);
             options.setKeepAliveInterval(60);
-            options.setSocketFactory(SSLSocketFactoryGenerator.getSocketFactory());  // ⚠️ Requiere configuración de SSL
+            options.setSocketFactory(SSLSocketFactoryGenerator.getSocketFactory());
 
             client.connect(options);
 
             client.subscribe(TOPIC, (topic, message) -> {
                 String payload = new String(message.getPayload());
-                System.out.println("📥 Mensaje recibido:");
-                System.out.println("  • Topic: " + topic);
-                System.out.println("  • Payload: " + payload);
+                try {
+                    Medicion medicion = objectMapper.readValue(payload, Medicion.class);
+                    medicionRepository.save(medicion);
+                    //TODO: falta mapear el sector de la medicion
+                    System.out.println("✅ Medición guardada en la base de datos.");
+                } catch (Exception e) {
+                    System.err.println("❌ Error al mapear o guardar: " + e.getMessage());
+                }
             });
 
             System.out.println("✅ Suscrito a " + TOPIC + " con éxito.");
