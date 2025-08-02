@@ -21,7 +21,6 @@ public class Medicion {
     private int flow;
 
     @Column
-    @JsonFormat(pattern = "yyyy:MM:dd:HH:mm")
     private LocalDateTime timestamp;
 
 
@@ -32,6 +31,12 @@ public class Medicion {
     public Medicion(int flow, LocalDateTime timestamp) {
         this.flow = flow;
         this.timestamp = timestamp;
+    }
+    public Sector getSector() {
+        return sector;
+    }
+    public void setSector(Sector sector) {
+        this.sector = sector;
     }
 
     public int getFlow() {

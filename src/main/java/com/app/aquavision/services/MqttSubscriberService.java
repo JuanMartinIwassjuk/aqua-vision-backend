@@ -1,7 +1,9 @@
 package com.app.aquavision.services;
 
+import com.app.aquavision.dto.MedicionDTO;
 import com.app.aquavision.entities.domain.Medicion;
 import com.app.aquavision.repositories.MedicionRepository;
+import com.app.aquavision.repositories.SectorRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.eclipse.paho.client.mqttv3.*;
@@ -12,6 +14,9 @@ import org.springframework.stereotype.Service;
 public class MqttSubscriberService {
     @Autowired
     private MedicionRepository medicionRepository;
+
+    @Autowired
+    private SectorRepository sectorRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -39,10 +44,26 @@ public class MqttSubscriberService {
             client.subscribe(TOPIC, (topic, message) -> {
                 String payload = new String(message.getPayload());
                 try {
-                    Medicion medicion = objectMapper.readValue(payload, Medicion.class);
-                    medicionRepository.save(medicion);
-                    //TODO: falta mapear el sector de la medicion
-                    System.out.println("✅ Medición guardada en la base de datos.");
+                    System.out.println("📥 Mensaje recibido en el topic " + topic + ": " + payload);
+                    MedicionDTO dto = objectMapper.readValue(payload, MedicionDTO.class);
+                    System.out.println("📦 DTO mapeado: " +
+                            "id_sector " + dto.getSectorId()
+                    + ", Flujo: " + dto.getFlow()
+                            + ", Timestamp: " + dto.getTimestamp().toString());
+
+                    sectorRepository.findById(dto.getSectorId()).ifPresentOrElse(sector -> {
+
+                        Medicion medicion = new Medicion();
+                        medicion.setSector(sector);
+                        medicion.setFlow(dto.getFlow());
+                        medicion.setTimestamp(dto.getTimestamp());
+
+                        medicionRepository.save(medicion);
+                        System.out.println("✅ Medición guardada con sector ID: " + dto.getSectorId());
+                    }, () -> {
+                        System.err.println("❌ Sector con ID " + dto.getSectorId() + " no existe. Medición NO guardada.");
+                    });
+
                 } catch (Exception e) {
                     System.err.println("❌ Error al mapear o guardar: " + e.getMessage());
                 }
