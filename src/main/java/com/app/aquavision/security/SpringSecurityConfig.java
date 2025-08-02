@@ -44,15 +44,15 @@ import java.util.Arrays;
         @Bean
         SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
             return http.authorizeHttpRequests((authz) -> authz
-                    .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                    //.requestMatchers(HttpMethod.POST, "/login").permitAll()
+                    //.requestMatchers(HttpMethod.POST, "/users").permitAll()
                     // .requestMatchers(HttpMethod.POST, "/users").hasRole("ADMIN"))
-                    .anyRequest().authenticated())
-                    .addFilter(new JwtAuthenticationFilter(authenticationManager()))
-                    .addFilter(new JwtValidationFilter(authenticationManager()))
+                    .anyRequest().permitAll())//authenticated())
+                    //.addFilter(new JwtAuthenticationFilter(authenticationManager()))
+                    //.addFilter(new JwtValidationFilter(authenticationManager()))
                     .csrf(config -> config.disable())
                     .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                    .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                    //.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                     .build();
         }
         
