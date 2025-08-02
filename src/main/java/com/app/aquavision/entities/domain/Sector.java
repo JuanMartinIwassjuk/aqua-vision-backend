@@ -2,6 +2,7 @@ package com.app.aquavision.entities.domain;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +38,35 @@ public class Sector {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public int getConsumoTotalPorFecha(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
+        int consumoTotal = 0;
+
+        if (!mediciones.isEmpty()) {
+            for (Medicion medicion : mediciones) {
+                if (medicion.getTimestamp().isAfter(fechaInicio) && medicion.getTimestamp().isBefore(fechaFin)) {
+                    consumoTotal += medicion.getFlow();
+                }
+            }
+        }
+
+        return consumoTotal;
+    }
+
+    public int getConsumoActualDiaro() {
+        int consumoActual = 0;
+        LocalDateTime hoy = LocalDateTime.now();
+
+        if (!mediciones.isEmpty()) {
+            for (Medicion medicion : mediciones) {
+                if (medicion.getTimestamp().toLocalDate().equals(hoy.toLocalDate())) {
+                    consumoActual += medicion.getFlow();
+                }
+            }
+        }
+
+        return consumoActual;
     }
 
     public int getTotalConsumo() {
