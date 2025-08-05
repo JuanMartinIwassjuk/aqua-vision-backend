@@ -8,7 +8,7 @@ public class ConsumoSectorDTO {
     private final Sector sector;
 
     public ConsumoSectorDTO(Sector sector) {
-        this.consumoTotal = sector.totalConsumo();
+        this.consumoTotal = sector.consumoActualDiaro();
         this.sector = sector;
     }
 

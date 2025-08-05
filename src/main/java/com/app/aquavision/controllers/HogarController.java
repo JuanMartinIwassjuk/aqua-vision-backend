@@ -40,7 +40,14 @@ public class HogarController {
         return service.findById(id);
     }
 
-    //@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PostMapping
+    public ResponseEntity<?> create(@RequestBody @Valid Hogar hogar) {
+
+        logger.info("create - hogar: {}", hogar);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.save(hogar));
+    }
+
     @GetMapping("/{id}/consumo-actual-diario")
     public ResponseEntity<?> getConsumoActual(@PathVariable Long id) {
 
@@ -61,24 +68,26 @@ public class HogarController {
 
         Hogar hogar = service.findById(id);
 
-        //ConsumoHogarDTO consumoDiarioDTO = new ConsumoHogarDTO(hogar);
-        //return ResponseEntity.ok(consumoDiarioDTO);
+        //TODO
 
         return ResponseEntity.ok(0);
     }
 
-    @PostMapping
-    public ResponseEntity<?> create(@RequestBody @Valid Hogar hogar/*, BindingResult result*/) {
+    @GetMapping("/{id}/reportes/proyeccion")
+    public ResponseEntity<?> getReporteProyeccionPorFecha(@PathVariable Long id,
+                                                @RequestParam String fechaInicio,
+                                                @RequestParam String fechaFin) {
 
-        /*
-        if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(result.getAllErrors());
-        }*/
+        logger.info("getReportePorFecha - id: {}, fechaInicio: {}, fechaFin: {}", id, fechaInicio, fechaFin);
 
-        logger.info("create - hogar: {}", hogar);
+        Hogar hogar = service.findById(id);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.save(hogar));
+        //TODO
+
+        return ResponseEntity.ok(0);
     }
+
+
 
 
 
