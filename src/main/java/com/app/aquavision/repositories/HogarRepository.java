@@ -1,8 +1,8 @@
 package com.app.aquavision.repositories;
 
 import com.app.aquavision.entities.domain.Hogar;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.CrudRepository;
 
-
-public interface HogarRepository extends JpaRepository<Hogar, Long> {
+public interface HogarRepository extends CrudRepository<Hogar, Long>{
+    
 }

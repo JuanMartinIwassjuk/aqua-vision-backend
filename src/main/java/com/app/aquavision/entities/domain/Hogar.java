@@ -2,6 +2,7 @@ package com.app.aquavision.entities.domain;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,68 @@ public class Hogar {
     public Hogar(int miembros, String localidad) {
         this.miembros = miembros;
         this.localidad = localidad;
+    }
+
+    public void mostarProyeccionConsumoMensual() {
+        System.out.println("Proyección de Consumo A fin de mes del Hogar:");
+
+        LocalDateTime hoy = LocalDateTime.now();
+        LocalDateTime inicioMes = hoy.withDayOfMonth(1);
+
+        int diaHoy = hoy.getDayOfMonth();
+        int diasRestantes = 30 - diaHoy; //Asumiendo un mes de 30 días
+
+        int proyeccionHogar = 0;
+
+        for (Sector sector : sectores) {
+            int totalConsumoSector = sector.getConsumoTotalPorFecha(inicioMes, hoy);
+            int promedioConsumoSector = totalConsumoSector / diaHoy;
+            int proyeccionConsumoSector = totalConsumoSector + diasRestantes * promedioConsumoSector;
+
+            System.out.println("  Sector: " + sector.getNombre());
+            System.out.println("   -Categoria: " + sector.getCategoria());
+            System.out.println("   -Total Consumo: " + totalConsumoSector);
+            System.out.println("   -Promedio Consumo Diario: " + promedioConsumoSector);
+            System.out.println("   -Proyección Mensual: " + proyeccionConsumoSector);
+
+            proyeccionHogar += proyeccionConsumoSector;
+        }
+
+        System.out.println(" -Total Proyección Mensual Hogar: " + proyeccionHogar);
+    }
+
+    public void mostrarConsumoTotalPorFechas(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
+        System.out.println("Consumo Total del Hogar desde " + fechaInicio + " hasta " + fechaFin + ":");
+
+        int totalConsumoHogar = 0;
+
+        for (Sector sector : sectores) {
+            int totalConsumoSector = sector.getConsumoTotalPorFecha(fechaInicio, fechaFin);
+            totalConsumoHogar += totalConsumoSector;
+
+            System.out.println("  Sector: " + sector.getNombre());
+            System.out.println("   -Categoria: " + sector.getCategoria());
+            System.out.println("   -Total Consumo: " + totalConsumoSector);
+        }
+
+        System.out.println(" -Total Consumo Hogar: " + totalConsumoHogar);
+    }
+
+    public void mostrarConsumoActualDiaro(){
+        System.out.println("Consumo del Mes Actual del Hogar:");
+
+        int totalConsumoHogar = 0;
+
+        for (Sector sector : sectores) {
+            int totalConsumoSector = sector.getConsumoActualDiaro();
+            totalConsumoHogar += totalConsumoSector;
+
+            System.out.println("  Sector: " + sector.getNombre());
+            System.out.println("   -Categoria: " + sector.getCategoria());
+            System.out.println("   -Total Consumo: " + totalConsumoSector);
+        }
+
+        System.out.println(" -Total Consumo Hogar: " + totalConsumoHogar);
     }
 
     public void mostrarReporteHogar(){
