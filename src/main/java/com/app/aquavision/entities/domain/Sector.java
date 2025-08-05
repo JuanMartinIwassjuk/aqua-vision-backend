@@ -1,5 +1,6 @@
 package com.app.aquavision.entities.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -17,10 +18,12 @@ public class Sector {
     @Column
     private String nombre;
     @Column
+    @Enumerated(EnumType.STRING)
     private Categoria categoria;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn (name = "sector_id", referencedColumnName = "id")
+    //@JsonIgnore
     private List<Medicion> mediciones = new ArrayList<>();
 
     public Sector() {
@@ -40,7 +43,7 @@ public class Sector {
         this.nombre = nombre;
     }
 
-    public int getConsumoTotalPorFecha(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
+    public int consumoTotalPorFecha(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
         int consumoTotal = 0;
 
         if (!mediciones.isEmpty()) {
@@ -54,7 +57,7 @@ public class Sector {
         return consumoTotal;
     }
 
-    public int getConsumoActualDiaro() {
+    public int consumoActualDiaro() {
         int consumoActual = 0;
         LocalDateTime hoy = LocalDateTime.now();
 
@@ -69,7 +72,7 @@ public class Sector {
         return consumoActual;
     }
 
-    public int getTotalConsumo() {
+    public int totalConsumo() {
         int totalConsumo = 0;
 
         if (!mediciones.isEmpty()) {
@@ -81,9 +84,14 @@ public class Sector {
         return totalConsumo;
     }
 
-    public int getPromedioConsumo() {
+    public int promedioConsumo() {
 
-        int totalConsumo = getTotalConsumo();
+        int totalConsumo = totalConsumo();
+
+        if (mediciones.isEmpty()) {
+            return 0; // Evitar división por cero
+        }
+
         return totalConsumo / mediciones.size();
     }
 
@@ -101,5 +109,9 @@ public class Sector {
 
     public void setMediciones(List<Medicion> mediciones) {
         this.mediciones = mediciones;
+    }
+
+    public Long getId() {
+        return id;
     }
 }

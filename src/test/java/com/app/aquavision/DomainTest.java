@@ -4,7 +4,6 @@ import com.app.aquavision.entities.domain.Categoria;
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.entities.domain.Medicion;
 import com.app.aquavision.entities.domain.Sector;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -57,5 +56,4 @@ public class DomainTest {
     void ProyeccionHogarMensualTest() {
         hogar.mostarProyeccionConsumoMensual();
     }
-
 }
