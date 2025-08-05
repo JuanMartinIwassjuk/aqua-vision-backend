@@ -1,6 +1,7 @@
 package com.app.aquavision.entities.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -13,8 +14,9 @@ public class Medicion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne()
     @JoinColumn(name = "sector_id")
+    @JsonIgnore
     private Sector sector;
 
     @Column

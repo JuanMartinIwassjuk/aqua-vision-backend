@@ -24,6 +24,12 @@ public class HogarService {
     }
 
     @Transactional
+    public Hogar findById(Long id) {
+        Optional<Hogar> optionalHogar = repository.findById(id);
+        return optionalHogar.orElse(null);
+    }
+
+    @Transactional
     public Hogar save(Hogar hogar) {
 
         return repository.save(hogar);

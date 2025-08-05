@@ -20,7 +20,7 @@ public class Hogar {
     @Column
     private String localidad = "";
 
-    @OneToMany()
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn (name = "hogar_id", referencedColumnName = "id")
     private List<Sector> sectores = new ArrayList<>();
 
@@ -51,7 +51,7 @@ public class Hogar {
         int proyeccionHogar = 0;
 
         for (Sector sector : sectores) {
-            int totalConsumoSector = sector.getConsumoTotalPorFecha(inicioMes, hoy);
+            int totalConsumoSector = sector.consumoTotalPorFecha(inicioMes, hoy);
             int promedioConsumoSector = totalConsumoSector / diaHoy;
             int proyeccionConsumoSector = totalConsumoSector + diasRestantes * promedioConsumoSector;
 
@@ -73,7 +73,7 @@ public class Hogar {
         int totalConsumoHogar = 0;
 
         for (Sector sector : sectores) {
-            int totalConsumoSector = sector.getConsumoTotalPorFecha(fechaInicio, fechaFin);
+            int totalConsumoSector = sector.consumoTotalPorFecha(fechaInicio, fechaFin);
             totalConsumoHogar += totalConsumoSector;
 
             System.out.println("  Sector: " + sector.getNombre());
@@ -90,7 +90,7 @@ public class Hogar {
         int totalConsumoHogar = 0;
 
         for (Sector sector : sectores) {
-            int totalConsumoSector = sector.getConsumoActualDiaro();
+            int totalConsumoSector = sector.consumoActualDiaro();
             totalConsumoHogar += totalConsumoSector;
 
             System.out.println("  Sector: " + sector.getNombre());
@@ -111,8 +111,8 @@ public class Hogar {
         int totalConsumoHogar = 0;
 
         for (Sector sector : sectores) {
-            int totalConsumoSector = sector.getTotalConsumo();
-            int promedioConsumoSector = sector.getPromedioConsumo();
+            int totalConsumoSector = sector.totalConsumo();
+            int promedioConsumoSector = sector.promedioConsumo();
 
             System.out.println("  Sector: " + sector.getNombre());
             System.out.println("   -Categoria: " + sector.getCategoria());
@@ -150,4 +150,7 @@ public class Hogar {
         this.localidad = localidad;
     }
 
+    public Long getId() {
+        return id;
+    }
 }
