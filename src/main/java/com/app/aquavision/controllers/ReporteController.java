@@ -51,10 +51,10 @@ public class ReporteController {
 
         logger.info("getConsumoActual - id: {}", id);
 
-        LocalDateTime hoy = LocalDate.now().atStartOfDay();
-        LocalDateTime mañana = hoy.plusDays(1).minusSeconds(1);
+        LocalDateTime hoyInicio = LocalDate.now().atStartOfDay();
+        LocalDateTime hotFin = LocalDate.now().atTime(LocalTime.MAX);
 
-        Hogar hogar = reporteService.findByIdWithSectoresAndMediciones(id,hoy,mañana);
+        Hogar hogar = reporteService.findByIdWithSectoresAndMediciones(id,hoyInicio,hotFin);
 
         if (hogar == null) {
             return ResponseEntity.notFound().build();
