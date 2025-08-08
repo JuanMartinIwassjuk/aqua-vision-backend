@@ -12,9 +12,6 @@ public class ConsumoHogarDTO {
     private final String miembros;
     private final String localidad;
 
-    //private final String fechaDesde;
-    //private final String fechaHasta;
-
     private int consumoTotal = 0;
 
     private final List<ConsumoSectorDTO> consumosPorSector = new ArrayList<>();

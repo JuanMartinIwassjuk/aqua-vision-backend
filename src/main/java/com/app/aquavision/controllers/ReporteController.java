@@ -27,9 +27,10 @@ public class ReporteController {
 
     @Autowired
     private HogarService hogarService;
+    @Autowired
     private ReporteService reporteService;
 
-    @GetMapping("/{id}/consumo-actual-diario")
+    @GetMapping("/{id}/consumo-actual")
     @Operation(
             summary = "Obtener el consumo actual diario de un hogar",
             responses = {
@@ -50,7 +51,10 @@ public class ReporteController {
 
         logger.info("getConsumoActual - id: {}", id);
 
-        Hogar hogar = hogarService.findById(id);
+        LocalDateTime hoy = LocalDate.now().atStartOfDay();
+        LocalDateTime mañana = hoy.plusDays(1).minusSeconds(1);
+
+        Hogar hogar = reporteService.findByIdWithSectoresAndMediciones(id,hoy,mañana);
 
         if (hogar == null) {
             return ResponseEntity.notFound().build();

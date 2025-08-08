@@ -8,7 +8,8 @@ public class ConsumoSectorDTO {
     private final Sector sector;
 
     public ConsumoSectorDTO(Sector sector) {
-        this.consumoTotal = sector.consumoActualDiaro();
+        this.consumoTotal = sector.totalConsumo();
+        //Se delega al controller traer al sector con las mediciones ya filtradas por fecha
         this.sector = sector;
     }
 

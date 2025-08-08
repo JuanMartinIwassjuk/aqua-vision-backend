@@ -23,7 +23,7 @@ public class Sector {
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn (name = "sector_id", referencedColumnName = "id")
-    //@JsonIgnore
+    @JsonIgnore
     private List<Medicion> mediciones = new ArrayList<>();
 
     public Sector() {
