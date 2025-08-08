@@ -1,14 +1,11 @@
 package com.app.aquavision.services;
 
-import com.app.aquavision.entities.Role;
-import com.app.aquavision.entities.User;
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.repositories.HogarRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 

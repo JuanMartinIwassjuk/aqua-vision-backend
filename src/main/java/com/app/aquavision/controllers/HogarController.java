@@ -1,10 +1,8 @@
 package com.app.aquavision.controllers;
 
-import com.app.aquavision.dto.ConsumoHogarDTO;
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.services.HogarService;
 import jakarta.validation.Valid;
-import org.apache.juli.logging.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,48 +45,4 @@ public class HogarController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(hogar));
     }
-
-    @GetMapping("/{id}/consumo-actual-diario")
-    public ResponseEntity<?> getConsumoActual(@PathVariable Long id) {
-
-        logger.info("getConsumoActual - id: {}", id);
-
-        Hogar hogar = service.findById(id);
-        ConsumoHogarDTO consumoDiarioDTO = new ConsumoHogarDTO(hogar);
-
-        return ResponseEntity.ok(consumoDiarioDTO);
-    }
-
-    @GetMapping("/{id}/reportes/consumo")
-    public ResponseEntity<?> getReportePorFecha(@PathVariable Long id,
-                                                @RequestParam String fechaInicio,
-                                                @RequestParam String fechaFin) {
-
-        logger.info("getReportePorFecha - id: {}, fechaInicio: {}, fechaFin: {}", id, fechaInicio, fechaFin);
-
-        Hogar hogar = service.findById(id);
-
-        //TODO
-
-        return ResponseEntity.ok(0);
-    }
-
-    @GetMapping("/{id}/reportes/proyeccion")
-    public ResponseEntity<?> getReporteProyeccionPorFecha(@PathVariable Long id,
-                                                @RequestParam String fechaInicio,
-                                                @RequestParam String fechaFin) {
-
-        logger.info("getReportePorFecha - id: {}, fechaInicio: {}, fechaFin: {}", id, fechaInicio, fechaFin);
-
-        Hogar hogar = service.findById(id);
-
-        //TODO
-
-        return ResponseEntity.ok(0);
-    }
-
-
-
-
-
 }
