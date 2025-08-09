@@ -3,6 +3,7 @@ package com.app.aquavision.entities;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.validation.ExistsByUsername;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -44,13 +46,16 @@ public class User {
     @JsonIgnoreProperties({"users", "handler", "hibernateLazyInitializer"})
     @ManyToMany
     @JoinTable(
-        name = "users_roles",
+        name = "Usuarios_Roles",
         joinColumns = @JoinColumn(name="user_id"),
         inverseJoinColumns = @JoinColumn(name="role_id"),
         uniqueConstraints = { @UniqueConstraint(columnNames = {"user_id", "role_id"})}
     )
     private List<Role> roles;
 
+    @OneToOne
+    @JoinColumn(name = "hogar_id")
+    private Hogar hogar;
     
     public User() {
         roles = new ArrayList<>();
@@ -146,5 +151,11 @@ public class User {
         return true;
     }
 
-    
+    public Hogar getHogar() {
+        return hogar;
+    }
+
+    public void setHogar(Hogar hogar) {
+        this.hogar = hogar;
+    }
 }

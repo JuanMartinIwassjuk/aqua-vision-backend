@@ -1,5 +1,6 @@
 package com.app.aquavision.entities.domain;
 
+import com.app.aquavision.entities.User;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -23,6 +24,9 @@ public class Hogar {
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn (name = "hogar_id", referencedColumnName = "id")
     private List<Sector> sectores = new ArrayList<>();
+
+    @OneToOne(mappedBy = "hogar")
+    private User usuario;
 
     public Hogar() {
         // Constructor por defecto
@@ -152,5 +156,13 @@ public class Hogar {
 
     public Long getId() {
         return id;
+    }
+
+    public User getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(User usuario) {
+        this.usuario = usuario;
     }
 }
