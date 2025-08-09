@@ -5,10 +5,12 @@ import java.util.List;
 
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.validation.ExistsByUsername;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,6 +33,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private Long id;
 
     @ExistsByUsername
@@ -55,6 +58,7 @@ public class User {
 
     @OneToOne
     @JoinColumn(name = "hogar_id")
+    @JsonIgnore
     private Hogar hogar;
     
     public User() {

@@ -1,6 +1,7 @@
 package com.app.aquavision.entities.domain;
 
 import com.app.aquavision.entities.User;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ public class Hogar {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private Long id;
 
     @Column
@@ -24,9 +26,6 @@ public class Hogar {
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn (name = "hogar_id", referencedColumnName = "id")
     private List<Sector> sectores = new ArrayList<>();
-
-    @OneToOne(mappedBy = "hogar")
-    private User usuario;
 
     public Hogar() {
         // Constructor por defecto
@@ -130,6 +129,14 @@ public class Hogar {
         System.out.println(" -Promedio Consumo x Sector: " + totalConsumoHogar / sectores.size());
     }
 
+    public int consumoTotalHora(int hora){
+        int consumoTotal = 0;
+        for (Sector sector : sectores) {
+            consumoTotal += sector.totalConsumo(hora);
+        }
+        return consumoTotal;
+    }
+
     public List<Sector> getSectores() {
         return sectores;
     }
@@ -158,11 +165,4 @@ public class Hogar {
         return id;
     }
 
-    public User getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(User usuario) {
-        this.usuario = usuario;
-    }
 }

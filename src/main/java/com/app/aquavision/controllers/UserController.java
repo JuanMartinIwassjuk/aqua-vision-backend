@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,7 @@ import com.app.aquavision.services.UserService;
 import jakarta.validation.Valid;
 
 @CrossOrigin(origins = {"http://localhost:4200", "http://localhost:8080"}, originPatterns = "*")
+@Hidden
 @RestController
 @RequestMapping("/users")
 public class UserController {

@@ -1,6 +1,7 @@
 package com.app.aquavision.entities.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ public class Sector {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private Long id;
 
     @Column
@@ -82,6 +84,20 @@ public class Sector {
         }
 
         return totalConsumo;
+    }
+
+    public int totalConsumo(int hora){
+        int totalConsumoHora = 0;
+
+        if (!mediciones.isEmpty()) {
+            for (Medicion medicion : mediciones) {
+                if (medicion.getTimestamp().getHour() == hora) {
+                    totalConsumoHora += medicion.getFlow();
+                }
+            }
+        }
+
+        return totalConsumoHora;
     }
 
     public int promedioConsumo() {
