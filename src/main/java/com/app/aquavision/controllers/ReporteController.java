@@ -182,10 +182,10 @@ public class ReporteController {
             }
     )
     @GetMapping("/{id}/proyeccion")
-    public ResponseEntity<?> getReporteProyeccionMensual(@PathVariable Long hogarId,
+    public ResponseEntity<?> getReporteProyeccionMensual(@PathVariable Long id,
                                                           @RequestParam double umbralMensual) {
 
-        ProyeccionHogarDTO response = proyeccionService.calcularProyeccion(hogarId,umbralMensual);
+        ProyeccionHogarDTO response = proyeccionService.calcularProyeccion(id,umbralMensual);
 
         return ResponseEntity.ok(response);
     }
