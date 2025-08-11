@@ -1,6 +1,7 @@
 package com.app.aquavision.controllers;
 
 import com.app.aquavision.dto.ConsumoHogarDTO;
+import com.app.aquavision.dto.ConsumoPorHoraDTO;
 import com.app.aquavision.dto.ConsumosPorHoraHogarDTO;
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.services.ReporteService;
@@ -10,11 +11,35 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.thymeleaf.context.Context;
+
+import java.io.ByteArrayOutputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.NoSuchElementException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.ui.Model;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
+
+
+
+
+
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -168,6 +193,29 @@ public class ReporteController {
 
         return ResponseEntity.ok(0);
     }
+
+
+        @GetMapping("/{id}/descargar-reporte-pdf")
+        public ResponseEntity<byte[]> descargarReportePDF(@PathVariable Long id) {
+                try {
+                byte[] pdfBytes = reporteService.generarPdfReporte(id);
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_PDF);
+                headers.setContentDisposition(ContentDisposition.builder("attachment")
+                        .filename("reporte_consumo.pdf")
+                        .build());
+
+                return ResponseEntity.ok()
+                        .headers(headers)
+                        .body(pdfBytes);
+
+                } catch (NoSuchElementException e) {
+                return ResponseEntity.notFound().build();
+                } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                }
+        }
 
 
 }
