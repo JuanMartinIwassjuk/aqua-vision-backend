@@ -7,6 +7,8 @@ import com.app.aquavision.repositories.SectorRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.eclipse.paho.client.mqttv3.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +29,13 @@ public class MqttSubscriberService {
     private static final String PASSWORD = "test123"; //habria que moverlo tambien al .env.local estas credenciales
     private static final String TOPIC = "mediciones";
 
+    private static final Logger logger = LoggerFactory.getLogger(MqttSubscriberService.class);
+
     @PostConstruct
     public void start() {
+
+
+
         try {
             MqttClient client = new MqttClient(BROKER, CLIENT_ID, null);
 
@@ -44,11 +51,11 @@ public class MqttSubscriberService {
             client.subscribe(TOPIC, (topic, message) -> {
                 String payload = new String(message.getPayload());
                 try {
-                    System.out.println("📥 Mensaje recibido en el topic " + topic + ": " + payload);
+                    logger.info("📥 Mensaje recibido en el topic {}: {}", topic, payload);
                     MedicionDTO dto = objectMapper.readValue(payload, MedicionDTO.class);
-                    System.out.println("📦 DTO mapeado: " +
-                            "id_sector " + dto.getSectorId()
-                    + ", Flujo: " + dto.getFlow()
+                    logger.info("📦 DTO mapeado: "
+                            + "id_sector " + dto.getSectorId()
+                            + ", Flujo: " + dto.getFlow()
                             + ", Timestamp: " + dto.getTimestamp().toString());
 
                     sectorRepository.findById(dto.getSectorId()).ifPresentOrElse(sector -> {
@@ -59,20 +66,20 @@ public class MqttSubscriberService {
                         medicion.setTimestamp(dto.getTimestamp());
 
                         medicionRepository.save(medicion);
-                        System.out.println("✅ Medición guardada con sector ID: " + dto.getSectorId());
+                        logger.info("✅ Medición guardada con sector ID: {}", dto.getSectorId());
                     }, () -> {
-                        System.err.println("❌ Sector con ID " + dto.getSectorId() + " no existe. Medición NO guardada.");
+                        logger.error("❌ Sector con ID {} no existe. Medición NO guardada.", dto.getSectorId());
                     });
 
                 } catch (Exception e) {
-                    System.err.println("❌ Error al mapear o guardar: " + e.getMessage());
+                    logger.error("❌ Error al mapear o guardar la medición: {}", e.getMessage());
                 }
             });
 
-            System.out.println("✅ Suscrito a " + TOPIC + " con éxito.");
+            logger.info("✅ Suscrito a {} con éxito.", TOPIC);
 
         } catch (MqttException e) {
-            System.err.println("❌ Error al conectar al broker: " + e.getMessage());
+            logger.error("❌ Error al conectar al broker MQTT: {}", e.getMessage());
             e.printStackTrace();
         }
     }

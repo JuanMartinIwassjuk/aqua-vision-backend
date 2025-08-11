@@ -1,6 +1,8 @@
 package com.app.aquavision;
 
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
@@ -14,6 +16,8 @@ public class DBInitializer {
   @Autowired
   private DataSource dataSource;
 
+  private static final Logger logger = LoggerFactory.getLogger(DBInitializer.class);
+
   @PostConstruct
   public void init() {
       try (Connection connection = dataSource.getConnection()) {
@@ -21,8 +25,8 @@ public class DBInitializer {
       //ScriptUtils.executeSqlScript(connection, new ClassPathResource("dbScripts/homeDataMock.sql"));
       //ScriptUtils.executeSqlScript(connection, new ClassPathResource("dbScripts/measureDataMock.sql"));
     } catch (Exception e) {
-      System.err.println("Error al inicializar DB");
-      e.printStackTrace();
+        logger.error("Error al inicializar la base de datos", e);
+        e.printStackTrace();
     }
   }
 }

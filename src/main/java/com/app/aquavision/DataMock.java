@@ -1,6 +1,7 @@
 package com.app.aquavision;
 
-import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -24,17 +25,20 @@ public class DataMock {
   @Autowired
   private PasswordEncoder passwordEncoder;
 
+  private static final Logger logger = LoggerFactory.getLogger(DataMock.class);
+
   @EventListener(ApplicationReadyEvent.class)
   public void generarDatos() {
-    System.out.println("Comienzo de insercion de datos");
+
+    logger.info("Comienzo de inserción de datos mock");
+
     Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM Hogar", Integer.class);
-    if (count != null && count > 0) {
-      System.out.println("Datos mock ya insertados, no se ejecuto la inserción.");
+    if (count > 0) {
+      logger.info("Datos mock ya insertados, no se ejecutará la inserción.");
       return;
     }
 
     Random random = new Random();
-
 
     for (int i = 1; i <= 20; i++) {
       jdbcTemplate.update("INSERT INTO Hogar (miembros, localidad) VALUES (?, ?)",
@@ -51,10 +55,8 @@ public class DataMock {
       }
     }
 
-
     List<Long> sectorIds = jdbcTemplate.query("SELECT id FROM Sector",
         (rs, rowNum) -> rs.getLong("id"));
-
 
     int totalMediciones = 15000;
     int batchSize = 5000;
@@ -72,7 +74,7 @@ public class DataMock {
         jdbcTemplate.batchUpdate(
             "INSERT INTO Medicion (flow, timestamp, sector_id) VALUES (?, ?, ?)", batch);
         batch.clear();
-        System.out.println("Insertadas: " + i);
+        logger.info("Insertadas {} mediciones", i);
       }
     }
 
@@ -81,11 +83,11 @@ public class DataMock {
           "INSERT INTO Medicion (flow, timestamp, sector_id) VALUES (?, ?, ?)", batch);
     }
 
-
     insertarRoles();
     insertarUsuarios();
 
-    System.out.println("Inserts listos");
+    logger.info("Datos mock insertados correctamente");
+
   }
 
   private void insertarRoles() {
@@ -132,7 +134,7 @@ public class DataMock {
       Long hogarId = hogaresDisponibles.get(index++);
 
       Integer existe = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM User_ WHERE username = ?", Integer.class, username);
-      if (existe != null && existe > 0) continue;
+      if (existe > 0) continue;
 
       jdbcTemplate.update("INSERT INTO User_ (username, password, enabled, hogar_id) VALUES (?, ?, ?, ?)",
           username, passwordEncoder.encode("test123"), true, hogarId);

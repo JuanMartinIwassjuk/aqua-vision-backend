@@ -3,6 +3,7 @@ package com.app.aquavision.controllers;
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.services.HogarService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -40,13 +41,17 @@ public class HogarController {
     }
 
     @GetMapping("/{id}")
-    public Hogar list(@PathVariable Long id) {
-
+    @Operation(summary = "Obtener hogar por ID")
+    public Hogar list(
+            @Parameter(
+                    description = "ID del hogar a buscar",
+                    example = "1"
+            )
+            @PathVariable Long id
+    ) {
         logger.info("list hogar - id: {}", id);
-
         return service.findById(id);
     }
-
 
     @PostMapping
     @Operation(

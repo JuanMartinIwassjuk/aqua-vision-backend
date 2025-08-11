@@ -58,7 +58,7 @@ public class ReporteController {
             @Parameter(description = "ID del hogar a consultar", example = "1")
             @PathVariable Long id) {
 
-        logger.info("getConsumoActual - id: {}", id);
+        logger.info("getReporteConsumoActual - hogar_id: {}", id);
 
         LocalDateTime hoyInicio = LocalDate.now().atStartOfDay();
         LocalDateTime hoyFin = LocalDate.now().atTime(LocalTime.MAX);
@@ -93,7 +93,7 @@ public class ReporteController {
             @Parameter(description = "ID del hogar a consultar", example = "1")
             @PathVariable Long id) {
 
-        logger.info("getReporteConsumoPorHora - id: {}", id);
+        logger.info("getReporteConsumoPorHora - hogar_id: {}", id);
 
         LocalDateTime hoyInicio = LocalDate.now().atStartOfDay();
         LocalDateTime hoyActual = LocalDate.now().atTime(LocalTime.MAX);
@@ -151,7 +151,6 @@ public class ReporteController {
         return ResponseEntity.ok(consumoDiarioDTO);
     }
 
-
     @Operation(
             summary = "Obtener la proyección mensual del hogar",
             description = "Calcula la proyección mensual de consumo de un hogar según el umbral indicado.",
@@ -185,6 +184,8 @@ public class ReporteController {
     public ResponseEntity<?> getReporteProyeccionMensual(@PathVariable Long id,
                                                           @RequestParam double umbralMensual) {
 
+        logger.info("getReporteProyeccionMensual - hogar_id: {}, umbralMensual: {}", id, umbralMensual);
+
         ProyeccionHogarDTO response = proyeccionService.calcularProyeccion(id,umbralMensual);
 
         return ResponseEntity.ok(response);
@@ -193,7 +194,10 @@ public class ReporteController {
 
     @GetMapping("/{id}/descargar-reporte-pdf")
     public ResponseEntity<byte[]> descargarReportePDF(@PathVariable Long id) {
-            try {
+
+        logger.info("descargarReportePDF - hogar_id: {}", id);
+
+        try {
             byte[] pdfBytes = reporteService.generarPdfReporte(id);
 
             HttpHeaders headers = new HttpHeaders();
@@ -206,12 +210,11 @@ public class ReporteController {
                     .headers(headers)
                     .body(pdfBytes);
 
-            } catch (NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
-            } catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            }
+        }
     }
-
 
 }
