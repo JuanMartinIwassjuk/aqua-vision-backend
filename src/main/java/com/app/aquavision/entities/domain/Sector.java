@@ -111,6 +111,20 @@ public class Sector {
         return totalConsumo / mediciones.size();
     }
 
+    public int picoConsumo() {
+        int picoConsumo = 0;
+
+        if (!mediciones.isEmpty()) {
+            for (Medicion medicion : mediciones) {
+                if (medicion.getFlow() > picoConsumo) {
+                    picoConsumo = medicion.getFlow();
+                }
+            }
+        }
+
+        return picoConsumo;
+    }
+
     public Categoria getCategoria() {
         return categoria;
     }
