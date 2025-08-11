@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface MedicionRepository extends JpaRepository<Medicion, Long> {
-
     @Query("""
         select m
         from Medicion m

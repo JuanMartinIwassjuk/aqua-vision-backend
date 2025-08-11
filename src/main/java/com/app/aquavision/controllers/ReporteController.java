@@ -2,7 +2,9 @@ package com.app.aquavision.controllers;
 
 import com.app.aquavision.dto.ConsumoHogarDTO;
 import com.app.aquavision.dto.ConsumosPorHoraHogarDTO;
+import com.app.aquavision.dto.ProyeccionHogarDTO;
 import com.app.aquavision.entities.domain.Hogar;
+import com.app.aquavision.services.ProyeccionService;
 import com.app.aquavision.services.ReporteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,6 +34,9 @@ public class ReporteController {
 
     @Autowired
     private ReporteService reporteService;
+
+    @Autowired
+    private ProyeccionService proyeccionService;
 
     @GetMapping("/{id}/consumo-actual")
     @Operation(
@@ -147,26 +152,41 @@ public class ReporteController {
 
 
     @Operation(
-            summary = "Obtener la proyeccion del Hogar (TODO)"
+            summary = "Obtener la proyección mensual del hogar",
+            description = "Calcula la proyección mensual de consumo de un hogar según el umbral indicado.",
+            parameters = {
+                    @Parameter(
+                            name = "id",
+                            description = "ID del hogar a consultar",
+                            required = true,
+                            example = "18"
+                    ),
+                    @Parameter(
+                            name = "umbralMensual",
+                            description = "Umbral mensual de consumo",
+                            required = true,
+                            example = "120.5"
+                    )
+            },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Proyección calculada correctamente",
+                            content = @Content(schema = @Schema(implementation = ProyeccionHogarDTO.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Hogar no encontrado"
+                    )
+            }
     )
     @GetMapping("/{id}/proyeccion")
-    public ResponseEntity<?> getReporteProyeccionPorFecha(@PathVariable Long id,
-                                                          @RequestParam String fechaInicio,
-                                                          @RequestParam String fechaFin) {
+    public ResponseEntity<?> getReporteProyeccionMensual(@PathVariable Long hogarId,
+                                                          @RequestParam double umbralMensual) {
 
-        logger.info("getReporteProyeccionPorFecha - id: {}, fechaInicio: {}, fechaFin: {}", id, fechaInicio, fechaFin);
+        ProyeccionHogarDTO response = proyeccionService.calcularProyeccion(hogarId,umbralMensual);
 
-        LocalDate fechaDesde = LocalDate.parse(fechaInicio);
-        LocalDate fechaHasta = LocalDate.parse(fechaFin);
-
-        LocalDateTime desdeDateTime = fechaDesde.atStartOfDay();
-        LocalDateTime hastaDateTime = fechaHasta.atTime(LocalTime.MAX);
-
-        Hogar hogar = reporteService.findByIdWithSectoresAndMediciones(id,desdeDateTime, desdeDateTime);
-
-        //TODO
-
-        return ResponseEntity.ok(0);
+        return ResponseEntity.ok(response);
     }
 
 

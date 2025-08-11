@@ -7,6 +7,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface HogarRepository extends CrudRepository<Hogar, Long>{
 
+    @Query("SELECT h FROM Hogar h LEFT JOIN FETCH h.sectores s LEFT JOIN FETCH s.mediciones WHERE h.id = :hogarId")
+    Hogar findByIdWithSectoresAndMediciones(@Param("hogarId") Long hogarId);
+
     @Query("""
         select distinct h
         from Hogar h
