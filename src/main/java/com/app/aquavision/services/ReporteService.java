@@ -6,7 +6,6 @@ import com.app.aquavision.entities.domain.Medicion;
 import com.app.aquavision.repositories.HogarRepository;
 import com.app.aquavision.repositories.MedicionRepository;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,7 +58,7 @@ public class ReporteService {
             throw new NoSuchElementException("Hogar no encontrado con id: " + hogarId);
         }
 
-        ConsumosPorHoraHogarDTO dto = new ConsumosPorHoraHogarDTO(hogar);
+        ConsumosPorHoraHogarDTO dto = new ConsumosPorHoraHogarDTO(hogar, hoyInicio, hoyActual);
 
         Context context = new Context();
         context.setVariable("hogarId", dto.getHogarId());
