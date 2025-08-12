@@ -22,8 +22,12 @@
 
 <header>
     <h1>Reporte de Consumo</h1>
-    <p th:text="|Desde ${fechaDesde != null ? fechaDesde : ''} hasta ${fechaHasta != null ? fechaHasta : ''}|"></p>
+    <p th:text="${fechaDesde != null and fechaHasta != null and fechaDesde.equals(fechaHasta) 
+        ? 'Reporte del día ' + fechaDesde 
+        : 'Desde ' + (fechaDesde != null ? fechaDesde : '') + ' hasta ' + (fechaHasta != null ? fechaHasta : '')}">
+    </p>
 </header>
+
 
 <section class="info-hogar">
     <div class="info-item"><strong>Localidad:</strong> <span th:text="${localidad != null ? localidad : '-'}"></span></div>
