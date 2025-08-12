@@ -55,7 +55,7 @@ public class ConsumoHogarDTO {
         this.localidad = hogar.getLocalidad();
     }
 
-    public int getConsumoTotal() {
+    public Integer getConsumoTotal() {
         return consumoTotal;
     }
 
@@ -84,11 +84,11 @@ public class ConsumoHogarDTO {
         return fechaGeneracion;
     }
 
-    public int getConsumoPromedio() {
+    public Integer getConsumoPromedio() {
         return consumoPromedio;
     }
 
-    public int getConsumoPico() {
+    public Integer getConsumoPico() {
         return consumoPico;
     }
 

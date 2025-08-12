@@ -1,5 +1,6 @@
 package com.app.aquavision.services;
 
+import com.app.aquavision.dto.ConsumoHogarDTO;
 import com.app.aquavision.dto.ConsumosPorHoraHogarDTO;
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.entities.domain.Medicion;
@@ -17,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -49,27 +51,28 @@ public class ReporteService {
 
 
 
-    public byte[] generarPdfReporte(Long hogarId) {
-        LocalDateTime hoyInicio = LocalDate.now().atStartOfDay();
-        LocalDateTime hoyActual = LocalDate.now().atTime(LocalTime.MAX);
-
-        Hogar hogar = this.findByIdWithSectoresAndMediciones(hogarId, hoyInicio, hoyActual);
+    public byte[] generarPdfReporte(Long hogarId, LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
+        Hogar hogar = this.findByIdWithSectoresAndMediciones(hogarId, fechaDesde, fechaHasta);
         if (hogar == null) {
             throw new NoSuchElementException("Hogar no encontrado con id: " + hogarId);
         }
 
-        ConsumosPorHoraHogarDTO dto = new ConsumosPorHoraHogarDTO(hogar, hoyInicio, hoyActual);
+        ConsumoHogarDTO dto = new ConsumoHogarDTO(hogar, fechaDesde, fechaHasta);
+
+        DateTimeFormatter fechaFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter fechaHoraFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
         Context context = new Context();
-        context.setVariable("hogarId", dto.getHogarId());
-        context.setVariable("miembros", dto.getMiembros());
-        context.setVariable("localidad", dto.getLocalidad());
-        context.setVariable("consumosPorHora", dto.getConsumosPorHora());
+        context.setVariable("miembros", dto.getMiembros() != null ? dto.getMiembros() : 0);
+        context.setVariable("localidad", dto.getLocalidad() != null ? dto.getLocalidad() : "-");
+        context.setVariable("fechaDesde", fechaDesde != null ? fechaDesde.format(fechaFormatter) : "");
+        context.setVariable("fechaHasta", fechaHasta != null ? fechaHasta.format(fechaFormatter) : "");
+        context.setVariable("fechaGeneracion", dto.getFechaGeneracion() != null ? dto.getFechaGeneracion().format(fechaHoraFormatter) : "");
+        context.setVariable("consumoTotal",  dto.getConsumoTotal() != null ? dto.getConsumoTotal() : 0);
+        context.setVariable("consumoPromedio", dto.getConsumoPromedio() != null ? dto.getConsumoPromedio() : 0);
+        context.setVariable("consumoPico", dto.getConsumoPico() != null ? dto.getConsumoPico() : 0);
+        context.setVariable("consumosPorSector", dto.getConsumosPorSector() != null ? dto.getConsumosPorSector() : Collections.emptyList());
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        context.setVariable("fechaGeneracion", LocalDateTime.now().format(formatter));
-
- 
         String htmlContent = templateEngine.process("historical-report", context);
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
@@ -77,12 +80,13 @@ public class ReporteService {
             builder.withHtmlContent(htmlContent, "");
             builder.toStream(baos);
             builder.run();
-
             return baos.toByteArray();
         } catch (Exception e) {
             throw new RuntimeException("Error generando PDF", e);
         }
     }
+
+
 
 
 }
