@@ -192,29 +192,36 @@ public class ReporteController {
     }
 
 
-    @GetMapping("/{id}/descargar-reporte-pdf")
-    public ResponseEntity<byte[]> descargarReportePDF(@PathVariable Long id) {
+        @GetMapping("/{id}/descargar-reporte-pdf")
+        public ResponseEntity<byte[]> descargarReportePDF(
+                @PathVariable Long id,
+                @RequestParam String fechaInicio,
+                @RequestParam String fechaFin) {
 
-        logger.info("descargarReportePDF - hogar_id: {}", id);
+        logger.info("descargarReportePDF - hogar_id: {}, fechaInicio: {}, fechaFin: {}", id, fechaInicio, fechaFin);
 
         try {
-            byte[] pdfBytes = reporteService.generarPdfReporte(id);
+                LocalDate desde = LocalDate.parse(fechaInicio);
+                LocalDate hasta = LocalDate.parse(fechaFin);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDisposition(ContentDisposition.builder("attachment")
-                    .filename("reporte_consumo.pdf")
-                    .build());
+                byte[] pdfBytes = reporteService.generarPdfReporte(id, desde.atStartOfDay(), hasta.atTime(LocalTime.MAX));
 
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(pdfBytes);
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_PDF);
+                headers.setContentDisposition(ContentDisposition.builder("attachment")
+                        .filename("reporte_consumo.pdf")
+                        .build());
+
+                return ResponseEntity.ok()
+                        .headers(headers)
+                        .body(pdfBytes);
 
         } catch (NoSuchElementException e) {
-            return ResponseEntity.notFound().build();
+                return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-    }
+        }
+
 
 }

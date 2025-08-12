@@ -1,78 +1,58 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="es">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="es">
 <head>
     <meta charset="UTF-8" />
-    <title th:text="'Reporte de Consumo - Hogar ' + ${hogarId}"></title>
-    <style type="text/css">
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            color: #333;
+    <title>Reporte de Consumo</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+        header { text-align: center; border-bottom: 2px solid #00aaff; padding-bottom: 10px; margin-bottom: 20px; }
+        header h1 { margin: 0; color: #00aaff; }
+        .info-hogar, .info-sector {
+            background-color: #f5faff; padding: 10px 20px; border-radius: 8px; margin-bottom: 20px;
         }
-        header {
-            text-align: center;
-            border-bottom: 2px solid #00aaff;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        header h1 {
-            margin: 0;
-            color: #00aaff;
-        }
-        .info-hogar {
-            display: flex;
-            justify-content: space-between;
-            background-color: #f5faff;
-            padding: 10px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        .info-item {
-            font-size: 14px;
-        }
-        .tabla-consumo {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-        }
-        .tabla-consumo th, .tabla-consumo td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: center;
-        }
-        .tabla-consumo th {
-            background-color: #00aaff;
-            color: white;
-        }
+        .info-item { font-size: 14px; margin: 5px 0; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th { background-color: #00aaff; color: white; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>Reporte de Consumo por Hora</h1>
-    <p th:text="'Resumen del consumo diario para el hogar ID: ' + ${hogarId}"></p>
+    <h1>Reporte de Consumo</h1>
+    <p th:text="|Desde ${fechaDesde != null ? fechaDesde : ''} hasta ${fechaHasta != null ? fechaHasta : ''}|"></p>
 </header>
 
 <section class="info-hogar">
-    <div class="info-item"><strong>Miembros:</strong> <span th:text="${miembros}"></span></div>
-    <div class="info-item"><strong>Localidad:</strong> <span th:text="${localidad}"></span></div>
-    <div class="info-item"><strong>Fecha de generación:</strong> <span th:text="${fechaGeneracion}"></span></div>
+    <div class="info-item"><strong>Localidad:</strong> <span th:text="${localidad != null ? localidad : '-'}"></span></div>
+    <div class="info-item"><strong>Miembros del hogar:</strong> <span th:text="${miembros != null ? miembros : 0}"></span></div>
+    <div class="info-item"><strong>Consumo total:</strong> <span th:text="|${consumoTotal != null ? consumoTotal : 0} litros|"></span></div>
+    <div class="info-item"><strong>Consumo promedio:</strong> <span th:text="|${consumoPromedio != null ? consumoPromedio : 0} litros|"></span></div>
+    <div class="info-item"><strong>Consumo pico:</strong> <span th:text="|${consumoPico != null ? consumoPico : 0} litros|"></span></div>
+    <div class="info-item"><strong>Fecha de generación:</strong> <span th:text="${fechaGeneracion != null ? fechaGeneracion : ''}"></span></div>
 </section>
 
-<h2>Consumo por Hora</h2>
-<table class="tabla-consumo">
+<h2>Detalle por Sector</h2>
+<table>
     <thead>
         <tr>
-            <th>Hora</th>
-            <th>Consumo (Litros)</th>
+            <th>Sector</th>
+            <th>Consumo Total (L)</th>
+            <th>Consumo Promedio (L)</th>
+            <th>Consumo Pico (L)</th>
         </tr>
     </thead>
-    <tbody>
-        <tr th:each="c : ${consumosPorHora}">
-            <td th:text="${c.hora}"></td>
-            <td th:text="${c.consumo}"></td>
-        </tr>
-    </tbody>
+        <tbody>
+            <tr th:each="consumoSector : ${consumosPorSector}">
+                <td th:text="${consumoSector.sector != null ? consumoSector.sector.nombre : '-'}"></td>
+                <td th:text="${consumoSector.consumoTotal}"></td>
+                <td th:text="${consumoSector.consumoPromedio}"></td>
+                <td th:text="${consumoSector.consumoPico}"></td>
+            </tr>
+        </tbody>
+
 </table>
 
 </body>
