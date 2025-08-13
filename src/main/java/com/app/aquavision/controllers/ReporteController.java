@@ -135,7 +135,7 @@ public class ReporteController {
         logger.info("getReporteConsumoPorFecha - id: {}, fechaInicio: {}, fechaFin: {}", id, fechaInicio, fechaFin);
 
         LocalDate fechaDesde = LocalDate.parse(fechaInicio);
-        LocalDate fechaHasta = LocalDate.parse(fechaFin);
+        LocalDate fechaHasta = LocalDate.parse(fechaFin).plusDays(1);
 
         LocalDateTime desdeDateTime = fechaDesde.atStartOfDay();
         LocalDateTime hastaDateTime = fechaHasta.atTime(LocalTime.MAX);

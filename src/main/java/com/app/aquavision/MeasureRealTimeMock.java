@@ -67,7 +67,7 @@ public class MeasureRealTimeMock {
                         logger.info("----------------------------------------------------------------------------------");
                     }
                     ejecucion++;
-                    Thread.sleep(10_000); // cada 10 segundos
+                    Thread.sleep(5_000); // cada 10 segundos
                 }
             }
         } catch (Exception e) {
@@ -102,7 +102,7 @@ public class MeasureRealTimeMock {
     }
 
     private static int medicionRandom(Random random) {
-        if (random.nextDouble() < 0.8) {
+        if (random.nextDouble() < 0.1) {
             return 0;
         }
         return random.nextInt(99) + 1;
