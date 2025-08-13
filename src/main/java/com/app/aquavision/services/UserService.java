@@ -20,4 +20,6 @@ public interface UserService {
 
     User update(Long id, User userDetails);
 
+    Long findHomeIdFromAuthenticatedUser();
+
 }

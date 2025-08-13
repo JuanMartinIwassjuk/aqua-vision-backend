@@ -96,6 +96,13 @@ public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody User 
         return ResponseEntity.badRequest().body(errors);
     }
 
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @GetMapping("/authenticatedId")
+    public Long getHomeId() {
+        return service.findHomeIdFromAuthenticatedUser();
+    }
+
     
 
 }
