@@ -121,6 +121,20 @@ public class UserServiceImpl implements UserService{
         return repository.findByUsername(username).
                 orElseThrow(() -> new RuntimeException("User do not found with Username: " + username));
         }
+
+
+        @Override
+        @Transactional
+        public Long findHomeIdFromAuthenticatedUser(){
+
+            User user = this.getAuthenticatedUser();
+
+            Long idHogar = user.getHogar().getId();
+
+            return idHogar;
+
+        }
+        
     
     
 }
