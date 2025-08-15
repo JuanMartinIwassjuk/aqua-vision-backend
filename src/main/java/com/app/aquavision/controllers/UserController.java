@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,8 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/users")
 public class UserController {
+
+    Logger logger = Logger.getLogger(UserController.class.getName());
 
     @Autowired
     private UserService service;
@@ -71,21 +74,18 @@ public class UserController {
         }
     }
 
-
-@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-@PutMapping("/{id}")
-public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody User userDetails, BindingResult result) {
-    userDetails.setPassword("asd");
-    try {
-        User updatedUser = service.update(id, userDetails);
-        return ResponseEntity.ok(updatedUser);
-    } catch (RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("error", e.getMessage()));
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody User userDetails, BindingResult result) {
+        userDetails.setPassword("asd");
+        try {
+            User updatedUser = service.update(id, userDetails);
+            return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("error", e.getMessage()));
+        }
     }
-}
 
-
- 
     private ResponseEntity<?> validation(BindingResult result) {
         Map<String, String> errors = new HashMap<>();
 
@@ -96,13 +96,15 @@ public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody User 
         return ResponseEntity.badRequest().body(errors);
     }
 
-
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/authenticatedId")
     public Long getHomeId() {
-        return service.findHomeIdFromAuthenticatedUser();
-    }
 
-    
+        Long id_hogar = service.findHomeIdFromAuthenticatedUser();
+
+        logger.info("ID del hogar del usuario autenticado: " + id_hogar);
+
+        return id_hogar;
+    }
 
 }

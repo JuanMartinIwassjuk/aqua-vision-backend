@@ -1,4 +1,4 @@
-package com.app.aquavision.dto;
+package com.app.aquavision.dto.proyecciones;
 
 import java.util.List;
 

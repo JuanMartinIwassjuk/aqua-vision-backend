@@ -1,13 +1,12 @@
-package com.app.aquavision.dto;
+package com.app.aquavision.dto.consumos;
 
 import com.app.aquavision.entities.domain.Hogar;
-import com.app.aquavision.entities.domain.Sector;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConsumoHogarDTO {
+public class ConsumoTotalHogarDTO {
 
     //Hogar
     private final int hogarId;
@@ -21,38 +20,26 @@ public class ConsumoHogarDTO {
 
     //Consumos
     private int consumoTotal = 0;
-    private int consumoPromedio = 0;
-    private int consumoPico = 0;
+    private float consumoPromedio = 0;
+    private float consumoPico = 0;
 
-    private final List<ConsumoSectorDTO> consumosPorSector = new ArrayList<>();
+    private final List<ConsumoTotalSectorDTO> consumosPorSector = new ArrayList<>();
 
-    public ConsumoHogarDTO(Hogar hogar, LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
-        this.consumoTotal = 0;
-
-        //TODO: Mover logica a service
-        for (Sector sector: hogar.getSectores()) {
-            ConsumoSectorDTO consumoDiarioSectorDTO = new ConsumoSectorDTO(sector);
-            this.consumosPorSector.add(consumoDiarioSectorDTO);
-
-            this.consumoTotal += consumoDiarioSectorDTO.getConsumoTotal();
-        }
-
-        if (!this.consumosPorSector.isEmpty()) {
-            this.consumoPromedio = this.consumosPorSector.stream()
-                    .mapToInt(ConsumoSectorDTO::getConsumoPromedio)
-                    .sum();
-            this.consumoPico = this.consumosPorSector.stream()
-                    .mapToInt(ConsumoSectorDTO::getConsumoPico)
-                    .max()
-                    .orElse(0);
-        }
-
+    public ConsumoTotalHogarDTO(Hogar hogar, LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
         this.fechaDesde = fechaDesde;
         this.fechaHasta = fechaHasta;
 
         this.hogarId = hogar.getId().intValue();
         this.miembros = String.valueOf(hogar.getMiembros());
         this.localidad = hogar.getLocalidad();
+    }
+
+    public void addConsumoSector(ConsumoTotalSectorDTO consumoSector) {
+        this.consumosPorSector.add(consumoSector);
+    }
+
+    public void sumarConsumoTotal(int consumo) {
+        this.consumoTotal += consumo;
     }
 
     public Integer getConsumoTotal() {
@@ -68,7 +55,7 @@ public class ConsumoHogarDTO {
     public String getLocalidad() {
         return localidad;
     }
-    public List<ConsumoSectorDTO> getConsumosPorSector() {
+    public List<ConsumoTotalSectorDTO> getConsumosPorSector() {
         return consumosPorSector;
     }
 
@@ -84,12 +71,20 @@ public class ConsumoHogarDTO {
         return fechaGeneracion;
     }
 
-    public Integer getConsumoPromedio() {
+    public Float getConsumoPromedio() {
         return consumoPromedio;
     }
 
-    public Integer getConsumoPico() {
+    public Float getConsumoPico() {
         return consumoPico;
+    }
+
+    public void setConsumoPromedio(float consumoPromedio) {
+        this.consumoPromedio = consumoPromedio;
+    }
+
+    public void setConsumoPico(float consumoPico) {
+        this.consumoPico = consumoPico;
     }
 
 }
