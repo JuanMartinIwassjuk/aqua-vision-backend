@@ -1,4 +1,4 @@
-package com.app.aquavision.dto;
+package com.app.aquavision.dto.consumos;
 
 import com.app.aquavision.entities.domain.Hogar;
 
@@ -16,20 +16,18 @@ public class ConsumosPorHoraHogarDTO {
     private final LocalDateTime fechaGeneracion = LocalDateTime.now();
     private final List<ConsumoPorHoraDTO> consumosPorHora = new ArrayList<>();
 
-        public ConsumosPorHoraHogarDTO(Hogar hogar, LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
-            this.hogarId = hogar.getId();
-            this.miembros = hogar.getMiembros();
-            this.localidad = hogar.getLocalidad();
+    public ConsumosPorHoraHogarDTO(Hogar hogar, LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
+        this.hogarId = hogar.getId();
+        this.miembros = hogar.getMiembros();
+        this.localidad = hogar.getLocalidad();
 
-            this.fechaDesde = fechaDesde;
-            this.fechaHasta = fechaHasta;
+        this.fechaDesde = fechaDesde;
+        this.fechaHasta = fechaHasta;
+    }
 
-            //TODO: Mover logica a service
-            for (int i = 0; i < 24; i++) {
-                int consumo = hogar.consumoTotalHora(i);
-                consumosPorHora.add(new ConsumoPorHoraDTO(i, consumo));
-            }
-        }
+    public void addConsumoPorHora(ConsumoPorHoraDTO consumo) {
+        this.consumosPorHora.add(consumo);
+    }
 
     public List<ConsumoPorHoraDTO> getConsumosPorHora() {
         return consumosPorHora;

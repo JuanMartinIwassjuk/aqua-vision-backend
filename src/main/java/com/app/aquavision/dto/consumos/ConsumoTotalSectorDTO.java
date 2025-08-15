@@ -1,8 +1,8 @@
-package com.app.aquavision.dto;
+package com.app.aquavision.dto.consumos;
 
 import com.app.aquavision.entities.domain.Sector;
 
-public class ConsumoSectorDTO {
+public class ConsumoTotalSectorDTO {
 
     //Sector
     private final Sector sector;
@@ -13,7 +13,7 @@ public class ConsumoSectorDTO {
     private int consumoPico = 0;
 
 
-    public ConsumoSectorDTO(Sector sector) {
+    public ConsumoTotalSectorDTO(Sector sector) {
         //Se delega al controller traer al sector con las mediciones ya filtradas por fecha
 
         this.consumoTotal = sector.totalConsumo();

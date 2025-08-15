@@ -1,7 +1,7 @@
 package com.app.aquavision.services;
 
-import com.app.aquavision.dto.ProyeccionHogarDTO;
-import com.app.aquavision.dto.ProyeccionSectorDTO;
+import com.app.aquavision.dto.proyecciones.ProyeccionHogarDTO;
+import com.app.aquavision.dto.proyecciones.ProyeccionSectorDTO;
 import com.app.aquavision.entities.domain.EstadoConsumo;
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.entities.domain.Medicion;

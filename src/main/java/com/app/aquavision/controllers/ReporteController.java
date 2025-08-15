@@ -1,9 +1,9 @@
 package com.app.aquavision.controllers;
 
-import com.app.aquavision.dto.ConsumoHogarDTO;
-import com.app.aquavision.dto.ConsumosPorHoraHogarDTO;
-import com.app.aquavision.dto.ProyeccionHogarDTO;
-import com.app.aquavision.entities.domain.Hogar;
+import com.app.aquavision.dto.consumos.ConsumoMensualHogarDTO;
+import com.app.aquavision.dto.consumos.ConsumoTotalHogarDTO;
+import com.app.aquavision.dto.consumos.ConsumosPorHoraHogarDTO;
+import com.app.aquavision.dto.proyecciones.ProyeccionHogarDTO;
 import com.app.aquavision.services.ProyeccionService;
 import com.app.aquavision.services.ReporteService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,7 +46,7 @@ public class ReporteController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "Consumo diario obtenido correctamente",
-                            content = @Content(schema = @Schema(implementation = ConsumoHogarDTO.class))
+                            content = @Content(schema = @Schema(implementation = ConsumoTotalHogarDTO.class))
                     ),
                     @ApiResponse(
                             responseCode = "404",
@@ -60,16 +60,7 @@ public class ReporteController {
 
         logger.info("getReporteConsumoActual - hogar_id: {}", id);
 
-        LocalDateTime hoyInicio = LocalDate.now().atStartOfDay();
-        LocalDateTime hoyFin = LocalDate.now().atTime(LocalTime.MAX);
-
-        Hogar hogar = reporteService.findByIdWithSectoresAndMediciones(id,hoyInicio,hoyFin);
-
-        if (hogar == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        ConsumoHogarDTO consumoDiarioDTO = new ConsumoHogarDTO(hogar, hoyInicio, hoyFin);
+        ConsumoTotalHogarDTO consumoDiarioDTO = this.reporteService.consumosHogarYSectoresDia(id);
 
         return ResponseEntity.ok(consumoDiarioDTO);
     }
@@ -95,16 +86,7 @@ public class ReporteController {
 
         logger.info("getReporteConsumoPorHora - hogar_id: {}", id);
 
-        LocalDateTime hoyInicio = LocalDate.now().atStartOfDay();
-        LocalDateTime hoyActual = LocalDate.now().atTime(LocalTime.MAX);
-
-        Hogar hogar = reporteService.findByIdWithSectoresAndMediciones(id, hoyInicio, hoyActual);
-
-        if (hogar == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        ConsumosPorHoraHogarDTO consumosPorHoraHogarDTO = new ConsumosPorHoraHogarDTO(hogar, hoyInicio, hoyActual);
+        ConsumosPorHoraHogarDTO consumosPorHoraHogarDTO = this.reporteService.consumosHogarPorHora(id);
 
         return ResponseEntity.ok(consumosPorHoraHogarDTO);
     }
@@ -115,7 +97,7 @@ public class ReporteController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "Reporte de consumo obtenido correctamente",
-                            content = @Content(schema = @Schema(implementation = ConsumoHogarDTO.class))
+                            content = @Content(schema = @Schema(implementation = ConsumoTotalHogarDTO.class))
                     ),
                     @ApiResponse(
                             responseCode = "404",
@@ -132,23 +114,53 @@ public class ReporteController {
             @Parameter(description = "Fecha de fin en formato yyyy-MM-dd", example = "2025-08-05")
             @RequestParam String fechaFin) {
 
-        logger.info("getReporteConsumoPorFecha - id: {}, fechaInicio: {}, fechaFin: {}", id, fechaInicio, fechaFin);
+        logger.info("getReporteConsumoPorFecha - hogar_id: {}, fechaInicio: {}, fechaFin: {}", id, fechaInicio, fechaFin);
 
         LocalDate fechaDesde = LocalDate.parse(fechaInicio);
-        LocalDate fechaHasta = LocalDate.parse(fechaFin).plusDays(1);
+        LocalDate fechaHasta = LocalDate.parse(fechaFin);
 
         LocalDateTime desdeDateTime = fechaDesde.atStartOfDay();
         LocalDateTime hastaDateTime = fechaHasta.atTime(LocalTime.MAX);
 
-        Hogar hogar = reporteService.findByIdWithSectoresAndMediciones(id, desdeDateTime, hastaDateTime);
+        ConsumoTotalHogarDTO consumoHogarFecha = reporteService.consumosHogarYSectoresFecha(id, desdeDateTime, hastaDateTime);
 
-        if (hogar == null) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(consumoHogarFecha);
+    }
 
-        ConsumoHogarDTO consumoDiarioDTO = new ConsumoHogarDTO(hogar, desdeDateTime, hastaDateTime);
+    @Operation(
+            summary = "Obtener reporte de consumo mensual de un hogar y sus sectores entre dos fechas",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Reporte mensual de consumo obtenido correctamente",
+                            content = @Content(schema = @Schema(implementation = ConsumoMensualHogarDTO.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Hogar no encontrado"
+                    )
+            }
+    )
+    @GetMapping("/{id}/consumo-fecha-mensual")
+    public ResponseEntity<?> getReporteConsumoPorFechaMensual(
+            @Parameter(description = "ID del hogar a consultar", example = "1")
+            @PathVariable Long id,
+            @Parameter(description = "Fecha de inicio en formato yyyy-MM-dd", example = "2025-05-01")
+            @RequestParam String fechaInicio,
+            @Parameter(description = "Fecha de fin en formato yyyy-MM-dd", example = "2025-08-05")
+            @RequestParam String fechaFin) {
 
-        return ResponseEntity.ok(consumoDiarioDTO);
+        logger.info("getReporteConsumoPorFechaMensual - hogar_id: {}, fechaInicio: {}, fechaFin: {}", id, fechaInicio, fechaFin);
+
+        LocalDate fechaDesde = LocalDate.parse(fechaInicio);
+        LocalDate fechaHasta = LocalDate.parse(fechaFin);
+
+        LocalDateTime desdeDateTime = fechaDesde.atStartOfDay();
+        LocalDateTime hastaDateTime = fechaHasta.atTime(LocalTime.MAX);
+
+        ConsumoMensualHogarDTO consumoMensualHogar = reporteService.consumosHogarYSectoresFechaMensual(id, desdeDateTime, hastaDateTime);
+
+        return ResponseEntity.ok(consumoMensualHogar);
     }
 
     @Operation(
@@ -191,37 +203,37 @@ public class ReporteController {
         return ResponseEntity.ok(response);
     }
 
-
-        @GetMapping("/{id}/descargar-reporte-pdf")
-        public ResponseEntity<byte[]> descargarReportePDF(
-                @PathVariable Long id,
-                @RequestParam String fechaInicio,
-                @RequestParam String fechaFin) {
+    @GetMapping("/{id}/descargar-reporte-pdf")
+    public ResponseEntity<byte[]> descargarReportePDF(
+            @PathVariable Long id,
+            @RequestParam String fechaInicio,
+            @RequestParam String fechaFin) {
 
         logger.info("descargarReportePDF - hogar_id: {}, fechaInicio: {}, fechaFin: {}", id, fechaInicio, fechaFin);
 
         try {
-                LocalDate desde = LocalDate.parse(fechaInicio);
-                LocalDate hasta = LocalDate.parse(fechaFin);
+            LocalDate desde = LocalDate.parse(fechaInicio);
+            LocalDate hasta = LocalDate.parse(fechaFin);
 
-                byte[] pdfBytes = reporteService.generarPdfReporte(id, desde.atStartOfDay(), hasta.atTime(LocalTime.MAX));
+            byte[] pdfBytes = reporteService.generarPdfReporte(id, desde.atStartOfDay(), hasta.atTime(LocalTime.MAX));
 
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_PDF);
-                headers.setContentDisposition(ContentDisposition.builder("attachment")
-                        .filename("reporte_consumo.pdf")
-                        .build());
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDisposition(ContentDisposition.builder("attachment")
+                    .filename("reporte_consumo.pdf")
+                    .build());
 
-                return ResponseEntity.ok()
-                        .headers(headers)
-                        .body(pdfBytes);
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfBytes);
 
-        } catch (NoSuchElementException e) {
+            }
+        catch (NoSuchElementException e) {
                 return ResponseEntity.notFound().build();
-        } catch (Exception e) {
+            }
+        catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-        }
-
+            }
+    }
 
 }

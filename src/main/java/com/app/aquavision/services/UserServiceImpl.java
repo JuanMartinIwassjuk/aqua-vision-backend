@@ -114,26 +114,26 @@ public class UserServiceImpl implements UserService{
         return repository.save(existingUser);
     }
 
-        public User getAuthenticatedUser() {
-        
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    public User getAuthenticatedUser() {
 
-        return repository.findByUsername(username).
-                orElseThrow(() -> new RuntimeException("User do not found with Username: " + username));
-        }
+    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+    return repository.findByUsername(username).
+            orElseThrow(() -> new RuntimeException("User do not found with Username: " + username));
+    }
 
 
-        @Override
-        @Transactional
-        public Long findHomeIdFromAuthenticatedUser(){
+    @Override
+    @Transactional
+    public Long findHomeIdFromAuthenticatedUser(){
 
-            User user = this.getAuthenticatedUser();
+        User user = this.getAuthenticatedUser();
 
-            Long idHogar = user.getHogar().getId();
+        Long idHogar = user.getHogar().getId();
 
-            return idHogar;
+        return idHogar;
 
-        }
+    }
         
     
     

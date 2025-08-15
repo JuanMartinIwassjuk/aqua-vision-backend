@@ -18,11 +18,16 @@ public class Medidor {
     @OneToOne
     private Sector sector;
 
+    @Column
+    @Enumerated(EnumType.STRING)
+    private EstadoMedidor estado;
+
     public Medidor() {}
 
     public Medidor(int numeroSerie, Sector sector) {
         this.numeroSerie = numeroSerie;
         this.sector = sector;
+        this.estado = EstadoMedidor.UNKNOWN; // Default state
     }
 
     public Long getId() {
@@ -47,6 +52,14 @@ public class Medidor {
 
     public void setSector(Sector sector) {
         this.sector = sector;
+    }
+
+    public EstadoMedidor getEstado() {
+        return estado;
+    }
+
+    public void setEstado(EstadoMedidor estado) {
+        this.estado = estado;
     }
 
 }
