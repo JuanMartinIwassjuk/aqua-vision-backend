@@ -9,10 +9,17 @@ public class ConsumoMensualSectoresDTO {
 
     public float totalMes = 0;
 
+    public int anio = 0;
+
     List<ConsumoTotalSectorDTO> consumosSectorMes = new ArrayList<>();
 
-    public ConsumoMensualSectoresDTO(int mes) {
+    public ConsumoMensualSectoresDTO(int mes,int anio) {
         this.mes = mes;
+        this.anio=anio;
+    }
+
+    public int getAnio() {
+        return anio;
     }
 
     public int getMes() {

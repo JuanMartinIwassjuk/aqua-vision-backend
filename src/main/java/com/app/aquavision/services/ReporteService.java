@@ -118,8 +118,9 @@ public class ReporteService {
             Hogar hogar = this.findByIdWithSectoresAndMediciones(hogarId, fechaDesde, fechaDesde.plusMonths(1).minusDays(1));
 
             int mes = fechaDesde.getMonthValue();
+            int anio = fechaDesde.getYear();
 
-            ConsumoMensualSectoresDTO consumoMensualSectoresDTO = new ConsumoMensualSectoresDTO(mes);
+            ConsumoMensualSectoresDTO consumoMensualSectoresDTO = new ConsumoMensualSectoresDTO(mes,anio);
             for (Sector sector : hogar.getSectores()) {
                 ConsumoTotalSectorDTO consumoTotalSectorDTO = new ConsumoTotalSectorDTO(sector);
                 consumoMensualSectoresDTO.addConsumoSector(consumoTotalSectorDTO);
