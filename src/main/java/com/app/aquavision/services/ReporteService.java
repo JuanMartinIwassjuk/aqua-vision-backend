@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 
 @Service
@@ -33,9 +34,8 @@ public class ReporteService {
 
     @Transactional(readOnly = true)
     public Hogar findByIdWithSectoresAndMediciones(Long id, LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
-        Hogar hogar = hogarRepository.findByIdWithSectores(id);
-        if (hogar == null) return null;
-
+        Optional<Hogar> opcional = hogarRepository.findByIdWithSectores(id);
+        Hogar hogar = opcional.orElseThrow(() -> new NoSuchElementException("Hogar no encontrado con id: " + id));
         hogar.getSectores().forEach(sector -> {
             List<Medicion> mediciones = medicionRepository
                     .findBySectorIdAndFechaBetween(sector.getId(), fechaDesde, fechaHasta);
