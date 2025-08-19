@@ -27,7 +27,6 @@ import com.app.aquavision.services.UserService;
 
 import jakarta.validation.Valid;
 
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:8080"}, originPatterns = "*")
 @Hidden
 @RestController
 @RequestMapping("/users")

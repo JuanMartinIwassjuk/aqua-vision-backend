@@ -25,7 +25,6 @@ import java.time.LocalTime;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:8080"}, originPatterns = "*")
 @Tag(
         name = "Reportes",
         description = "Operaciones para consultar reportes de hogares y sus sectores"
