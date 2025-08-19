@@ -21,7 +21,7 @@ public class DBInitializer {
   @PostConstruct
   public void init() {
       try (Connection connection = dataSource.getConnection()) {
-      ScriptUtils.executeSqlScript(connection, new ClassPathResource("dbScripts/initializeSchema.sql"));
+      //ScriptUtils.executeSqlScript(connection, new ClassPathResource("dbScripts/initializeSchema.sql"));
       //ScriptUtils.executeSqlScript(connection, new ClassPathResource("dbScripts/homeDataMock.sql"));
       //ScriptUtils.executeSqlScript(connection, new ClassPathResource("dbScripts/measureDataMock.sql"));
     } catch (Exception e) {

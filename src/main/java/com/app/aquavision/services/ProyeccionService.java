@@ -11,6 +11,8 @@ import com.app.aquavision.entities.domain.Sector;
 import com.app.aquavision.repositories.HogarRepository;
 import com.app.aquavision.repositories.MedicionRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +39,8 @@ public class ProyeccionService {
     private HogarRepository hogarRepository;
 
     private final double precioPorUnidad = 0.5;
+
+    private static final Logger logger = LoggerFactory.getLogger(ProyeccionService.class);
 
     @Transactional(readOnly = true)
     public Hogar findByIdWithSectores(Long id) {
@@ -242,15 +246,14 @@ public class ProyeccionService {
         int diasTotalesMes = mesActual.lengthOfMonth();
         int diasRestantes = diasTotalesMes - diasTranscurridos;
 
-
         // mostrar las fecha obtenidas
-        System.out.println("Inicio del mes: " + inicioMes);
-        System.out.println("Fecha actual: " + hoy);
-        System.out.println("Fin del mes: " + finMes);
-        System.out.println("Días transcurridos: " + diasTranscurridos);
-        System.out.println("Días totales del mes: " + diasTotalesMes);
-        System.out.println("Días restantes: " + diasRestantes);
-
+        logger.info("Iniciando calculo de proyeccion para el hogar con ID: {}", hogarId);
+        logger.info("Inicio del mes: {}", inicioMes);
+        logger.info("Fecha actual: {}", hoy);
+        logger.info("Fin del mes: {}", finMes);
+        logger.info("Días transcurridos: {}", diasTranscurridos);
+        logger.info("Días totales del mes: {}", diasTotalesMes);
+        logger.info("Días restantes: {}", diasRestantes);
 
         //obtiene el hogar con sus sectores y mediciones de mes actual
         Hogar hogar = reporteService.findByIdWithSectoresAndMediciones(hogarId, inicioMes, finMes);
