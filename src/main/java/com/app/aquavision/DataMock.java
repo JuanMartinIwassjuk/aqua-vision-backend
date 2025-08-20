@@ -46,11 +46,12 @@ public class DataMock {
 
       int sectoresCount = random.nextInt(3) + 1;
       for (int j = 1; j <= sectoresCount; j++) {
-        jdbcTemplate.update("""
+          String categoria = randomCategoria();
+            jdbcTemplate.update("""
                     INSERT INTO Sector (nombre, categoria, hogar_id)
                     VALUES (?, ?, ?)
-                """, "Sector_" + i + "_" + j,
-            randomCategoria(),
+                """, categoria + "_" + i + "_" + j,
+            categoria,
             i);
       }
     }
