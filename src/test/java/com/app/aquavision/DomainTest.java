@@ -1,9 +1,6 @@
 package com.app.aquavision;
 
-import com.app.aquavision.entities.domain.Categoria;
-import com.app.aquavision.entities.domain.Hogar;
-import com.app.aquavision.entities.domain.Medicion;
-import com.app.aquavision.entities.domain.Sector;
+import com.app.aquavision.entities.domain.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -56,4 +53,18 @@ public class DomainTest {
     void ProyeccionHogarMensualTest() {
         hogar.mostarProyeccionConsumoMensual();
     }
+
+    @Test
+    void RecompensasTest(){
+        Recompensa recompensa = new Recompensa("DESCUENTO MEDIDOR 5%", 100);
+
+        hogar.setPuntos(120);
+        hogar.reclamarRecompensa(recompensa);
+
+        assert(
+                hogar.getRecompensas().getFirst().getRecompensa().equals(recompensa) &&
+                hogar.getPuntos() == 20
+        );
+    }
+
 }

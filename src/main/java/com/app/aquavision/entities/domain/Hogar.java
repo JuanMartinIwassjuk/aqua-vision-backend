@@ -1,6 +1,5 @@
 package com.app.aquavision.entities.domain;
 
-import com.app.aquavision.entities.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
@@ -22,6 +21,15 @@ public class Hogar {
 
     @Column
     private String localidad = "";
+
+    @Column
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    private int puntos = 0;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn (name = "hogar_id", referencedColumnName = "id")
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    private List<RecompensaHogar> recompensas = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn (name = "hogar_id", referencedColumnName = "id")
@@ -135,6 +143,44 @@ public class Hogar {
             consumoTotal += sector.totalConsumo(hora);
         }
         return consumoTotal;
+    }
+
+    public void reclamarRecompensa(Recompensa recompensa) {
+        if (this.puedeCanjearRecompensa(recompensa)) {
+            this.puntos -= recompensa.getPuntosNecesarios();
+            RecompensaHogar recompensaHogar = new RecompensaHogar(recompensa, EstadoRecompensa.DISPONIBLE, LocalDateTime.now().toLocalDate());
+            this.agregarRecompensa(recompensaHogar);
+        } else {
+            throw new IllegalArgumentException("No tienes suficientes puntos para canjear esta recompensa.");
+        }
+    }
+
+    public boolean puedeCanjearRecompensa(Recompensa recompensa) {
+        return this.puntos >= recompensa.getPuntosNecesarios();
+    }
+
+    public void agregarRecompensa(RecompensaHogar recompensa) {
+        this.recompensas.add(recompensa);
+    }
+
+    public void sumarPuntos(int puntos) {
+        this.puntos += puntos;
+    }
+
+    public int getPuntos() {
+        return puntos;
+    }
+
+    public void setPuntos(int puntos) {
+        this.puntos = puntos;
+    }
+
+    public List<RecompensaHogar> getRecompensas() {
+        return recompensas;
+    }
+
+    public void setRecompensas(List<RecompensaHogar> recompensas) {
+        this.recompensas = recompensas;
     }
 
     public List<Sector> getSectores() {

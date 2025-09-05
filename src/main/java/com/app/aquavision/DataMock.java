@@ -41,7 +41,7 @@ public class DataMock {
     Random random = new Random();
 
     for (int i = 1; i <= 20; i++) {
-      jdbcTemplate.update("INSERT INTO Hogar (miembros, localidad) VALUES (?, ?)",
+      jdbcTemplate.update("INSERT INTO Hogar (miembros, localidad, puntos) VALUES (?, ?, 0)",
           random.nextInt(5) + 1, "Localidad_" + i);
 
       int sectoresCount = random.nextInt(3) + 1;
@@ -86,9 +86,31 @@ public class DataMock {
 
     insertarRoles();
     insertarUsuarios();
+    insertarRecompensas();
 
     logger.info("Datos mock insertados correctamente");
 
+  }
+
+  private void insertarRecompensas(){
+    List<Map<String, Object>> recompensas = List.of(
+        Map.of("descripcion", "Descuento del 10% en medidor", "puntos", 50),
+        Map.of("descripcion", "Descuento del 20% en medidor", "puntos", 90),
+        Map.of("descripcion", "Descuento del 5% en mantenimiento", "puntos", 300)
+    );
+
+    for (Map<String, Object> recompensa : recompensas) {
+      String descripcion = (String) recompensa.get("descripcion");
+      int puntos = (int) recompensa.get("puntos");
+
+      Integer count = jdbcTemplate.queryForObject(
+          "SELECT COUNT(*) FROM Recompensa WHERE descripcion = ?", Integer.class, descripcion);
+      if (count == 0) {
+        jdbcTemplate.update(
+            "INSERT INTO Recompensa (descripcion, puntos_necesarios) VALUES (?, ?)",
+            descripcion, puntos);
+      }
+    }
   }
 
   private void insertarRoles() {
