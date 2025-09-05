@@ -19,6 +19,7 @@ public class Sector {
 
     @Column
     private String nombre;
+
     @Column
     @Enumerated(EnumType.STRING)
     private Categoria categoria;

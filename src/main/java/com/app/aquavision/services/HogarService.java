@@ -1,7 +1,9 @@
 package com.app.aquavision.services;
 
 import com.app.aquavision.entities.domain.Hogar;
+import com.app.aquavision.entities.domain.Recompensa;
 import com.app.aquavision.repositories.HogarRepository;
+import com.app.aquavision.repositories.RecompensaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +16,9 @@ public class HogarService {
 
     @Autowired
     private HogarRepository repository;
+
+    @Autowired
+    private RecompensaRepository recompensaRepository;
 
     @Transactional()
     public List<Hogar> findAll() {
@@ -28,8 +33,34 @@ public class HogarService {
 
     @Transactional
     public Hogar save(Hogar hogar) {
-
         return repository.save(hogar);
+    }
+
+    @Transactional
+    public Hogar addPuntosToHogar(Long id, int puntos) {
+        Optional<Hogar> optionalHogar = repository.findById(id);
+        if (optionalHogar.isPresent()) {
+            Hogar hogar = optionalHogar.get();
+            hogar.sumarPuntos(puntos);
+            repository.save(hogar);
+        }
+        return optionalHogar.orElse(null);
+    }
+
+    @Transactional
+    public Hogar reclamarRecompensa(Long hogarId, Long recompensaId) {
+        Optional<Hogar> optionalHogar = repository.findById(hogarId);
+        Optional<Recompensa> optionalRecompensa = recompensaRepository.findById(recompensaId);
+
+        if (optionalHogar.isPresent() && optionalRecompensa.isPresent()) {
+            Hogar hogar = optionalHogar.get();
+            Recompensa recompensa = optionalRecompensa.get();
+
+            hogar.reclamarRecompensa(recompensa);
+            repository.save(hogar);
+        }
+
+        return optionalHogar.orElse(null);
     }
 
 }
