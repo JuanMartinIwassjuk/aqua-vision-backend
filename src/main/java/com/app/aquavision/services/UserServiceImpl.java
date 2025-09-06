@@ -134,7 +134,17 @@ public class UserServiceImpl implements UserService{
         return idHogar;
 
     }
-        
-    
+
+    @Override
+    @Transactional
+    public User updateLastLogin(Long id) {
+
+        User existingUser = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+
+        existingUser.setLastLogin(java.time.LocalDateTime.now());
+
+        return repository.save(existingUser);
+    }
     
 }

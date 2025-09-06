@@ -1,7 +1,6 @@
 package com.app.aquavision.controllers;
 
 import com.app.aquavision.entities.domain.Hogar;
-import com.app.aquavision.entities.domain.RecompensaHogar;
 import com.app.aquavision.services.HogarService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -39,7 +38,7 @@ public class GamificationController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "Puntos modificados correctamente",
-                            content = @Content(schema = @Schema(implementation = int.class))
+                            content = @Content(schema = @Schema(implementation = Hogar.class))
                     ),
                     @ApiResponse(
                             responseCode = "400",
@@ -56,9 +55,8 @@ public class GamificationController {
         logger.info("Adding " + puntos + " points to hogar with ID: " + id);
 
         Hogar hogar = service.addPuntosToHogar(id, puntos);
-        int puntosActuales = hogar.getPuntos();
 
-        return ResponseEntity.ok(puntosActuales);
+        return ResponseEntity.ok(hogar);
     }
 
     @PostMapping("/{id}/recompensas/{recompensaId}")
@@ -68,7 +66,7 @@ public class GamificationController {
                     @ApiResponse(
                             responseCode = "201",
                             description = "Recompensa reclamada correctamente",
-                            content = @Content(schema = @Schema(implementation = RecompensaHogar.class))
+                            content = @Content(schema = @Schema(implementation = Hogar.class))
                     ),
                     @ApiResponse(
                             responseCode = "400",
@@ -87,7 +85,71 @@ public class GamificationController {
         try{
             Hogar hogar = service.reclamarRecompensa(id, recompensaId);
             logger.info("Reward redeemed successfully for hogar ID: " + id);
-            return ResponseEntity.status(HttpStatus.CREATED).body(hogar.getRecompensas().getLast());
+            return ResponseEntity.status(HttpStatus.CREATED).body(hogar);
+        } catch (IllegalArgumentException e) {
+            logger.info(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
+    }
+
+    @PostMapping("/{id}/racha/aumentar")
+    @Operation(
+            summary = "Incrementar la racha de un hogar",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Racha incrementada correctamente",
+                            content = @Content(schema = @Schema(implementation = Hogar.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Solicitud inválida"
+                    )
+            }
+    )
+    public ResponseEntity<?> aumentarRachaDiaria(
+            @Parameter(description = "ID del hogar", example = "1")
+            @PathVariable Long id){
+
+        logger.info("Hogar with ID: " + id + " is attempting to increment their streak");
+
+        try{
+            Hogar hogar = service.aumentarRachaDiaria(id);
+            logger.info("Reward redeemed successfully for hogar ID: " + id);
+            return ResponseEntity.status(HttpStatus.OK).body(hogar);
+        } catch (IllegalArgumentException e) {
+            logger.info(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
+    }
+
+    @PostMapping("/{id}/racha/resetear")
+    @Operation(
+            summary = "Resetear la racha de un hogar",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Racha incrementada correctamente",
+                            content = @Content(schema = @Schema(implementation = Hogar.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Solicitud inválida"
+                    )
+            }
+    )
+    public ResponseEntity<?> resetearRachaDiaria(
+            @Parameter(description = "ID del hogar", example = "1")
+            @PathVariable Long id){
+
+        logger.info("Hogar with ID: " + id + " is attempting to increment their streak");
+
+        try{
+            Hogar hogar = service.resetearRachaDiaria(id);
+            logger.info("Reward redeemed successfully for hogar ID: " + id);
+            return ResponseEntity.status(HttpStatus.OK).body(hogar);
         } catch (IllegalArgumentException e) {
             logger.info(e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());

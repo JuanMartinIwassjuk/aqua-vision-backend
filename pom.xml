@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.aquavision.app</groupId>
-	<artifactId>aquavision-crud</artifactId>
+	<artifactId>aquavision-backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>aquavision-backend</name>
 	<description>AquaVision BackEnd App</description>

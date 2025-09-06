@@ -24,6 +24,10 @@ public class Hogar {
 
     @Column
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    private int rachaDiaria = 0;
+
+    @Column
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private int puntos = 0;
 
     @OneToMany(cascade = CascadeType.ALL)
@@ -145,6 +149,14 @@ public class Hogar {
         return consumoTotal;
     }
 
+    public void aumentarRachaDiaria() {
+        this.rachaDiaria += 1;
+    }
+
+    public void resetearRachaDiaria() {
+        this.rachaDiaria = 0;
+    }
+
     public void reclamarRecompensa(Recompensa recompensa) {
         if (this.puedeCanjearRecompensa(recompensa)) {
             this.puntos -= recompensa.getPuntosNecesarios();
@@ -209,6 +221,14 @@ public class Hogar {
 
     public Long getId() {
         return id;
+    }
+
+    public void setRachaDiaria(int rachaDiaria) {
+        this.rachaDiaria = rachaDiaria;
+    }
+
+    public int getRachaDiaria() {
+        return rachaDiaria;
     }
 
 }

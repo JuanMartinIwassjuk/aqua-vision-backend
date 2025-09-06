@@ -63,4 +63,28 @@ public class HogarService {
         return optionalHogar.orElse(null);
     }
 
+    @Transactional
+    public Hogar aumentarRachaDiaria(Long hogarId) {
+        Optional<Hogar> optionalHogar = repository.findById(hogarId);
+        if (optionalHogar.isPresent()) {
+            Hogar hogar = optionalHogar.get();
+            hogar.aumentarRachaDiaria();
+            repository.save(hogar);
+            return hogar;
+        }
+        return null;
+    }
+
+    @Transactional
+    public Hogar resetearRachaDiaria(Long hogarId) {
+        Optional<Hogar> optionalHogar = repository.findById(hogarId);
+        if (optionalHogar.isPresent()) {
+            Hogar hogar = optionalHogar.get();
+            hogar.resetearRachaDiaria();
+            repository.save(hogar);
+            return hogar;
+        }
+        return null;
+    }
+
 }
