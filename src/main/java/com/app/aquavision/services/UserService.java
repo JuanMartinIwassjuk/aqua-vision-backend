@@ -22,4 +22,6 @@ public interface UserService {
 
     Long findHomeIdFromAuthenticatedUser();
 
+    User updateLastLogin(Long id);
+
 }

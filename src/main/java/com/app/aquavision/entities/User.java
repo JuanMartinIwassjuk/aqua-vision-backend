@@ -1,5 +1,6 @@
 package com.app.aquavision.entities;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +46,9 @@ public class User {
     @NotBlank
     @JsonProperty(access = Access.WRITE_ONLY)
     private String password;
+
+    @Column
+    private LocalDateTime lastLogin;
 
     @JsonIgnoreProperties({"users", "handler", "hibernateLazyInitializer"})
     @ManyToMany
@@ -161,5 +165,13 @@ public class User {
 
     public void setHogar(Hogar hogar) {
         this.hogar = hogar;
+    }
+
+    public LocalDateTime getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(LocalDateTime lastLogin) {
+        this.lastLogin = lastLogin;
     }
 }

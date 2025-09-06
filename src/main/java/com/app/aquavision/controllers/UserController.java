@@ -101,6 +101,8 @@ public class UserController {
 
         Long id_hogar = service.findHomeIdFromAuthenticatedUser();
 
+        service.updateLastLogin(id_hogar); //TODO: Revisar si esto va aca
+
         logger.info("ID del hogar del usuario autenticado: " + id_hogar);
 
         return id_hogar;

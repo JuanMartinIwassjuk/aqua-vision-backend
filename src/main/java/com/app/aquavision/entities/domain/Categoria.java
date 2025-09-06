@@ -5,4 +5,5 @@ public enum Categoria {
     BAÑO,
     COCINA,
     PATIO,
+    LAVADERO
 }

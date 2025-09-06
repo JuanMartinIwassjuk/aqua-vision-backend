@@ -41,8 +41,8 @@ public class DataMock {
     Random random = new Random();
 
     for (int i = 1; i <= 20; i++) {
-      jdbcTemplate.update("INSERT INTO Hogar (miembros, localidad, puntos) VALUES (?, ?, 0)",
-          random.nextInt(5) + 1, "Localidad_" + i);
+      jdbcTemplate.update("INSERT INTO Hogar (miembros, localidad, racha_diaria, puntos) VALUES (?, ?, 0, 0)",
+          random.nextInt(5) + 1, randomLocalidad());
 
       int sectoresCount = random.nextInt(3) + 1;
       for (int j = 1; j <= sectoresCount; j++) {
@@ -170,10 +170,21 @@ public class DataMock {
 
   private String randomCategoria() {
     return switch (new Random().nextInt(4)) {
-      case 0 -> "HOGAR";
+      case 0 -> "LAVADERO";
       case 1 -> "BAÑO";
       case 2 -> "COCINA";
       default -> "PATIO";
     };
   }
+
+  private String randomLocalidad() {
+    return switch (new Random().nextInt(5)) {
+      case 0 -> "Palermo";
+      case 1 -> "Belgrano";
+      case 2 -> "Recoleta";
+      case 3 -> "Caballito";
+      default -> "CABA";
+    };
+  }
+
 }
