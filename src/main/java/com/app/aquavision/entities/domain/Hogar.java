@@ -47,11 +47,13 @@ public class Hogar {
         this.miembros = miembros;
         this.localidad = localidad;
         this.sectores = sectores;
+        this.puntos=0;
     }
 
     public Hogar(int miembros, String localidad) {
         this.miembros = miembros;
         this.localidad = localidad;
+         this.puntos=0;
     }
 
     public void mostarProyeccionConsumoMensual() {

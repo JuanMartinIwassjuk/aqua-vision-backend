@@ -1,6 +1,7 @@
 package com.app.aquavision.controllers;
 
 import com.app.aquavision.entities.domain.Hogar;
+import com.app.aquavision.entities.domain.Sector;
 import com.app.aquavision.services.HogarService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @Tag(
@@ -73,4 +75,11 @@ public class HogarController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(hogar));
     }
+
+    @GetMapping("/{id}/sectores")
+   public List<Sector> getSectoresByHogar(@PathVariable Long id) {
+    Hogar hogar = service.findById(id);
+    return hogar != null ? hogar.getSectores() : Collections.emptyList();
+}
+
 }
