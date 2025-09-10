@@ -31,14 +31,12 @@ public class AquaEventoController {
 
     @GetMapping
     public List<AquaEvento> list() {
-        logger.info("list - all eventos");
         return service.findAll();
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Obtener evento por ID")
     public AquaEvento getById(@PathVariable Long id) {
-        logger.info("getById - evento id: {}", id);
         return service.findById(id);
     }
 
@@ -54,14 +52,12 @@ public class AquaEventoController {
             }
     )
     public ResponseEntity<?> create(@RequestBody AquaEvento evento) {
-        logger.info("create - evento: {}", evento);
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(evento));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Editar parcialmente un evento")
     public ResponseEntity<?> edit(@PathVariable Long id, @RequestBody AquaEvento updatedEvent) {
-        logger.info("edit - evento id: {}", id);
         AquaEvento updated = service.editEvent(id, updatedEvent);
         if (updated != null) {
             return ResponseEntity.ok(updated);
@@ -72,7 +68,6 @@ public class AquaEventoController {
     @PutMapping
     @Operation(summary = "Actualizar completamente un evento")
     public ResponseEntity<?> update(@RequestBody AquaEvento updatedEvent) {
-        logger.info("update - evento id: {}", updatedEvent.getId());
         AquaEvento updated = service.updateEvent(updatedEvent);
         if (updated != null) {
             return ResponseEntity.ok(updated);
@@ -83,7 +78,6 @@ public class AquaEventoController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar evento por ID")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        logger.info("delete - evento id: {}", id);
         service.deleteById(id);
         return ResponseEntity.noContent().build();
     }
