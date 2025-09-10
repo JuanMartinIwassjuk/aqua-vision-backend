@@ -1,11 +1,13 @@
 package com.app.aquavision.services;
 
 import com.app.aquavision.entities.domain.AquaEvento;
+import com.app.aquavision.entities.domain.Estado;
 import com.app.aquavision.repositories.AquaEventoRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +30,10 @@ public class AquaEventoService {
 
     @Transactional
     public AquaEvento save(AquaEvento evento) {
+
+        if (evento.getEstado() == Estado.EN_PROCESO && evento.getFechaInicio() == null) {
+            evento.setFechaInicio(LocalDateTime.now());
+        }
         return repository.save(evento);
     }
 
@@ -55,11 +61,18 @@ public class AquaEventoService {
         return null;
     }
 
-    @Transactional
-    public AquaEvento updateEvent(AquaEvento updatedEvent) {
-        if (repository.existsById(updatedEvent.getId())) {
-            return repository.save(updatedEvent);
+@Transactional
+public AquaEvento updateEvent(AquaEvento updatedEvent) {
+    if (repository.existsById(updatedEvent.getId())) {
+
+
+        if (updatedEvent.getEstado() == Estado.FINALIZADO && updatedEvent.getFechaFin() == null) {
+            updatedEvent.setFechaFin(LocalDateTime.now());
         }
-        return null;
+
+        return repository.save(updatedEvent);
     }
+    return null;
+}
+
 }
