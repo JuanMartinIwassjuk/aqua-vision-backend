@@ -8,30 +8,30 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "Sector")
-public class Sector {
+    @Entity
+    @Table(name = "Sector")
+    public class Sector {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-    private Long id;
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+        private Long id;
 
-    @Column
-    private String nombre;
+        @Column
+        private String nombre;
 
-    @Column
-    @Enumerated(EnumType.STRING)
-    private Categoria categoria;
+        @Column
+        @Enumerated(EnumType.STRING)
+        private Categoria categoria;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn (name = "sector_id", referencedColumnName = "id")
-    @JsonIgnore
-    private List<Medicion> mediciones = new ArrayList<>();
+        @OneToMany(fetch = FetchType.LAZY)
+        @JoinColumn (name = "sector_id", referencedColumnName = "id")
+        @JsonIgnore
+        private List<Medicion> mediciones = new ArrayList<>();
 
-    public Sector() {
-        // Constructor por defecto
-    }
+        public Sector() {
+            // Constructor por defecto
+        }
 
     public Sector(String nombre, Categoria categoria) {
         this.nombre = nombre;

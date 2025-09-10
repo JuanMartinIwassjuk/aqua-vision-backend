@@ -69,6 +69,11 @@ public class AquaEventoService {
 public AquaEvento updateEvent(AquaEvento updatedEvent) {
     if (repository.existsById(updatedEvent.getId())) {
 
+    if (updatedEvent.getEstado() == Estado.EN_PROCESO && updatedEvent.getFechaInicio() == null) {
+            updatedEvent.setFechaInicio(LocalDateTime.now());
+        }
+
+
         if (updatedEvent.getEstado() == Estado.FINALIZADO) {
 
             if (updatedEvent.getFechaFin() == null) {
