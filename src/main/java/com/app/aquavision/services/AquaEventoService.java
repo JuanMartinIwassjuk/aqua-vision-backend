@@ -2,12 +2,16 @@ package com.app.aquavision.services;
 
 import com.app.aquavision.entities.domain.AquaEvento;
 import com.app.aquavision.entities.domain.Estado;
+import com.app.aquavision.entities.domain.Medicion;
+import com.app.aquavision.entities.domain.Sector;
 import com.app.aquavision.repositories.AquaEventoRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,14 +69,44 @@ public class AquaEventoService {
 public AquaEvento updateEvent(AquaEvento updatedEvent) {
     if (repository.existsById(updatedEvent.getId())) {
 
+        if (updatedEvent.getEstado() == Estado.FINALIZADO) {
 
-        if (updatedEvent.getEstado() == Estado.FINALIZADO && updatedEvent.getFechaFin() == null) {
-            updatedEvent.setFechaFin(LocalDateTime.now());
+            if (updatedEvent.getFechaFin() == null) {
+                updatedEvent.setFechaFin(LocalDateTime.now());
+            }
+
+          
+            Sector sector = updatedEvent.getSector();
+            if (sector != null && sector.getMediciones() != null) {
+                List<Medicion> mediciones = sector.getMediciones().stream()
+                        .filter(m -> m.getTimestamp() != null
+                                && !m.getTimestamp().isBefore(updatedEvent.getFechaInicio())
+                                && !m.getTimestamp().isAfter(updatedEvent.getFechaFin()))
+                        .sorted(Comparator.comparing(Medicion::getTimestamp))
+                        .toList();
+
+                double litros = 0.0;
+                for (int i = 0; i < mediciones.size() - 1; i++) {
+                    Medicion actual = mediciones.get(i);
+                    Medicion siguiente = mediciones.get(i + 1);
+
+                    long minutos = Duration.between(
+                            actual.getTimestamp(),
+                            siguiente.getTimestamp()
+                    ).toMinutes();
+
+                    
+                    litros += actual.getFlow() * minutos;
+                }
+
+                updatedEvent.setLitrosConsumidos(litros);
+            }
         }
 
         return repository.save(updatedEvent);
     }
     return null;
 }
+
 
 }
