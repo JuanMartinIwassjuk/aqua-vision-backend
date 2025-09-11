@@ -1,9 +1,11 @@
 package com.app.aquavision.controllers;
 
 import com.app.aquavision.entities.domain.Hogar;
+import com.app.aquavision.entities.domain.Recompensa;
 import com.app.aquavision.services.HogarService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,11 +13,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 @Tag(
@@ -157,5 +157,25 @@ public class GamificationController {
 
     }
 
+    @GetMapping("/recompensas")
+    @Operation(
+            summary = "Listar recompensas reclamables por los hogares",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Racha incrementada correctamente",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(implementation = Recompensa.class))
+                            )
+                    )
+            }
+    )
+    public ResponseEntity<List<Recompensa>> getRecompensas() {
+
+        List<Recompensa> recompensaList = service.getRecompensasDisponibles();
+
+        return ResponseEntity.ok(recompensaList);
+    }
 
 }

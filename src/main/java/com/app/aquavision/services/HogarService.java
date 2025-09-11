@@ -64,6 +64,11 @@ public class HogarService {
     }
 
     @Transactional
+    public List<Recompensa> getRecompensasDisponibles(){
+        return (List<Recompensa>) recompensaRepository.findAll();
+    }
+
+    @Transactional
     public Hogar aumentarRachaDiaria(Long hogarId) {
         Optional<Hogar> optionalHogar = repository.findById(hogarId);
         if (optionalHogar.isPresent()) {
