@@ -1,5 +1,6 @@
 package com.app.aquavision;
 
+import com.app.aquavision.entities.domain.EstadoMedidor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +88,7 @@ public class DataMock {
     insertarRoles();
     insertarUsuarios();
     insertarRecompensas();
+    insertarMedidores();
 
     logger.info("Datos mock insertados correctamente");
 
@@ -165,6 +167,17 @@ public class DataMock {
       Long userId = jdbcTemplate.queryForObject("SELECT id FROM User_ WHERE username = ?", Long.class, username);
       jdbcTemplate.update("INSERT INTO Usuarios_Roles (user_id, role_id) VALUES (?, ?)",
           userId, esAdmin ? roleAdminId : roleUserId);
+    }
+  }
+
+  private void insertarMedidores() {
+    List<Long> sectorIds = jdbcTemplate.query("SELECT id FROM Sector",
+        (rs, rowNum) -> rs.getLong("id"));
+
+    for (Long sectorId : sectorIds) {
+        int numeroSerie = 100000 + sectorId.intValue();
+        jdbcTemplate.update("INSERT INTO medidores (numero_serie, estado, sector_id) VALUES (?, ?, ?)",
+            numeroSerie, EstadoMedidor.ON.name(), sectorId);
     }
   }
 
