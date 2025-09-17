@@ -1,6 +1,6 @@
 package com.app.aquavision.controllers;
 
-import com.app.aquavision.entities.domain.TagEvento;
+import com.app.aquavision.entities.domain.gamification.TagEvento;
 import com.app.aquavision.services.TagEventoService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;

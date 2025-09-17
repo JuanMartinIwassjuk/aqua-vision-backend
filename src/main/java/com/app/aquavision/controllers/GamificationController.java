@@ -1,7 +1,7 @@
 package com.app.aquavision.controllers;
 
 import com.app.aquavision.entities.domain.Hogar;
-import com.app.aquavision.entities.domain.Recompensa;
+import com.app.aquavision.entities.domain.gamification.Recompensa;
 import com.app.aquavision.services.HogarService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

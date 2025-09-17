@@ -1,7 +1,7 @@
 package com.app.aquavision.services;
 
-import com.app.aquavision.entities.domain.AquaEvento;
-import com.app.aquavision.entities.domain.Estado;
+import com.app.aquavision.entities.domain.gamification.AquaEvento;
+import com.app.aquavision.entities.domain.gamification.EstadoEvento;
 import com.app.aquavision.entities.domain.Medicion;
 import com.app.aquavision.entities.domain.Sector;
 import com.app.aquavision.repositories.AquaEventoRepository;
@@ -35,7 +35,7 @@ public class AquaEventoService {
     @Transactional
     public AquaEvento save(AquaEvento evento) {
 
-        if (evento.getEstado() == Estado.EN_PROCESO && evento.getFechaInicio() == null) {
+        if (evento.getEstado() == EstadoEvento.EN_PROCESO && evento.getFechaInicio() == null) {
             evento.setFechaInicio(LocalDateTime.now());
         }
         return repository.save(evento);
@@ -69,12 +69,12 @@ public class AquaEventoService {
 public AquaEvento updateEvent(AquaEvento updatedEvent) {
     if (repository.existsById(updatedEvent.getId())) {
 
-    if (updatedEvent.getEstado() == Estado.EN_PROCESO && updatedEvent.getFechaInicio() == null) {
+    if (updatedEvent.getEstado() == EstadoEvento.EN_PROCESO && updatedEvent.getFechaInicio() == null) {
             updatedEvent.setFechaInicio(LocalDateTime.now());
         }
 
 
-        if (updatedEvent.getEstado() == Estado.FINALIZADO) {
+        if (updatedEvent.getEstado() == EstadoEvento.FINALIZADO) {
 
             if (updatedEvent.getFechaFin() == null) {
                 updatedEvent.setFechaFin(LocalDateTime.now());

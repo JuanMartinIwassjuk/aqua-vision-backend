@@ -1,7 +1,8 @@
 package com.app.aquavision;
 
 import com.app.aquavision.entities.domain.*;
-import com.app.aquavision.services.EmailService;
+import com.app.aquavision.entities.domain.gamification.Recompensa;
+import com.app.aquavision.services.notifications.EmailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

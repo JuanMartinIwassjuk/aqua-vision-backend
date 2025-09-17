@@ -1,7 +1,7 @@
 package com.app.aquavision.repositories;
 
 
-import com.app.aquavision.entities.domain.TagEvento;
+import com.app.aquavision.entities.domain.gamification.TagEvento;
 
 import java.util.Optional;
 

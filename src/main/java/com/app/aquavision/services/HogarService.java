@@ -1,7 +1,7 @@
 package com.app.aquavision.services;
 
 import com.app.aquavision.entities.domain.Hogar;
-import com.app.aquavision.entities.domain.Recompensa;
+import com.app.aquavision.entities.domain.gamification.Recompensa;
 import com.app.aquavision.repositories.HogarRepository;
 import com.app.aquavision.repositories.RecompensaRepository;
 import org.springframework.beans.factory.annotation.Autowired;

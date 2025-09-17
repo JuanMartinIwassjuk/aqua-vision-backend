@@ -4,7 +4,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.app.aquavision.entities.domain.TagEvento;
+import com.app.aquavision.entities.domain.gamification.TagEvento;
 import com.app.aquavision.repositories.TagEventoRepository;
 
 @Component

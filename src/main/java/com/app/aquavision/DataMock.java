@@ -31,13 +31,13 @@ public class DataMock {
   @EventListener(ApplicationReadyEvent.class)
   public void generarDatos() {
 
-    logger.info("Comienzo de inserción de datos mock");
-
     Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM Hogar", Integer.class);
     if (count > 0) {
       logger.info("Datos mock ya insertados, no se ejecutará la inserción.");
       return;
     }
+
+    logger.info("Comienzo de inserción de datos mock");
 
     Random random = new Random();
 

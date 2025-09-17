@@ -1,4 +1,4 @@
-package com.app.aquavision.entities.domain;
+package com.app.aquavision.entities.domain.gamification;
 
 public enum EstadoRecompensa {
     DISPONIBLE,

@@ -1,4 +1,4 @@
-package com.app.aquavision.services;
+package com.app.aquavision.services.broker;
 
 import com.app.aquavision.dto.MedicionDTO;
 import com.app.aquavision.entities.domain.Medicion;
@@ -59,6 +59,10 @@ public class MqttSubscriberService {
                             + ", Flujo: " + dto.getFlow()
                             + ", Timestamp: " + dto.getTimestamp().toString());
 
+                    if (dto.getFlow() == 0) {
+                        logger.info("❌ Flujo nulo recibido: {}. Medición NO guardada.", dto.getFlow());
+                        return;
+                    }
                     sectorRepository.findById(dto.getSectorId()).ifPresentOrElse(sector -> {
 
                         Medicion medicion = new Medicion();
@@ -67,6 +71,7 @@ public class MqttSubscriberService {
                         medicion.setTimestamp(dto.getTimestamp());
 
                         medicionRepository.save(medicion);
+
                         logger.info("✅ Medición guardada con sector ID: {}", dto.getSectorId());
                     }, () -> {
                         logger.error("❌ Sector con ID {} no existe. Medición NO guardada.", dto.getSectorId());

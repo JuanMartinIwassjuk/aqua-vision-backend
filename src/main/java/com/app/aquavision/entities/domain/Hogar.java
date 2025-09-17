@@ -1,7 +1,8 @@
 package com.app.aquavision.entities.domain;
 
-import com.app.aquavision.entities.domain.notifications.Notificacion;
-import com.app.aquavision.services.EmailService;
+import com.app.aquavision.entities.domain.gamification.EstadoRecompensa;
+import com.app.aquavision.entities.domain.gamification.Recompensa;
+import com.app.aquavision.entities.domain.gamification.RecompensaHogar;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 

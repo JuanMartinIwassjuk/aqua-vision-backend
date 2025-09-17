@@ -1,4 +1,4 @@
-package com.app.aquavision.services;
+package com.app.aquavision.services.notifications;
 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;

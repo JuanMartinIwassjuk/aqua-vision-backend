@@ -1,5 +1,6 @@
-package com.app.aquavision.entities.domain;
+package com.app.aquavision.entities.domain.gamification;
 
+import com.app.aquavision.entities.domain.Sector;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
@@ -32,7 +33,7 @@ public class AquaEvento {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Estado estado;
+    private EstadoEvento estadoEvento;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -57,12 +58,12 @@ public class AquaEvento {
     }
 
     public AquaEvento(String titulo, String descripcion, LocalDateTime fechaInicio, LocalDateTime fechaFin,
-                      Estado estado, Sector sector, Double litrosConsumidos, Double costo) {
+                      EstadoEvento estadoEvento, Sector sector, Double litrosConsumidos, Double costo) {
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
-        this.estado = estado;
+        this.estadoEvento = estadoEvento;
         this.sector = sector;
         this.litrosConsumidos = litrosConsumidos;
         this.costo = costo;
@@ -104,12 +105,12 @@ public class AquaEvento {
         this.fechaFin = fechaFin;
     }
 
-    public Estado getEstado() {
-        return estado;
+    public EstadoEvento getEstado() {
+        return estadoEvento;
     }
 
-    public void setEstado(Estado estado) {
-        this.estado = estado;
+    public void setEstado(EstadoEvento estadoEvento) {
+        this.estadoEvento = estadoEvento;
     }
 
     public List<TagEvento> getTags() {

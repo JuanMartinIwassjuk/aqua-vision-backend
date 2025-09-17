@@ -1,6 +1,6 @@
 package com.app.aquavision.services;
 
-import com.app.aquavision.entities.domain.TagEvento;
+import com.app.aquavision.entities.domain.gamification.TagEvento;
 import com.app.aquavision.repositories.TagEventoRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;

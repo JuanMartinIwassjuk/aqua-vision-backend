@@ -1,6 +1,6 @@
 package com.app.aquavision.controllers;
 
-import com.app.aquavision.entities.domain.AquaEvento;
+import com.app.aquavision.entities.domain.gamification.AquaEvento;
 import com.app.aquavision.services.AquaEventoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
