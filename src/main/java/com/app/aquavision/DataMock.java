@@ -41,19 +41,26 @@ public class DataMock {
 
     Random random = new Random();
 
+    int medidorId = 1;
     for (int i = 1; i <= 20; i++) {
-      jdbcTemplate.update("INSERT INTO Hogar (miembros, localidad, racha_diaria, puntos) VALUES (?, ?, 0, 0)",
-          random.nextInt(5) + 1, randomLocalidad());
+      jdbcTemplate.update("INSERT INTO Hogar (miembros, localidad, email, racha_diaria, puntos) VALUES (?, ?, ?, 0, 0)",
+          random.nextInt(5) + 1, randomLocalidad(), "hogar" + i + "@example.com");
 
       int sectoresCount = random.nextInt(3) + 1;
       for (int j = 1; j <= sectoresCount; j++) {
           String categoria = randomCategoria();
+          //Insert medidores
+            int numeroSerie = 100000 + i*1000 + j;
+            jdbcTemplate.update("INSERT INTO medidores (numero_serie, estado) VALUES (?, ?)",
+                  numeroSerie, EstadoMedidor.ON.name());
+          //Insert sectores
             jdbcTemplate.update("""
-                    INSERT INTO Sector (nombre, categoria, hogar_id)
-                    VALUES (?, ?, ?)
+                    INSERT INTO Sector (nombre, categoria, hogar_id, medidor_id)
+                    VALUES (?, ?, ?, ?)
                 """, categoria + "_" + i + "_" + j,
             categoria,
-            i);
+            i, medidorId);
+            medidorId++;
       }
     }
 
@@ -88,7 +95,6 @@ public class DataMock {
     insertarRoles();
     insertarUsuarios();
     insertarRecompensas();
-    insertarMedidores();
 
     logger.info("Datos mock insertados correctamente");
 
@@ -167,17 +173,6 @@ public class DataMock {
       Long userId = jdbcTemplate.queryForObject("SELECT id FROM User_ WHERE username = ?", Long.class, username);
       jdbcTemplate.update("INSERT INTO Usuarios_Roles (user_id, role_id) VALUES (?, ?)",
           userId, esAdmin ? roleAdminId : roleUserId);
-    }
-  }
-
-  private void insertarMedidores() {
-    List<Long> sectorIds = jdbcTemplate.query("SELECT id FROM Sector",
-        (rs, rowNum) -> rs.getLong("id"));
-
-    for (Long sectorId : sectorIds) {
-        int numeroSerie = 100000 + sectorId.intValue();
-        jdbcTemplate.update("INSERT INTO medidores (numero_serie, estado, sector_id) VALUES (?, ?, ?)",
-            numeroSerie, EstadoMedidor.ON.name(), sectorId);
     }
   }
 
