@@ -4,8 +4,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
-@Entity
-@Table
+//@Entity
+//@Table
 public class Notificacion { //TODO: Revisar si persistirlas o no
 
     @Column
