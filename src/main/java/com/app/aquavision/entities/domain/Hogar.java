@@ -1,5 +1,7 @@
 package com.app.aquavision.entities.domain;
 
+import com.app.aquavision.entities.domain.notifications.Notificacion;
+import com.app.aquavision.services.EmailService;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
@@ -21,6 +23,9 @@ public class Hogar {
 
     @Column
     private String localidad = "";
+
+    @Column
+    private String email = "";
 
     @Column
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
@@ -50,10 +55,11 @@ public class Hogar {
         this.puntos=0;
     }
 
-    public Hogar(int miembros, String localidad) {
+    public Hogar(int miembros, String localidad, String email) {
         this.miembros = miembros;
         this.localidad = localidad;
-         this.puntos=0;
+        this.email = email;
+        this.puntos=0;
     }
 
     public void mostarProyeccionConsumoMensual() {
@@ -231,6 +237,14 @@ public class Hogar {
 
     public int getRachaDiaria() {
         return rachaDiaria;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
 }

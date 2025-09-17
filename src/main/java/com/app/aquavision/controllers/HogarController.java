@@ -77,9 +77,9 @@ public class HogarController {
     }
 
     @GetMapping("/{id}/sectores")
-   public List<Sector> getSectoresByHogar(@PathVariable Long id) {
-    Hogar hogar = service.findById(id);
-    return hogar != null ? hogar.getSectores() : Collections.emptyList();
+    public List<Sector> getSectoresByHogar(@PathVariable Long id) {
+        Hogar hogar = service.findById(id);
+        return hogar != null ? hogar.getSectores() : Collections.emptyList();
 }
 
 }

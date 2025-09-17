@@ -54,7 +54,7 @@ public class MedidorController {
                     @ApiResponse(
                             responseCode = "201",
                             description = "Medidor creado correctamente",
-                            content = @Content(schema = @Schema(implementation = Medidor.class))
+                            content = @Content(schema = @Schema(implementation = Sector.class))
                     ),
                     @ApiResponse(
                             responseCode = "400",
@@ -64,7 +64,7 @@ public class MedidorController {
     )
     public ResponseEntity<?> create(
             @RequestParam("sectorId") Long sectorId,
-            @RequestParam("numeroSerie") int numeroSerie) {
+            @RequestParam("numeroSerie") Integer numeroSerie) {
 
         logger.info("create - medidor: {}, sectorId: {}", numeroSerie, sectorId);
 
@@ -73,8 +73,9 @@ public class MedidorController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sector not found with id: " + sectorId);
         }
 
-        Medidor medidor = new Medidor(numeroSerie, sector);
+        Medidor medidor = new Medidor(numeroSerie);
+        sector.setMedidor(medidor);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.save(medidor));
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.saveSector(sector));
     }
 }

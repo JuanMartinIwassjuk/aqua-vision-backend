@@ -26,7 +26,7 @@ public class MqttSubscriberService {
     private static final String BROKER = "ssl://m171d340.ala.us-east-1.emqxsl.com:8883";
     private static final String CLIENT_ID = "spring-backend-listener";
     private static final String USERNAME = "test";
-    private static final String PASSWORD = "test123"; //habria que moverlo tambien al .env.local estas credenciales
+    private static final String PASSWORD = "test123"; //TODO: Mover a envs
     private static final String TOPIC = "mediciones";
 
     private static final Logger logger = LoggerFactory.getLogger(MqttSubscriberService.class);
@@ -77,6 +77,8 @@ public class MqttSubscriberService {
             });
 
             logger.info("✅ Suscrito a {} con éxito.", TOPIC);
+
+            //TODO: Agregar validacion de datos recibidos y enviar notificaciones
 
         } catch (MqttException e) {
             logger.error("❌ Error al conectar al broker MQTT: {}", e.getMessage());

@@ -41,4 +41,9 @@ public class MedidorService {
     public Medidor save(Medidor medidor) {
         return repository.save(medidor);
     }
+
+    public Sector saveSector(Sector sector) {
+        return sectorRepository.save(sector);
+    }
+
 }
