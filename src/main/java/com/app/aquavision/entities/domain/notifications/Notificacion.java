@@ -1,12 +1,16 @@
 package com.app.aquavision.entities.domain.notifications;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.*;
 
 //@Entity
 //@Table
 public class Notificacion { //TODO: Revisar si persistirlas o no
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    private Long id;
 
     @Column
     private TipoNotificacion tipo;

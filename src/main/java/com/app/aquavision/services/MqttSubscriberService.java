@@ -10,10 +10,13 @@ import org.eclipse.paho.client.mqttv3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
 @Service
+@ConfigurationProperties(prefix = "app.mqtt")
 public class MqttSubscriberService {
+
     @Autowired
     private MedicionRepository medicionRepository;
 
@@ -23,32 +26,30 @@ public class MqttSubscriberService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private static final String BROKER = "ssl://m171d340.ala.us-east-1.emqxsl.com:8883";
-    private static final String CLIENT_ID = "spring-backend-listener";
-    private static final String USERNAME = "test";
-    private static final String PASSWORD = "test123"; //TODO: Mover a envs
-    private static final String TOPIC = "mediciones";
+    private String broker;
+    private String clientId;
+    private String username;
+    private String password;
+    private String topic;
 
     private static final Logger logger = LoggerFactory.getLogger(MqttSubscriberService.class);
 
     @PostConstruct
     public void start() {
 
-
-
         try {
-            MqttClient client = new MqttClient(BROKER, CLIENT_ID, null);
+            MqttClient client = new MqttClient(broker, clientId, null);
 
             MqttConnectOptions options = new MqttConnectOptions();
-            options.setUserName(USERNAME);
-            options.setPassword(PASSWORD.toCharArray());
+            options.setUserName(username);
+            options.setPassword(password.toCharArray());
             options.setCleanSession(true);
             options.setKeepAliveInterval(60);
             options.setSocketFactory(SSLSocketFactoryGenerator.getSocketFactory());
 
             client.connect(options);
 
-            client.subscribe(TOPIC, (topic, message) -> {
+            client.subscribe(topic, (topic, message) -> {
                 String payload = new String(message.getPayload());
                 try {
                     logger.info("📥 Mensaje recibido en el topic {}: {}", topic, payload);
@@ -76,13 +77,28 @@ public class MqttSubscriberService {
                 }
             });
 
-            logger.info("✅ Suscrito a {} con éxito.", TOPIC);
+            logger.info("✅ Suscrito a {} con éxito.", topic);
 
             //TODO: Agregar validacion de datos recibidos y enviar notificaciones
 
         } catch (MqttException e) {
             logger.error("❌ Error al conectar al broker MQTT: {}", e.getMessage());
-            e.printStackTrace();
         }
     }
+
+    public String getBroker() { return broker; }
+    public void setBroker(String broker) { this.broker = broker; }
+
+    public String getClientId() { return clientId; }
+    public void setClientId(String clientId) { this.clientId = clientId; }
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+
+    public String getTopic() { return topic; }
+    public void setTopic(String topic) { this.topic = topic; }
+
 }
