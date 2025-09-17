@@ -10,8 +10,6 @@ public class ConsumoTotalHogarDTO {
 
     //Hogar
     private final int hogarId;
-    private final String miembros;
-    private final String localidad;
 
     //Fechas
     private final LocalDateTime fechaDesde;
@@ -28,10 +26,7 @@ public class ConsumoTotalHogarDTO {
     public ConsumoTotalHogarDTO(Hogar hogar, LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
         this.fechaDesde = fechaDesde;
         this.fechaHasta = fechaHasta;
-
         this.hogarId = hogar.getId().intValue();
-        this.miembros = String.valueOf(hogar.getMiembros());
-        this.localidad = hogar.getLocalidad();
     }
 
     public void addConsumoSector(ConsumoTotalSectorDTO consumoSector) {
@@ -49,12 +44,7 @@ public class ConsumoTotalHogarDTO {
     public int getHogarId() {
         return hogarId;
     }
-    public String getMiembros() {
-        return miembros;
-    }
-    public String getLocalidad() {
-        return localidad;
-    }
+
     public List<ConsumoTotalSectorDTO> getConsumosPorSector() {
         return consumosPorSector;
     }

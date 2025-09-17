@@ -99,12 +99,15 @@ public class ReporteService {
 
         Hogar hogar = this.findByIdWithSectoresAndMediciones(hogar_id, hoyInicio, hoyActual);
 
-        ConsumosPorHoraHogarDTO consumosPorHoraHogarDTO = new ConsumosPorHoraHogarDTO(hogar, hoyInicio, hoyActual);
+        ConsumosPorHoraHogarDTO consumosPorHoraHogarDTO = new ConsumosPorHoraHogarDTO(hogar_id, hoyInicio, hoyActual);
 
+        float consumoTotalDia = 0;
         for (int i = 0; i < 24; i++) {
             int consumo = hogar.consumoTotalHora(i);
             consumosPorHoraHogarDTO.addConsumoPorHora(new ConsumoPorHoraDTO(i, consumo));
+            consumoTotalDia += consumo;
         }
+        consumosPorHoraHogarDTO.setConsumoTotal(consumoTotalDia);
 
         return consumosPorHoraHogarDTO;
     }
@@ -149,8 +152,6 @@ public class ReporteService {
         DateTimeFormatter fechaHoraFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
         Context context = new Context();
-        context.setVariable("miembros", dto.getMiembros() != null ? dto.getMiembros() : 0);
-        context.setVariable("localidad", dto.getLocalidad() != null ? dto.getLocalidad() : "-");
         context.setVariable("fechaDesde", fechaDesde != null ? fechaDesde.format(fechaFormatter) : "");
         context.setVariable("fechaHasta", fechaHasta != null ? fechaHasta.format(fechaFormatter) : "");
         context.setVariable("fechaGeneracion", dto.getFechaGeneracion() != null ? dto.getFechaGeneracion().format(fechaHoraFormatter) : "");

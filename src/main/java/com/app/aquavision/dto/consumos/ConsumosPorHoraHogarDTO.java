@@ -9,18 +9,14 @@ import java.util.List;
 public class ConsumosPorHoraHogarDTO {
 
     private final Long hogarId;
-    private final int miembros;
-    private final String localidad;
     private final LocalDateTime fechaDesde;
     private final LocalDateTime fechaHasta;
     private final LocalDateTime fechaGeneracion = LocalDateTime.now();
+    private Float consumoTotal = 0f;
     private final List<ConsumoPorHoraDTO> consumosPorHora = new ArrayList<>();
 
-    public ConsumosPorHoraHogarDTO(Hogar hogar, LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
-        this.hogarId = hogar.getId();
-        this.miembros = hogar.getMiembros();
-        this.localidad = hogar.getLocalidad();
-
+    public ConsumosPorHoraHogarDTO(Long hogar_id, LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
+        this.hogarId = hogar_id;
         this.fechaDesde = fechaDesde;
         this.fechaHasta = fechaHasta;
     }
@@ -37,14 +33,6 @@ public class ConsumosPorHoraHogarDTO {
         return hogarId;
     }
 
-    public int getMiembros() {
-        return miembros;
-    }
-
-    public String getLocalidad() {
-        return localidad;
-    }
-
     public LocalDateTime getFechaDesde() {
         return fechaDesde;
     }
@@ -55,6 +43,14 @@ public class ConsumosPorHoraHogarDTO {
 
     public LocalDateTime getFechaGeneracion() {
         return fechaGeneracion;
+    }
+
+    public Float getConsumoTotal() {
+        return consumoTotal;
+    }
+
+    public void setConsumoTotal(Float consumoTotal) {
+        this.consumoTotal = consumoTotal;
     }
 
 }
