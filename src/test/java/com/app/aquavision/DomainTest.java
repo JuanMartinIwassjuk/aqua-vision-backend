@@ -29,11 +29,11 @@ public class DomainTest {
         Medicion medicion4 = new Medicion(300, hoy);
 
         Medidor medidor1 = new Medidor(123456);
-        Sector baño = new Sector("Baño", Categoria.BAÑO, medidor1);
+        Sector baño = new Sector("Baño", CategoriaSector.BAÑO, medidor1);
         baño.setMediciones(List.of(medicion1, medicion2, medicion3));
 
         Medidor medidor2 = new Medidor(654321);
-        Sector cocina = new Sector("Cocina", Categoria.COCINA, medidor2);
+        Sector cocina = new Sector("Cocina", CategoriaSector.COCINA, medidor2);
         cocina.setMediciones(List.of(medicion4));
 
         List<Sector> sectores = List.of(baño, cocina);

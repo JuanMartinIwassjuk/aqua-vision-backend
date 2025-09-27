@@ -22,7 +22,7 @@ public class Sector {
 
     @Column
     @Enumerated(EnumType.STRING)
-    private Categoria categoria;
+    private CategoriaSector categoriaSector;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn (name = "sector_id", referencedColumnName = "id")
@@ -37,9 +37,9 @@ public class Sector {
         // Constructor por defecto
     }
 
-    public Sector(String nombre, Categoria categoria, Medidor medidor) {
+    public Sector(String nombre, CategoriaSector categoriaSector, Medidor medidor) {
         this.nombre = nombre;
-        this.categoria = categoria;
+        this.categoriaSector = categoriaSector;
         this.medidor = medidor;
     }
 
@@ -131,12 +131,12 @@ public class Sector {
         return picoConsumo;
     }
 
-    public Categoria getCategoria() {
-        return categoria;
+    public CategoriaSector getCategoria() {
+        return categoriaSector;
     }
 
-    public void setCategoria(Categoria categoria) {
-        this.categoria = categoria;
+    public void setCategoria(CategoriaSector categoriaSector) {
+        this.categoriaSector = categoriaSector;
     }
 
     public List<Medicion> getMediciones() {

@@ -76,7 +76,7 @@ public class DataMock {
                         numeroSerie, EstadoMedidor.ON.name());
 
                 //Insert sector
-                jdbcTemplate.update("INSERT INTO Sector (nombre, categoria, hogar_id, medidor_id) VALUES (?, ?, ?, ?)",
+                jdbcTemplate.update("INSERT INTO Sector (nombre, categoria_sector, hogar_id, medidor_id) VALUES (?, ?, ?, ?)",
                 categoria, categoria, hogarId, medidorId);
 
                 medidorId++;

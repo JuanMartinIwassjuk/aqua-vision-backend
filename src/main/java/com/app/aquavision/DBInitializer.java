@@ -1,3 +1,4 @@
+/*
 package com.app.aquavision;
 
 import jakarta.annotation.PostConstruct;
@@ -29,4 +30,4 @@ public class DBInitializer {
         e.printStackTrace();
     }
   }
-}
+}*/

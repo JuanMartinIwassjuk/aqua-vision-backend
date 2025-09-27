@@ -60,7 +60,7 @@ public class MeasureRealTimeMock {
 
 
                             logger.info("Caudal registrado: {} m³ --- Usuario: {} --- Sector: {} -- ID Hogar {} -- Fecha: {}",
-                                        flow, sector.username, sector.categoria, sector.hogarId, ts);
+                                        flow, sector.username, sector.categoriaSector, sector.hogarId, ts);
                             }
 
                         }
@@ -77,7 +77,7 @@ public class MeasureRealTimeMock {
 
     private static List<SectorInfo> getSectorInfoForUser(Connection conn, String username) {
         String sql = """
-            SELECT s.id, s.categoria, h.id AS hogar_id, u.username
+            SELECT s.id, s.categoriaSector, h.id AS hogar_id, u.username
             FROM Sector s
             JOIN Hogar h ON s.hogar_id = h.id
             JOIN User_ u ON u.hogar_id = h.id
@@ -90,7 +90,7 @@ public class MeasureRealTimeMock {
             while (rs.next()) {
                 sectores.add(new SectorInfo(
                         rs.getLong("id"),
-                        rs.getString("categoria"),
+                        rs.getString("categoriaSector"),
                         rs.getLong("hogar_id"),
                         rs.getString("username")
                 ));
@@ -108,5 +108,5 @@ public class MeasureRealTimeMock {
         return random.nextInt(99) + 1;
     }
 
-    private record SectorInfo(Long id, String categoria, Long hogarId, String username) {}
+    private record SectorInfo(Long id, String categoriaSector, Long hogarId, String username) {}
 }
