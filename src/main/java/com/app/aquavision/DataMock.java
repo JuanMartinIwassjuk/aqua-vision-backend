@@ -31,76 +31,99 @@ public class DataMock {
   @EventListener(ApplicationReadyEvent.class)
   public void generarDatos() {
 
-    Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM Hogar", Integer.class);
-    if (count > 0) {
+    if (this.datosMockInsertados()) {
       logger.info("Datos mock ya insertados, no se ejecutará la inserción.");
       return;
     }
 
     logger.info("Comienzo de inserción de datos mock");
 
-    Random random = new Random();
-
-    int medidorId = 1;
-    for (int i = 1; i <= 20; i++) {
-      jdbcTemplate.update("INSERT INTO Hogar (miembros, localidad, email, racha_diaria, puntos) VALUES (?, ?, ?, 0, 0)",
-          random.nextInt(5) + 1, randomLocalidad(), "hogar" + i + "@example.com");
-
-      int sectoresCount = random.nextInt(3) + 1;
-      for (int j = 1; j <= sectoresCount; j++) {
-          String categoria = randomCategoria();
-          //Insert medidores
-            int numeroSerie = 100000 + i*1000 + j;
-            jdbcTemplate.update("INSERT INTO medidores (numero_serie, estado) VALUES (?, ?)",
-                  numeroSerie, EstadoMedidor.ON.name());
-          //Insert sectores
-            jdbcTemplate.update("""
-                    INSERT INTO Sector (nombre, categoria, hogar_id, medidor_id)
-                    VALUES (?, ?, ?, ?)
-                """, categoria + "_" + i + "_" + j,
-            categoria,
-            i, medidorId);
-            medidorId++;
-      }
-    }
-
-    List<Long> sectorIds = jdbcTemplate.query("SELECT id FROM Sector",
-        (rs, rowNum) -> rs.getLong("id"));
-
-    int totalMediciones = 15000;
-    int batchSize = 5000;
-    List<Object[]> batch = new ArrayList<>(batchSize);
-
-    for (int i = 1; i <= totalMediciones; i++) {
-      int flow = random.nextInt(100);
-      Timestamp ts = Timestamp.valueOf(
-          LocalDateTime.now().minusMinutes(random.nextInt(100000)));
-      Long sectorId = sectorIds.get(random.nextInt(sectorIds.size()));
-
-      batch.add(new Object[]{flow, ts, sectorId});
-
-      if (i % batchSize == 0) {
-        jdbcTemplate.batchUpdate(
-            "INSERT INTO Medicion (flow, timestamp, sector_id) VALUES (?, ?, ?)", batch);
-        batch.clear();
-        logger.info("Insertadas {} mediciones", i);
-      }
-    }
-
-    if (!batch.isEmpty()) {
-      jdbcTemplate.batchUpdate(
-          "INSERT INTO Medicion (flow, timestamp, sector_id) VALUES (?, ?, ?)", batch);
-    }
+    insertarHogares();
+    insertarMediciones();
+    insertarRecompensas();
 
     insertarRoles();
     insertarUsuarios();
-    insertarRecompensas();
 
     logger.info("Datos mock insertados correctamente");
 
   }
 
+  private void insertarHogares() {
+
+      logger.info("Insertando hogares, sectores y medidores...");
+
+        int medidorId = 1;
+        int cantidadHogares = 20;
+        Random random = new Random();
+
+        for (int hogarId = 1; hogarId <= cantidadHogares; hogarId++) {
+
+            int cantidadMiembros = random.nextInt(5) + 1;
+            int cantidadSectores = random.nextInt(3) + 1;
+
+            jdbcTemplate.update("INSERT INTO Hogar (miembros, localidad, email, racha_diaria, puntos) VALUES (?, ?, ?, 0, 0)",
+                    cantidadMiembros, randomLocalidad(), "hogar" + hogarId + "@example.com");
+
+            List<String> categorias = getCategorias(cantidadSectores);
+            for (int j = 0; j < cantidadSectores; j++) {
+
+                String categoria = categorias.get(j);
+
+                //Insert medidor
+                int numeroSerie = 100000 + hogarId * 1000 + j;
+                jdbcTemplate.update("INSERT INTO medidores (numero_serie, estado) VALUES (?, ?)",
+                        numeroSerie, EstadoMedidor.ON.name());
+
+                //Insert sector
+                jdbcTemplate.update("INSERT INTO Sector (nombre, categoria, hogar_id, medidor_id) VALUES (?, ?, ?, ?)",
+                categoria, categoria, hogarId, medidorId);
+
+                medidorId++;
+            }
+        }
+
+  }
+
+  private void insertarMediciones(){
+
+      logger.info("Insertando mediciones...");
+
+      Random random = new Random();
+
+      List<Long> sectorIds = jdbcTemplate.query("SELECT id FROM Sector",
+              (rs, rowNum) -> rs.getLong("id"));
+
+      int totalMediciones = 15000;
+      int batchSize = 5000;
+      List<Object[]> batch = new ArrayList<>(batchSize);
+
+      for (int i = 1; i <= totalMediciones; i++) {
+          int flow = random.nextInt(100);
+          Timestamp ts = Timestamp.valueOf(
+                  LocalDateTime.now().minusMinutes(random.nextInt(100000)));
+          Long sectorId = sectorIds.get(random.nextInt(sectorIds.size()));
+
+          batch.add(new Object[]{flow, ts, sectorId});
+
+          if (i % batchSize == 0) {
+              jdbcTemplate.batchUpdate(
+                      "INSERT INTO Medicion (flow, timestamp, sector_id) VALUES (?, ?, ?)", batch);
+              batch.clear();
+              logger.info("Insertadas {} mediciones", i);
+          }
+      }
+
+      if (!batch.isEmpty()) {
+          jdbcTemplate.batchUpdate(
+                  "INSERT INTO Medicion (flow, timestamp, sector_id) VALUES (?, ?, ?)", batch);
+      }
+  }
+
   private void insertarRecompensas(){
+
+    logger.info("Insertando recompensas...");
+
     List<Map<String, Object>> recompensas = List.of(
         Map.of("descripcion", "Descuento del 10% en medidor", "puntos", 50),
         Map.of("descripcion", "Descuento del 20% en medidor", "puntos", 90),
@@ -122,6 +145,9 @@ public class DataMock {
   }
 
   private void insertarRoles() {
+
+    logger.info("Insertando roles...");
+
     List<String> roles = List.of("ROLE_USER", "ROLE_ADMIN");
     for (String rol : roles) {
       Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM Role_ WHERE name = ?", Integer.class, rol);
@@ -132,6 +158,9 @@ public class DataMock {
   }
 
   private void insertarUsuarios() {
+
+    logger.info("Insertando usuarios...");
+
     Map<String, Boolean> usuarios = new LinkedHashMap<>();
     usuarios.put("matif", false);
     usuarios.put("matifadmin", true);
@@ -176,13 +205,19 @@ public class DataMock {
     }
   }
 
-  private String randomCategoria() {
-    return switch (new Random().nextInt(4)) {
-      case 0 -> "LAVADERO";
-      case 1 -> "BAÑO";
-      case 2 -> "COCINA";
-      default -> "PATIO";
-    };
+  private List<String> getCategorias(int cantidad) {
+
+      List<String> categorias = new ArrayList<>(List.of("BAÑO", "COCINA", "PATIO", "LAVADERO"));
+
+      if (cantidad == 1){
+          return new ArrayList<>(List.of("HOGAR"));
+      }
+
+      for (int i = categorias.size(); i < cantidad; i++){
+          categorias.add("BAÑO");
+      }
+      return categorias;
+
   }
 
   private String randomLocalidad() {
@@ -193,6 +228,11 @@ public class DataMock {
       case 3 -> "Caballito";
       default -> "CABA";
     };
+  }
+
+  private boolean datosMockInsertados() {
+    Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM Hogar", Integer.class);
+    return count != null && count > 0;
   }
 
 }

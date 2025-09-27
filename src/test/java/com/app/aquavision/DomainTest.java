@@ -77,7 +77,21 @@ public class DomainTest {
 
     @Test
     void enviarMail(){
-        emailService.enviarMail(hogar.getEmail(), "Test", "Este es un mail de prueba");
+        String titulo = " \uD83D\uDEA8 ALERTA!!  \uD83D\uDEA8: Notificación AquaVision";
+        String cuerpo = "Este es un mail de prueba, para decirte que el proyecto AquaVision funciona correctamente. \n\nSaludos, \nEl equipo de AquaVision.";
+        emailService.enviarMail(hogar.getEmail(),titulo,cuerpo);
+
+        /*
+        String aquavision1 = "matiafernandez@frba.utn.edu.ar";
+        String aquavision2 = "jiwassjuk@frba.utn.edu.ar";
+        String aquavision3 = "mplanchuelo@frba.utn.edu.ar";
+        String aquavision4 = "equispechoque@frba.utn.edu.ar";
+
+        emailService.enviarMail(aquavision1,titulo,cuerpo);
+        emailService.enviarMail(aquavision2,titulo,cuerpo);
+        emailService.enviarMail(aquavision3,titulo,cuerpo);
+        emailService.enviarMail(aquavision4,titulo,cuerpo);*/
+
     }
 
 }
