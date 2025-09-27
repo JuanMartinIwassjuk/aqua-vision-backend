@@ -235,7 +235,7 @@ public class ProyeccionService {
         return hallazgos;
     }
 
-    public ProyeccionHogarDTO calcularProyeccion(Long hogarId, double umbralMensual) {
+    public ProyeccionHogarDTO calcularProyeccion(Long hogarId) {
 
         YearMonth mesActual = YearMonth.now();
         LocalDateTime inicioMes = mesActual.atDay(1).atStartOfDay();
@@ -247,13 +247,13 @@ public class ProyeccionService {
         int diasRestantes = diasTotalesMes - diasTranscurridos;
 
         // mostrar las fecha obtenidas
-        logger.info("Iniciando calculo de proyeccion para el hogar con ID: {}", hogarId);
-        logger.info("Inicio del mes: {}", inicioMes);
-        logger.info("Fecha actual: {}", hoy);
-        logger.info("Fin del mes: {}", finMes);
-        logger.info("Días transcurridos: {}", diasTranscurridos);
-        logger.info("Días totales del mes: {}", diasTotalesMes);
-        logger.info("Días restantes: {}", diasRestantes);
+        logger.debug("Iniciando calculo de proyeccion para el hogar con ID: {}", hogarId);
+        logger.debug("Inicio del mes: {}", inicioMes);
+        logger.debug("Fecha actual: {}", hoy);
+        logger.debug("Fin del mes: {}", finMes);
+        logger.debug("Días transcurridos: {}", diasTranscurridos);
+        logger.debug("Días totales del mes: {}", diasTotalesMes);
+        logger.debug("Días restantes: {}", diasRestantes);
 
         //obtiene el hogar con sus sectores y mediciones de mes actual
         Hogar hogar = reporteService.findByIdWithSectoresAndMediciones(hogarId, inicioMes, finMes);
@@ -264,6 +264,8 @@ public class ProyeccionService {
         List<ProyeccionSectorDTO> prediccionesSectores = new ArrayList<>();
 
         for (Sector sector : sectores) {
+
+            float umbralMensual = sector.getUmbralMensual();
             // Obtener mediciones de este sector en el mes actual-las mediciones hasta hoy
             List<Medicion> mediciones = medicionRepository.findBySectorIdAndFechaBetween(
                     sector.getId(), inicioMes, hoy.plusDays(1)

@@ -78,8 +78,8 @@ public class DataMock {
                         numeroSerie, EstadoMedidor.ON.name());
 
                 //Insert sector
-                jdbcTemplate.update("INSERT INTO Sector (nombre, categoria_sector, hogar_id, medidor_id) VALUES (?, ?, ?, ?)",
-                categoria, categoria, hogarId, medidorId);
+                jdbcTemplate.update("INSERT INTO Sector (nombre, categoria_sector, hogar_id, medidor_id, umbral_mensual) VALUES (?, ?, ?, ?, ?)",
+                categoria, categoria, hogarId, medidorId, 10000);
 
                 medidorId++;
             }

@@ -20,6 +20,9 @@ public class Sector {
     @Column
     private String nombre;
 
+    @Column(name = "umbral_mensual")
+    private float umbralMensual = 0;
+
     @Column
     @Enumerated(EnumType.STRING)
     private CategoriaSector categoriaSector;
@@ -157,6 +160,14 @@ public class Sector {
 
     public void setMedidor(Medidor medidor) {
         this.medidor = medidor;
+    }
+
+    public float getUmbralMensual() {
+        return umbralMensual;
+    }
+
+    public void setUmbralMensual(float umbralMensual) {
+        this.umbralMensual = umbralMensual;
     }
 
 }

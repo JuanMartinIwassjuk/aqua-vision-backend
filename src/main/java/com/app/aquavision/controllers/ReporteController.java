@@ -32,7 +32,7 @@ import java.util.NoSuchElementException;
 @RestController
 @RequestMapping("/reportes")
 public class ReporteController {
-    private static final Logger logger = LoggerFactory.getLogger(HogarController.class);
+    private static final Logger logger = LoggerFactory.getLogger(ReporteController.class);
 
     @Autowired
     private ReporteService reporteService;
@@ -154,7 +154,7 @@ public class ReporteController {
         logger.info("getReporteConsumoPorFechaMensual - hogar_id: {}, fechaInicio: {}, fechaFin: {}", id, fechaInicio, fechaFin);
 
         LocalDate fechaDesde = LocalDate.parse(fechaInicio);
-        LocalDate fechaHasta = LocalDate.parse(fechaFin).plusDays(1);
+        LocalDate fechaHasta = LocalDate.parse(fechaFin);
 
         LocalDateTime desdeDateTime = fechaDesde.atStartOfDay();
         LocalDateTime hastaDateTime = fechaHasta.atTime(LocalTime.MAX);
@@ -173,12 +173,6 @@ public class ReporteController {
                             description = "ID del hogar a consultar",
                             required = true,
                             example = "18"
-                    ),
-                    @Parameter(
-                            name = "umbralMensual",
-                            description = "Umbral mensual de consumo",
-                            required = true,
-                            example = "120.5"
                     )
             },
             responses = {
@@ -194,12 +188,11 @@ public class ReporteController {
             }
     )
     @GetMapping("/{id}/proyeccion")
-    public ResponseEntity<?> getReporteProyeccionMensual(@PathVariable Long id,
-                                                          @RequestParam double umbralMensual) {
+    public ResponseEntity<?> getReporteProyeccionMensual(@PathVariable Long id) {
 
-        logger.info("getReporteProyeccionMensual - hogar_id: {}, umbralMensual: {}", id, umbralMensual);
+        logger.info("getReporteProyeccionMensual - hogar_id: {}", id);
 
-        ProyeccionHogarDTO response = proyeccionService.calcularProyeccion(id,umbralMensual);
+        ProyeccionHogarDTO response = proyeccionService.calcularProyeccion(id);
 
         return ResponseEntity.ok(response);
     }
