@@ -3,9 +3,11 @@ package com.app.aquavision.entities.domain.notifications;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
-//@Entity
-//@Table
-public class Notificacion { //TODO: Revisar si persistirlas o no
+import java.time.LocalDateTime;
+
+@Entity
+@Table
+public class Notificacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,10 +23,16 @@ public class Notificacion { //TODO: Revisar si persistirlas o no
     @Column
     private String titulo;
 
+    @Column
+    private LocalDateTime fechaEnvio = LocalDateTime.now();
+
     public Notificacion(TipoNotificacion tipo, String titulo, String mensaje) {
         this.tipo = tipo;
         this.mensaje = mensaje;
         this.titulo = titulo;
+    }
+
+    public Notificacion() {
     }
 
     public TipoNotificacion getTipo() {
@@ -49,6 +57,14 @@ public class Notificacion { //TODO: Revisar si persistirlas o no
 
     public void setTitulo(String titulo) {
         this.titulo = titulo;
+    }
+
+    public LocalDateTime getFechaEnvio() {
+        return fechaEnvio;
+    }
+
+    public void setFechaEnvio(LocalDateTime fechaEnvio) {
+        this.fechaEnvio = fechaEnvio;
     }
 
 }

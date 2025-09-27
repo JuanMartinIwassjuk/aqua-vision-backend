@@ -3,6 +3,7 @@ package com.app.aquavision.entities.domain;
 import com.app.aquavision.entities.domain.gamification.EstadoRecompensa;
 import com.app.aquavision.entities.domain.gamification.Recompensa;
 import com.app.aquavision.entities.domain.gamification.RecompensaHogar;
+import com.app.aquavision.entities.domain.notifications.Notificacion;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
@@ -35,6 +36,11 @@ public class Hogar {
     @Column
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private int puntos = 0;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn (name = "hogar_id", referencedColumnName = "id")
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    private List<Notificacion> notificaciones = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn (name = "hogar_id", referencedColumnName = "id")
@@ -246,6 +252,14 @@ public class Hogar {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public List<Notificacion> getNotificaciones() {
+        return notificaciones;
+    }
+
+    public void setNotificaciones(List<Notificacion> notificaciones) {
+        this.notificaciones = notificaciones;
     }
 
 }

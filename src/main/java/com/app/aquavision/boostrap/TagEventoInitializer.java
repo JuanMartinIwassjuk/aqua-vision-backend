@@ -37,6 +37,8 @@ public class TagEventoInitializer implements CommandLineRunner {
         createTagIfNotExists("Eventos Sociales", "#e84393");
         createTagIfNotExists("Control de Cloro", "#1abc9c");
         createTagIfNotExists("Bomba de Agua", "#34495e");
+
+        logger.info("Finalizada la creación de tags de eventos");
     }
 
     private void createTagIfNotExists(String nombre, String color) {

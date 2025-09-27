@@ -26,6 +26,10 @@ public class Medidor {
         this.estado = EstadoMedidor.UNKNOWN; // Default state
     }
 
+    public boolean isActive() {
+        return this.estado == EstadoMedidor.ON;
+    }
+
     public Long getId() {
         return id;
     }
