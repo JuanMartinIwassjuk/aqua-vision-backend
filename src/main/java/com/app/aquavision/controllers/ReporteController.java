@@ -121,7 +121,7 @@ public class ReporteController {
         LocalDate fechaHasta = LocalDate.parse(fechaFin);
 
         LocalDateTime desdeDateTime = fechaDesde.atStartOfDay();
-        LocalDateTime hastaDateTime = fechaHasta.atTime(LocalTime.MAX);
+        LocalDateTime hastaDateTime = fechaHasta.atTime(LocalTime.MIN);
 
         ConsumoTotalHogarDTO consumoHogarFecha = reporteService.consumosHogarYSectoresFecha(id, desdeDateTime, hastaDateTime);
 
@@ -154,7 +154,7 @@ public class ReporteController {
         logger.info("getReporteConsumoPorFechaMensual - hogar_id: {}, fechaInicio: {}, fechaFin: {}", id, fechaInicio, fechaFin);
 
         LocalDate fechaDesde = LocalDate.parse(fechaInicio);
-        LocalDate fechaHasta = LocalDate.parse(fechaFin);
+        LocalDate fechaHasta = LocalDate.parse(fechaFin).plusDays(1);
 
         LocalDateTime desdeDateTime = fechaDesde.atStartOfDay();
         LocalDateTime hastaDateTime = fechaHasta.atTime(LocalTime.MAX);

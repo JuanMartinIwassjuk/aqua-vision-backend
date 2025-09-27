@@ -60,7 +60,7 @@ public class MqttSubscriberService {
                             + ", Timestamp: " + dto.getTimestamp().toString());
 
                     if (dto.getFlow() == 0) {
-                        logger.info("❌ Flujo nulo recibido: {}. Medición NO guardada.", dto.getFlow());
+                        logger.info("➖ Flujo nulo recibido: {}. Medición NO guardada.", dto.getFlow());
                         return;
                     }
                     sectorRepository.findById(dto.getSectorId()).ifPresentOrElse(sector -> {
