@@ -1,4 +1,4 @@
-package com.app.aquavision;
+package com.app.aquavision.boostrap;
 
 import com.app.aquavision.entities.domain.EstadoMedidor;
 import org.slf4j.Logger;
@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.Random;
 
 @Component
+@Order(1)
 public class DataMock {
 
   @Autowired

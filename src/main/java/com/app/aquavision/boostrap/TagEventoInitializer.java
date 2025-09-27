@@ -1,4 +1,6 @@
 package com.app.aquavision.boostrap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
@@ -8,14 +10,19 @@ import com.app.aquavision.entities.domain.gamification.TagEvento;
 import com.app.aquavision.repositories.TagEventoRepository;
 
 @Component
-@Order(1)
+@Order(2)
 public class TagEventoInitializer implements CommandLineRunner {
 
     @Autowired
     private TagEventoRepository tagEventoRepository;
 
+    private static final Logger logger = LoggerFactory.getLogger(TagEventoInitializer.class);
+
     @Override
     public void run(String... args) {
+
+        logger.info("Iniciando la creación de tags de eventos...");
+
         createTagIfNotExists("Limpieza", "#27ae60");
         createTagIfNotExists("Pileta", "#2980b9");
         createTagIfNotExists("Riego", "#8e44ad");
@@ -36,7 +43,7 @@ public class TagEventoInitializer implements CommandLineRunner {
         if (!tagEventoRepository.findByNombre(nombre).isPresent()) {
             TagEvento tag = new TagEvento(nombre, color);
             tagEventoRepository.save(tag);
-            System.out.println("Tag creado: " + nombre);
+            logger.info("Tag creado: {}", nombre);
         }
     }
 }
