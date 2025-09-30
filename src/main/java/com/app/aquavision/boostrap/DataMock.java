@@ -73,16 +73,23 @@ public class DataMock {
                 String categoria = categorias.get(j);
 
                 //Insert medidor
-                int numeroSerie = 100000 + hogarId * 1000 + j;
+                int numeroSerie;
+                if (hogarId == 1 && j == 0) {
+                    numeroSerie = 11000780; // fijo para el primer medidor del primer hogar
+                } else {
+                    numeroSerie = 100000 + hogarId * 1000 + j;
+                }
+
                 jdbcTemplate.update("INSERT INTO medidores (numero_serie, estado) VALUES (?, ?)",
                         numeroSerie, EstadoMedidor.ON.name());
 
                 //Insert sector
                 jdbcTemplate.update("INSERT INTO Sector (nombre, categoria_sector, hogar_id, medidor_id, umbral_mensual) VALUES (?, ?, ?, ?, ?)",
-                categoria, categoria, hogarId, medidorId, 10000);
+                        categoria, categoria, hogarId, medidorId, 10000);
 
                 medidorId++;
             }
+
         }
 
   }
