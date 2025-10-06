@@ -1,7 +1,9 @@
 package com.app.aquavision.services;
 
 import com.app.aquavision.entities.domain.Hogar;
+import com.app.aquavision.entities.domain.Sector;
 import com.app.aquavision.entities.domain.gamification.Recompensa;
+import com.app.aquavision.entities.domain.notifications.Notificacion;
 import com.app.aquavision.repositories.HogarRepository;
 import com.app.aquavision.repositories.RecompensaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +88,46 @@ public class HogarService {
         if (optionalHogar.isPresent()) {
             Hogar hogar = optionalHogar.get();
             hogar.resetearRachaDiaria();
+            repository.save(hogar);
+            return hogar;
+        }
+        return null;
+    }
+
+    @Transactional
+    public Hogar updateUmbralSector(Long hogarId, Long sectorId, Float nuevoUmbral) {
+        Optional<Hogar> optionalHogar = repository.findByIdWithSectores(hogarId);
+        if (optionalHogar.isPresent()) {
+            Sector sector = optionalHogar.get().getSectores().stream()
+                    .filter(s -> s.getId().equals(sectorId))
+                    .findFirst()
+                    .orElse(null);
+            if (sector != null){
+                sector.setUmbralMensual(nuevoUmbral);
+            } else {
+                return null;
+            }
+
+            repository.save(optionalHogar.get());
+            return optionalHogar.get();
+        }
+        return null;
+    }
+
+    @Transactional
+    public Hogar visualizarNotificacion(Long hogarId, Long notificacionId) {
+        Optional<Hogar> optionalHogar = repository.findById(hogarId);
+        if (optionalHogar.isPresent()) {
+            Hogar hogar = optionalHogar.get();
+            Notificacion notificacion = hogar.getNotificaciones().stream()
+                    .filter(n -> n.getId().equals(notificacionId))
+                    .findFirst()
+                    .orElse(null);
+            if (notificacion != null){
+                notificacion.leer();
+            } else {
+                return null;
+            }
             repository.save(hogar);
             return hogar;
         }

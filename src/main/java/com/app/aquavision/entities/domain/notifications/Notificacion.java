@@ -24,6 +24,9 @@ public class Notificacion {
     private String titulo;
 
     @Column
+    private boolean leido = false;
+
+    @Column
     private LocalDateTime fechaEnvio = LocalDateTime.now();
 
     public Notificacion(TipoNotificacion tipo, String titulo, String mensaje) {
@@ -33,6 +36,14 @@ public class Notificacion {
     }
 
     public Notificacion() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public TipoNotificacion getTipo() {
@@ -65,6 +76,18 @@ public class Notificacion {
 
     public void setFechaEnvio(LocalDateTime fechaEnvio) {
         this.fechaEnvio = fechaEnvio;
+    }
+
+    public boolean isLeido() {
+        return leido;
+    }
+
+    public void setLeido(boolean leido) {
+        this.leido = leido;
+    }
+
+    public void leer() {
+        this.setLeido(true);
     }
 
 }
