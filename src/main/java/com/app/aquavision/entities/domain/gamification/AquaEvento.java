@@ -19,7 +19,6 @@ public class AquaEvento {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private Long id;
 
-    @Column(nullable = false)
     private String titulo;
 
     @Column(columnDefinition = "TEXT")
@@ -32,7 +31,6 @@ public class AquaEvento {
     private LocalDateTime fechaFin;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private EstadoEvento estadoEvento;
 
     @ManyToMany(fetch = FetchType.LAZY)
