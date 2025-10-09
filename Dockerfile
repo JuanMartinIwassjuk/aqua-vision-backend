@@ -15,17 +15,27 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # =====================
-# 2) Runtime Stage
+# 2) Runtime Stage (liviano y optimizado)
 # =====================
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:21-jre-alpine
 
+# Definir directorio de trabajo
 WORKDIR /app
 
-# Copiar el .jar generado desde el stage de build
+# Copiar el .jar desde el build
 COPY --from=builder /app/target/*.jar app.jar
 
-# Puerto de la aplicación (Render lo detecta, pero es bueno declararlo)
+# Exponer el puerto
 EXPOSE 8080
 
-# Comando de arranque
-ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=prod"]
+# Configuración JVM para entornos livianos
+# - Usa SerialGC (menos threads, menos consumo)
+# - Limita el uso de RAM al 60% del contenedor
+# - Optimiza arranque y estabilidad en Render
+ENTRYPOINT ["java", \
+    "-XX:+UseContainerSupport", \
+    "-XX:MaxRAMPercentage=60.0", \
+    "-XX:+UseSerialGC", \
+    "-XX:+AlwaysPreTouch", \
+    "-jar", "app.jar", \
+    "--spring.profiles.active=prod"]
