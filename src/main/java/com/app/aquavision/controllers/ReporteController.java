@@ -3,7 +3,8 @@ package com.app.aquavision.controllers;
 import com.app.aquavision.dto.consumos.ConsumoMensualHogarDTO;
 import com.app.aquavision.dto.consumos.ConsumoTotalHogarDTO;
 import com.app.aquavision.dto.consumos.ConsumosPorHoraHogarDTO;
-import com.app.aquavision.dto.proyecciones.ProyeccionGraficoDTO;
+import com.app.aquavision.dto.proyecciones.ProyeccionGraficoHogarDTO;
+import com.app.aquavision.dto.proyecciones.ProyeccionGraficoSectorDTO;
 import com.app.aquavision.dto.proyecciones.ProyeccionHogarDTO;
 import com.app.aquavision.services.ProyeccionService;
 import com.app.aquavision.services.ReporteService;
@@ -200,7 +201,10 @@ public class ReporteController {
     @GetMapping("/{hogarId}/proyeccion-grafico")
     @Operation(
             summary = "Obtener proyección de consumo por hogar",
-            description = "Genera y devuelve la proyección de consumo de energía para un hogar específico, desglosada por sector. Incluye datos históricos, actuales, proyectados y hallazgos relevantes.",
+            description = """
+        Genera y devuelve la proyección de consumo de agua para un hogar específico,
+        desglosada por sector. Incluye datos históricos, actuales, proyectados y hallazgos relevantes.
+        """,
             parameters = {
                     @Parameter(
                             name = "hogarId",
@@ -215,20 +219,22 @@ public class ReporteController {
                             description = "Proyección de consumo generada exitosamente",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = Map.class) // Puedes usar una clase de respuesta más específica si la tienes
+                                    schema = @Schema(implementation = ProyeccionGraficoHogarDTO.class)
                             )
                     ),
                     @ApiResponse(
                             responseCode = "404",
-                            description = "Hogar no encontrado"
+                            description = "Hogar no encontrado",
+                            content = @Content(schema = @Schema(example = "{\"error\": \"Hogar no encontrado\"}"))
                     ),
                     @ApiResponse(
                             responseCode = "500",
-                            description = "Error interno del servidor"
+                            description = "Error interno del servidor",
+                            content = @Content(schema = @Schema(example = "{\"error\": \"Error interno del servidor\"}"))
                     )
             }
     )
-    public Map<String, ProyeccionGraficoDTO> obtenerProyeccionPorHogar(
+    public ProyeccionGraficoHogarDTO obtenerProyeccionPorHogar(
             @Parameter(description = "ID del hogar para el que se generará la proyección")
             @PathVariable Long hogarId) {
         return proyeccionService.generarProyeccionPorHogar(hogarId);

@@ -1,9 +1,6 @@
 package com.app.aquavision.services;
 
-import com.app.aquavision.dto.proyecciones.ProyeccionGraficoDTO;
-import com.app.aquavision.dto.proyecciones.ProyeccionPuntosDTO;
-import com.app.aquavision.dto.proyecciones.ProyeccionHogarDTO;
-import com.app.aquavision.dto.proyecciones.ProyeccionSectorDTO;
+import com.app.aquavision.dto.proyecciones.*;
 import com.app.aquavision.entities.domain.EstadoConsumo;
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.entities.domain.Medicion;
@@ -48,20 +45,25 @@ public class ProyeccionService {
                 .orElseThrow(() -> new EntityNotFoundException("Hogar no encontrado con id: " + id));
     }
 
-    public Map<String, ProyeccionGraficoDTO> generarProyeccionPorHogar(Long hogarId) {
+    public ProyeccionGraficoHogarDTO generarProyeccionPorHogar(Long hogarId) {
         Hogar hogar = hogarRepository.findByIdWithSectores(hogarId)
                 .orElseThrow(() -> new EntityNotFoundException("Hogar no encontrado con id: " + hogarId));
 
-        Map<String, ProyeccionGraficoDTO> proyeccionPorSector = new HashMap<>();
+        ProyeccionGraficoHogarDTO proyeccionHogar = new ProyeccionGraficoHogarDTO();
+
         hogar.getSectores().forEach(sector -> {
-            ProyeccionGraficoDTO datosGrafico = generarProyeccionPorSector(sector.getId());
-            proyeccionPorSector.put(sector.getNombre(), datosGrafico);
+            ProyeccionGraficoSectorDTO datosGrafico = generarProyeccionPorSector(sector.getId());
+            datosGrafico.setNombreSector(sector.getNombre());
+            proyeccionHogar.setHogarId(hogarId);
+            proyeccionHogar.anadirProyeccionSector(datosGrafico);
+
         });
 
-        return proyeccionPorSector;
+        return proyeccionHogar;
     }
 
-    private ProyeccionGraficoDTO generarProyeccionPorSector(Long sectorId) {
+    private ProyeccionGraficoSectorDTO generarProyeccionPorSector(Long sectorId) {
+
         LocalDate hoy = LocalDate.now();
         LocalDate inicioMesPasado = hoy.minusMonths(1).withDayOfMonth(1);
         LocalDate finMesActual = hoy.withDayOfMonth(hoy.lengthOfMonth());
@@ -86,7 +88,7 @@ public class ProyeccionService {
 
         List<String> hallazgos = analizarConsumo(consumoActualMap, consumoHistoricoMap, consumoProyectadoTotal);
 
-        return new ProyeccionGraficoDTO(puntos, hallazgos);
+        return new ProyeccionGraficoSectorDTO(puntos, hallazgos);
     }
 
     private Map<Integer, Double> agruparPorDia(List<Medicion> mediciones, int mes, int anio) {
