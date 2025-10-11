@@ -74,7 +74,7 @@ public class ReporteController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "Consumo por hora de un dia de un sector obtenido correctamente",
-                            content = @Content(schema = @Schema(implementation = ConsumosPorHoraSectorDTO.class))
+                            content = @Content(schema = @Schema(implementation = ConsumosPorHoraSectoresDTO.class))
                     ),
                     @ApiResponse(
                             responseCode = "404",
