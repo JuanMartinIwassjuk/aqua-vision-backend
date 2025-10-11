@@ -1,8 +1,6 @@
 package com.app.aquavision.controllers;
 
-import com.app.aquavision.dto.consumos.ConsumoMensualHogarDTO;
-import com.app.aquavision.dto.consumos.ConsumoTotalHogarDTO;
-import com.app.aquavision.dto.consumos.ConsumosPorHoraHogarDTO;
+import com.app.aquavision.dto.consumos.*;
 import com.app.aquavision.dto.proyecciones.ProyeccionGraficoHogarDTO;
 import com.app.aquavision.dto.proyecciones.ProyeccionHogarDTO;
 import com.app.aquavision.services.ProyeccionService;
@@ -68,6 +66,37 @@ public class ReporteController {
         ConsumosPorHoraHogarDTO consumosPorHoraHogarDTO = this.reporteService.consumosHogarPorHora(id, diaInicio, diaFin);
 
         return ResponseEntity.ok(consumosPorHoraHogarDTO);
+    }
+
+    @Operation(
+            summary = "Obtener el consumo de un hogar por sector por hora de un dia",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Consumo por hora de un dia de un sector obtenido correctamente",
+                            content = @Content(schema = @Schema(implementation = ConsumosPorHoraSectorDTO.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Hogar no encontrado"
+                    )
+            }
+    )
+    @GetMapping("/{id}/consumo-dia-hora-sectores")
+    public ResponseEntity<?> getReporteConsumoPorDiaPorHoraPorSector(
+            @Parameter(description = "ID del hogar a consultar", example = "1")
+            @PathVariable Long id,
+            @Parameter(description = "Dia en formato yyyy-MM-dd", example = "2025-08-01")
+            @RequestParam String dia)
+    {
+        logger.info("getReporteConsumoPorHoraPorDiaPorSector - hogar_id: {}, dia: {}", id, dia);
+
+        LocalDateTime diaInicio = LocalDate.parse(dia).atStartOfDay();
+        LocalDateTime diaFin = LocalDate.parse(dia).atTime(LocalTime.MAX);
+
+        ConsumosPorHoraSectoresDTO consumosPorHoraSectoresDTO = this.reporteService.consumosSectoresPorHora(id, diaInicio, diaFin);
+
+        return ResponseEntity.ok(consumosPorHoraSectoresDTO);
     }
 
     @Operation(
