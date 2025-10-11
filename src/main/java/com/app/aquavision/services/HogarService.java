@@ -134,4 +134,11 @@ public class HogarService {
         return null;
     }
 
+    @Transactional
+    public List<Hogar> getRanking(){
+
+        return repository.findAllByOrderByPuntajeDesc();
+
+    }
+
 }

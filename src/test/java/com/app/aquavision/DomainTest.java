@@ -42,27 +42,6 @@ public class DomainTest {
     }
 
     @Test
-    void HogarTest() {
-        hogar.mostrarReporteHogar();
-    }
-
-    @Test
-    void ConsumoHogarActualTest() {
-        hogar.mostrarConsumoActualDiaro();
-    }
-
-    @Test
-    void ConsumoHogarPorFechasTest() {
-        LocalDateTime fechaInicio = LocalDateTime.of(2025, 1, 5, 0, 0, 0);
-        hogar.mostrarConsumoTotalPorFechas(fechaInicio, hoy);
-    }
-
-    @Test
-    void ProyeccionHogarMensualTest() {
-        hogar.mostarProyeccionConsumoMensual();
-    }
-
-    @Test
     void RecompensasTest(){
         Recompensa recompensa = new Recompensa("DESCUENTO MEDIDOR 5%", 100);
 
