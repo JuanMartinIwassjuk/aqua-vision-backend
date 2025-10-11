@@ -43,6 +43,8 @@ public class DataMock {
     insertarHogares();
     insertarMediciones();
     insertarRecompensas();
+    insertarNotificaciones();
+    insertarEventos();
 
     insertarRoles();
     insertarUsuarios();
@@ -142,14 +144,58 @@ public class DataMock {
     for (Map<String, Object> recompensa : recompensas) {
       String descripcion = (String) recompensa.get("descripcion");
       int puntos = (int) recompensa.get("puntos");
-
-      Integer count = jdbcTemplate.queryForObject(
-          "SELECT COUNT(*) FROM Recompensa WHERE descripcion = ?", Integer.class, descripcion);
-      if (count == 0) {
-        jdbcTemplate.update(
+      jdbcTemplate.update(
             "INSERT INTO Recompensa (descripcion, puntos_necesarios) VALUES (?, ?)",
             descripcion, puntos);
-      }
+    }
+
+    List<Long> hogaresIDs = jdbcTemplate.query("SELECT id FROM Hogar",
+              (rs, rowNum) -> rs.getLong("id"));
+
+    LocalDateTime hoy = LocalDateTime.now();
+
+    for (Long hogarId : hogaresIDs) {
+      jdbcTemplate.update(
+            "INSERT INTO recompensa_hogar (hogar_id, recompensa_id, estado, fecha_de_reclamo) VALUES (?, ?, ?, ?)",
+            hogarId, 1, "DISPONIBLE", hoy);
+    }
+
+  }
+
+  private void insertarNotificaciones(){
+
+    logger.info("Insertando notificaciones...");
+
+    List<Long> hogaresIDs = jdbcTemplate.query("SELECT id FROM Hogar",
+              (rs, rowNum) -> rs.getLong("id"));
+
+    LocalDateTime hoy = LocalDateTime.now();
+
+    for (Long hogarId : hogaresIDs) {
+        jdbcTemplate.update(
+            "INSERT INTO Notificacion (hogar_id, mensaje, fecha_envio, titulo, leido, tipo) VALUES (?, ?, ?, ?, ?, ?)",
+            hogarId, "Notificacion de prueba AquaVision", hoy, "Notificacion", false, 0);
+
+    }
+
+  }
+
+  private void insertarEventos(){
+
+    logger.info("Insertando eventos...");
+
+    List<Long> sectoresIDs = jdbcTemplate.query("SELECT id FROM Sector",
+              (rs, rowNum) -> rs.getLong("id"));
+
+    LocalDateTime hoy = LocalDateTime.now();
+
+    for (Long sectorId : sectoresIDs) {
+        jdbcTemplate.update(
+            "INSERT INTO aqua_evento (costo, litros_consumidos, fecha_inicio, id, sector_id, descripcion, titulo, estado_evento) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                123, 3, hoy, sectorId, sectorId, "Evento de limpieza", "Limpieza", "EN_PROCESO");
+        jdbcTemplate.update(
+                "INSERT INTO evento_tags (evento_id, tag_id) VALUES (?, ?)",
+                sectorId, 1);
     }
   }
 
