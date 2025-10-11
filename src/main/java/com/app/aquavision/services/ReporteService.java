@@ -92,14 +92,11 @@ public class ReporteService {
         return consumoTotalHogarDTO;
     }
 
-    public ConsumosPorHoraHogarDTO consumosHogarPorHora(Long hogar_id) {
+    public ConsumosPorHoraHogarDTO consumosHogarPorHora(Long hogar_id, LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
 
-        LocalDateTime hoyInicio = LocalDate.now().atStartOfDay();
-        LocalDateTime hoyActual = LocalDate.now().atTime(LocalTime.MAX);
+        Hogar hogar = this.findByIdWithSectoresAndMediciones(hogar_id, fechaDesde, fechaHasta);
 
-        Hogar hogar = this.findByIdWithSectoresAndMediciones(hogar_id, hoyInicio, hoyActual);
-
-        ConsumosPorHoraHogarDTO consumosPorHoraHogarDTO = new ConsumosPorHoraHogarDTO(hogar_id, hoyInicio, hoyActual);
+        ConsumosPorHoraHogarDTO consumosPorHoraHogarDTO = new ConsumosPorHoraHogarDTO(hogar_id, fechaDesde, fechaHasta);
 
         float consumoTotalDia = 0;
         for (int i = 0; i < 24; i++) {

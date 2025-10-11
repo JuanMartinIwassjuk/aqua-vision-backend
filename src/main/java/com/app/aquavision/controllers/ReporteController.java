@@ -4,7 +4,6 @@ import com.app.aquavision.dto.consumos.ConsumoMensualHogarDTO;
 import com.app.aquavision.dto.consumos.ConsumoTotalHogarDTO;
 import com.app.aquavision.dto.consumos.ConsumosPorHoraHogarDTO;
 import com.app.aquavision.dto.proyecciones.ProyeccionGraficoHogarDTO;
-import com.app.aquavision.dto.proyecciones.ProyeccionGraficoSectorDTO;
 import com.app.aquavision.dto.proyecciones.ProyeccionHogarDTO;
 import com.app.aquavision.services.ProyeccionService;
 import com.app.aquavision.services.ReporteService;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Tag(
@@ -41,38 +39,12 @@ public class ReporteController {
     @Autowired
     private ProyeccionService proyeccionService;
 
-    @GetMapping("/{id}/consumo-actual")
     @Operation(
-            summary = "Obtener el consumo actual total de un hogar y sus sectores",
+            summary = "Obtener el consumo de un hogar por hora de un dia",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Consumo diario obtenido correctamente",
-                            content = @Content(schema = @Schema(implementation = ConsumoTotalHogarDTO.class))
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Hogar no encontrado"
-                    )
-            }
-    )
-    public ResponseEntity<?> getReporteConsumoActual(
-            @Parameter(description = "ID del hogar a consultar", example = "1")
-            @PathVariable Long id) {
-
-        logger.info("getReporteConsumoActual - hogar_id: {}", id);
-
-        ConsumoTotalHogarDTO consumoDiarioDTO = this.reporteService.consumosHogarYSectoresDia(id);
-
-        return ResponseEntity.ok(consumoDiarioDTO);
-    }
-
-    @Operation(
-            summary = "Obtener el consumo actual de un hogar por hora",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Consumo diario por hora obtenido correctamente",
+                            description = "Consumo por hora de un dia obtenido correctamente",
                             content = @Content(schema = @Schema(implementation = ConsumosPorHoraHogarDTO.class))
                     ),
                     @ApiResponse(
@@ -81,16 +53,85 @@ public class ReporteController {
                     )
             }
     )
-    @GetMapping("/{id}/consumo-actual-hora")
-    public ResponseEntity<?> getReporteConsumoPorHora(
+    @GetMapping("/{id}/consumo-dia-hora")
+    public ResponseEntity<?> getReporteConsumoPorDiaPorHora(
             @Parameter(description = "ID del hogar a consultar", example = "1")
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            @Parameter(description = "Dia en formato yyyy-MM-dd", example = "2025-08-01")
+            @RequestParam String dia)
+    {
+        logger.info("getReporteConsumoPorHoraPorDia - hogar_id: {}, dia: {}", id, dia);
 
-        logger.info("getReporteConsumoPorHora - hogar_id: {}", id);
+        LocalDateTime diaInicio = LocalDate.parse(dia).atStartOfDay();
+        LocalDateTime diaFin = LocalDate.parse(dia).atTime(LocalTime.MAX);
 
-        ConsumosPorHoraHogarDTO consumosPorHoraHogarDTO = this.reporteService.consumosHogarPorHora(id);
+        ConsumosPorHoraHogarDTO consumosPorHoraHogarDTO = this.reporteService.consumosHogarPorHora(id, diaInicio, diaFin);
 
         return ResponseEntity.ok(consumosPorHoraHogarDTO);
+    }
+
+    @Operation(
+            summary = "Obtener reporte de consumo total de un hogar y sus sectores de un dia específico",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Reporte de consumo obtenido correctamente",
+                            content = @Content(schema = @Schema(implementation = ConsumoTotalHogarDTO.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Hogar no encontrado"
+                    )
+            }
+    )
+    @GetMapping("/{id}/consumo-dia")
+    public ResponseEntity<?> getReporteConsumoPorDia(
+            @Parameter(description = "ID del hogar a consultar", example = "1")
+            @PathVariable Long id,
+            @Parameter(description = "Fecha de inicio en formato yyyy-MM-dd", example = "2025-08-01")
+            @RequestParam String dia)
+    {
+        logger.info("getReporteConsumoPorDia - hogar_id: {}, dia: {}", id, dia);
+
+        LocalDateTime diaInicio = LocalDate.parse(dia).atStartOfDay();
+        LocalDateTime diaFin = LocalDate.parse(dia).atTime(LocalTime.MAX);
+
+        ConsumoTotalHogarDTO consumoHogarFecha = reporteService.consumosHogarYSectoresFecha(id, diaInicio, diaFin);
+
+        return ResponseEntity.ok(consumoHogarFecha);
+    }
+
+    @Operation(
+            summary = "Obtener reporte de consumo mensual de un hogar y sus sectores entre dos fechas",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Reporte mensual de consumo obtenido correctamente",
+                            content = @Content(schema = @Schema(implementation = ConsumoMensualHogarDTO.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Hogar no encontrado"
+                    )
+            }
+    )
+    @GetMapping("/{id}/consumo-fecha-mensual")
+    public ResponseEntity<?> getReporteConsumoPorFechaMensual(
+            @Parameter(description = "ID del hogar a consultar", example = "1")
+            @PathVariable Long id,
+            @Parameter(description = "Fecha de inicio en formato yyyy-MM-dd", example = "2025-05-01")
+            @RequestParam String fechaInicio,
+            @Parameter(description = "Fecha de fin en formato yyyy-MM-dd", example = "2025-08-05")
+            @RequestParam String fechaFin) {
+
+        logger.info("getReporteConsumoPorFechaMensual - hogar_id: {}, fechaInicio: {}, fechaFin: {}", id, fechaInicio, fechaFin);
+
+        LocalDateTime desdeDateTime = LocalDate.parse(fechaInicio).atStartOfDay();
+        LocalDateTime hastaDateTime = LocalDate.parse(fechaFin).atTime(LocalTime.MAX);
+
+        ConsumoMensualHogarDTO consumoMensualHogar = reporteService.consumosHogarYSectoresFechaMensual(id, desdeDateTime, hastaDateTime);
+
+        return ResponseEntity.ok(consumoMensualHogar);
     }
 
     @Operation(
@@ -122,47 +163,11 @@ public class ReporteController {
         LocalDate fechaHasta = LocalDate.parse(fechaFin);
 
         LocalDateTime desdeDateTime = fechaDesde.atStartOfDay();
-        LocalDateTime hastaDateTime = fechaHasta.atTime(LocalTime.MIN);
+        LocalDateTime hastaDateTime = fechaHasta.atTime(LocalTime.MAX);
 
         ConsumoTotalHogarDTO consumoHogarFecha = reporteService.consumosHogarYSectoresFecha(id, desdeDateTime, hastaDateTime);
 
         return ResponseEntity.ok(consumoHogarFecha);
-    }
-
-    @Operation(
-            summary = "Obtener reporte de consumo mensual de un hogar y sus sectores entre dos fechas",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Reporte mensual de consumo obtenido correctamente",
-                            content = @Content(schema = @Schema(implementation = ConsumoMensualHogarDTO.class))
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Hogar no encontrado"
-                    )
-            }
-    )
-    @GetMapping("/{id}/consumo-fecha-mensual")
-    public ResponseEntity<?> getReporteConsumoPorFechaMensual(
-            @Parameter(description = "ID del hogar a consultar", example = "1")
-            @PathVariable Long id,
-            @Parameter(description = "Fecha de inicio en formato yyyy-MM-dd", example = "2025-05-01")
-            @RequestParam String fechaInicio,
-            @Parameter(description = "Fecha de fin en formato yyyy-MM-dd", example = "2025-08-05")
-            @RequestParam String fechaFin) {
-
-        logger.info("getReporteConsumoPorFechaMensual - hogar_id: {}, fechaInicio: {}, fechaFin: {}", id, fechaInicio, fechaFin);
-
-        LocalDate fechaDesde = LocalDate.parse(fechaInicio);
-        LocalDate fechaHasta = LocalDate.parse(fechaFin);
-
-        LocalDateTime desdeDateTime = fechaDesde.atStartOfDay();
-        LocalDateTime hastaDateTime = fechaHasta.atTime(LocalTime.MAX);
-
-        ConsumoMensualHogarDTO consumoMensualHogar = reporteService.consumosHogarYSectoresFechaMensual(id, desdeDateTime, hastaDateTime);
-
-        return ResponseEntity.ok(consumoMensualHogar);
     }
 
     @Operation(
