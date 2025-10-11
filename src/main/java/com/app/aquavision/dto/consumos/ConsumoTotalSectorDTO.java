@@ -1,12 +1,15 @@
 package com.app.aquavision.dto.consumos;
 
+import com.app.aquavision.entities.domain.CategoriaSector;
 import com.app.aquavision.entities.domain.Sector;
 
 public class ConsumoTotalSectorDTO {
 
     //Sector
-    private Long sector_id;
-    private String nombreSector;
+    private final Long sector_id;
+    private final String nombreSector;
+    private final CategoriaSector categoriaSector;
+    private final Float umbralMensual;
 
     //Consumos
     private int consumoTotal = 0;
@@ -21,6 +24,8 @@ public class ConsumoTotalSectorDTO {
         this.consumoPico = sector.picoConsumo();
         this.sector_id = sector.getId();
         this.nombreSector = sector.getNombre();
+        this.categoriaSector = sector.getCategoria();
+        this.umbralMensual = sector.getUmbralMensual();
     }
 
     public int getConsumoTotal() {
@@ -29,6 +34,14 @@ public class ConsumoTotalSectorDTO {
 
     public Long getSector_id() {
         return sector_id;
+    }
+
+    public CategoriaSector getCategoriaSector() {
+        return categoriaSector;
+    }
+
+    public Float getUmbralMensual() {
+        return umbralMensual;
     }
 
     public String getNombreSector() {
