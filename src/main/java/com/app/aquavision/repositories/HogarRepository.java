@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface HogarRepository extends CrudRepository<Hogar, Long>{
@@ -19,4 +20,12 @@ public interface HogarRepository extends CrudRepository<Hogar, Long>{
         where h.id = :id
     """)
     Optional<Hogar> findByIdWithSectores(@Param("id") Long id);
+
+    @Query("""
+        select distinct h
+        from Hogar h
+        order by h.puntaje_ranking desc
+    """)
+    List<Hogar> findAllByOrderByPuntajeDesc();
+
 }

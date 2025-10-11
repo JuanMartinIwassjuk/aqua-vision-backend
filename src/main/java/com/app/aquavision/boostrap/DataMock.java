@@ -66,8 +66,8 @@ public class DataMock {
             int cantidadMiembros = random.nextInt(5) + 1;
             int cantidadSectores = random.nextInt(3) + 1;
 
-            jdbcTemplate.update("INSERT INTO Hogar (miembros, localidad, email, racha_diaria, puntos) VALUES (?, ?, ?, 0, 0)",
-                    cantidadMiembros, randomLocalidad(), "hogar" + hogarId + "@example.com");
+            jdbcTemplate.update("INSERT INTO Hogar (miembros, localidad, email, racha_diaria, puntos, puntaje_ranking, nombre) VALUES (?, ?, ?, 0, 10, ?, ?)",
+                    cantidadMiembros, randomLocalidad(), "hogar" + hogarId + "@example.com", 10 + hogarId, "hogar" + hogarId);
 
             List<String> categorias = getCategorias(cantidadSectores);
             for (int j = 0; j < cantidadSectores; j++) {

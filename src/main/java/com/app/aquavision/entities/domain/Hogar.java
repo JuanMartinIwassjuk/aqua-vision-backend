@@ -30,12 +30,19 @@ public class Hogar {
     private String email = "";
 
     @Column
+    private String nombre = "hogar";
+
+    @Column
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private int rachaDiaria = 0;
 
     @Column
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private int puntos = 0;
+
+    @Column()
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    private int puntaje_ranking = 0;
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn (name = "hogar_id", referencedColumnName = "id")
@@ -67,93 +74,6 @@ public class Hogar {
         this.localidad = localidad;
         this.email = email;
         this.puntos=0;
-    }
-
-    public void mostarProyeccionConsumoMensual() {
-        System.out.println("Proyección de Consumo A fin de mes del Hogar:");
-
-        LocalDateTime hoy = LocalDateTime.now();
-        LocalDateTime inicioMes = hoy.withDayOfMonth(1);
-
-        int diaHoy = hoy.getDayOfMonth();
-        int diasRestantes = 30 - diaHoy; //Asumiendo un mes de 30 días
-
-        int proyeccionHogar = 0;
-
-        for (Sector sector : sectores) {
-            int totalConsumoSector = sector.consumoTotalPorFecha(inicioMes, hoy);
-            int promedioConsumoSector = totalConsumoSector / diaHoy;
-            int proyeccionConsumoSector = totalConsumoSector + diasRestantes * promedioConsumoSector;
-
-            System.out.println("  Sector: " + sector.getNombre());
-            System.out.println("   -Categoria: " + sector.getCategoria());
-            System.out.println("   -Total Consumo: " + totalConsumoSector);
-            System.out.println("   -Promedio Consumo Diario: " + promedioConsumoSector);
-            System.out.println("   -Proyección Mensual: " + proyeccionConsumoSector);
-
-            proyeccionHogar += proyeccionConsumoSector;
-        }
-
-        System.out.println(" -Total Proyección Mensual Hogar: " + proyeccionHogar);
-    }
-
-    public void mostrarConsumoTotalPorFechas(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
-        System.out.println("Consumo Total del Hogar desde " + fechaInicio + " hasta " + fechaFin + ":");
-
-        int totalConsumoHogar = 0;
-
-        for (Sector sector : sectores) {
-            int totalConsumoSector = sector.consumoTotalPorFecha(fechaInicio, fechaFin);
-            totalConsumoHogar += totalConsumoSector;
-
-            System.out.println("  Sector: " + sector.getNombre());
-            System.out.println("   -Categoria: " + sector.getCategoria());
-            System.out.println("   -Total Consumo: " + totalConsumoSector);
-        }
-
-        System.out.println(" -Total Consumo Hogar: " + totalConsumoHogar);
-    }
-
-    public void mostrarConsumoActualDiaro(){
-        System.out.println("Consumo del Mes Actual del Hogar:");
-
-        int totalConsumoHogar = 0;
-
-        for (Sector sector : sectores) {
-            int totalConsumoSector = sector.consumoActualDiaro();
-            totalConsumoHogar += totalConsumoSector;
-
-            System.out.println("  Sector: " + sector.getNombre());
-            System.out.println("   -Categoria: " + sector.getCategoria());
-            System.out.println("   -Total Consumo: " + totalConsumoSector);
-        }
-
-        System.out.println(" -Total Consumo Hogar: " + totalConsumoHogar);
-    }
-
-    public void mostrarReporteHogar(){
-
-        System.out.println("Reporte del Hogar:");
-        System.out.println(" -Miembros: " + miembros);
-        System.out.println(" -Localidad: " + localidad);
-        System.out.println(" -Sectores: " + sectores.size());
-
-        int totalConsumoHogar = 0;
-
-        for (Sector sector : sectores) {
-            int totalConsumoSector = sector.totalConsumo();
-            int promedioConsumoSector = sector.promedioConsumo();
-
-            System.out.println("  Sector: " + sector.getNombre());
-            System.out.println("   -Categoria: " + sector.getCategoria());
-            System.out.println("   -Total Consumo: " + totalConsumoSector);
-            System.out.println("   -Promedio Consumo: " + promedioConsumoSector);
-
-            totalConsumoHogar += totalConsumoSector;
-        }
-
-        System.out.println(" -Total Consumo Hogar: " + totalConsumoHogar);
-        System.out.println(" -Promedio Consumo x Sector: " + totalConsumoHogar / sectores.size());
     }
 
     public int consumoTotalHora(int hora){
@@ -191,6 +111,7 @@ public class Hogar {
     }
 
     public void sumarPuntos(int puntos) {
+        this.puntaje_ranking += puntos;
         this.puntos += puntos;
     }
 
@@ -260,6 +181,22 @@ public class Hogar {
 
     public void setNotificaciones(List<Notificacion> notificaciones) {
         this.notificaciones = notificaciones;
+    }
+
+    public int getPuntaje_ranking() {
+        return puntaje_ranking;
+    }
+
+    public void setPuntaje_ranking(int puntaje_ranking) {
+        this.puntaje_ranking = puntaje_ranking;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
 }
