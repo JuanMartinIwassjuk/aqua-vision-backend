@@ -92,14 +92,11 @@ public class ReporteService {
         return consumoTotalHogarDTO;
     }
 
-    public ConsumosPorHoraHogarDTO consumosHogarPorHora(Long hogar_id) {
+    public ConsumosPorHoraHogarDTO consumosHogarPorHora(Long hogar_id, LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
 
-        LocalDateTime hoyInicio = LocalDate.now().atStartOfDay();
-        LocalDateTime hoyActual = LocalDate.now().atTime(LocalTime.MAX);
+        Hogar hogar = this.findByIdWithSectoresAndMediciones(hogar_id, fechaDesde, fechaHasta);
 
-        Hogar hogar = this.findByIdWithSectoresAndMediciones(hogar_id, hoyInicio, hoyActual);
-
-        ConsumosPorHoraHogarDTO consumosPorHoraHogarDTO = new ConsumosPorHoraHogarDTO(hogar_id, hoyInicio, hoyActual);
+        ConsumosPorHoraHogarDTO consumosPorHoraHogarDTO = new ConsumosPorHoraHogarDTO(hogar_id, fechaDesde, fechaHasta);
 
         float consumoTotalDia = 0;
         for (int i = 0; i < 24; i++) {
@@ -110,6 +107,31 @@ public class ReporteService {
         consumosPorHoraHogarDTO.setConsumoTotal(consumoTotalDia);
 
         return consumosPorHoraHogarDTO;
+    }
+
+    public ConsumosPorHoraSectoresDTO consumosSectoresPorHora(Long hogar_id, LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
+
+        Hogar hogar = this.findByIdWithSectoresAndMediciones(hogar_id, fechaDesde, fechaHasta);
+
+        ConsumosPorHoraSectoresDTO consumosPorHoraSectoresDTO = new ConsumosPorHoraSectoresDTO(hogar_id, fechaDesde, fechaHasta);
+
+        for (Sector sector : hogar.getSectores()) {
+            ConsumosPorHoraSectorDTO consumoPorHoraSectorDTO = new ConsumosPorHoraSectorDTO();
+            consumoPorHoraSectorDTO.sectorId = sector.getId();
+            consumoPorHoraSectorDTO.nombreSector = sector.getNombre();
+            consumoPorHoraSectorDTO.categoria = sector.getCategoria();
+
+            float consumoTotalSector = 0;
+            for (int i = 0; i < 24; i++) {
+                int consumo = sector.totalConsumo(i);
+                consumoPorHoraSectorDTO.consumosPorHora.add(new ConsumoPorHoraDTO(i, consumo));
+                consumoTotalSector += consumo;
+            }
+            consumosPorHoraSectoresDTO.setConsumoTotal(consumosPorHoraSectoresDTO.getConsumoTotal() + consumoTotalSector);
+            consumosPorHoraSectoresDTO.addConsumoPorHora(consumoPorHoraSectorDTO);
+        }
+
+        return consumosPorHoraSectoresDTO;
     }
 
     public ConsumoMensualHogarDTO consumosHogarYSectoresFechaMensual(Long hogarId, LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
