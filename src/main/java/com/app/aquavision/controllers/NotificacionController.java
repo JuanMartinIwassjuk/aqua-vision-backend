@@ -65,35 +65,6 @@ public class NotificacionController {
 
 
     @Operation(
-        summary = "Crear una nueva notificación para un hogar",
-        description = "Crea una notificación de tipo ALERTA o INFORME para el hogar indicado."
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "Notificación creada exitosamente",
-            content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = Notificacion.class))),
-        @ApiResponse(responseCode = "404", description = "Hogar no encontrado")
-    })
-    @PostMapping
-    public ResponseEntity<?> createNotification(
-        @Parameter(description = "ID del hogar", example = "1") @PathVariable Long hogarId,
-        @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Datos de la notificación a crear",
-            required = true,
-            content = @Content(schema = @Schema(implementation = Notificacion.class))
-        )
-        @RequestBody Notificacion notificacion
-    ) {
-        try {
-            Notificacion creada = notificacionService.createNotification(hogarId, notificacion);
-            return ResponseEntity.status(201).body(creada);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-  
-    @Operation(
         summary = "Marcar una notificación como leída",
         description = "Actualiza el estado de una notificación específica a 'leído'."
     )
