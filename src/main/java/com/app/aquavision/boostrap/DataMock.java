@@ -175,7 +175,7 @@ private void insertarNotificaciones() {
     LocalDateTime hoy = LocalDateTime.now();
 
     for (Long hogarId : hogaresIDs) {
-        TipoNotificacion tipo = (hogarId % 2 == 0) ? TipoNotificacion.ALERTA : TipoNotificacion.INFORME;
+        TipoNotificacion tipo = TipoNotificacion.ALERTA;
         String titulo = (tipo == TipoNotificacion.ALERTA) ? "Alerta" : "Recompensa";
         String mensaje = (tipo == TipoNotificacion.ALERTA) 
             ? "Notificación de alerta para el hogar " + hogarId
