@@ -4,6 +4,8 @@ import com.app.aquavision.entities.domain.gamification.EstadoRecompensa;
 import com.app.aquavision.entities.domain.gamification.Recompensa;
 import com.app.aquavision.entities.domain.gamification.RecompensaHogar;
 import com.app.aquavision.entities.domain.notifications.Notificacion;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
@@ -43,11 +45,12 @@ public class Hogar {
     @Column()
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private int puntaje_ranking = 0;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn (name = "hogar_id", referencedColumnName = "id")
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    @OneToMany(mappedBy = "hogar", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Notificacion> notificaciones = new ArrayList<>();
+
+
+
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn (name = "hogar_id", referencedColumnName = "id")

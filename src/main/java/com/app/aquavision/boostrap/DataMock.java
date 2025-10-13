@@ -1,6 +1,8 @@
 package com.app.aquavision.boostrap;
 
 import com.app.aquavision.entities.domain.EstadoMedidor;
+import com.app.aquavision.entities.domain.notifications.TipoNotificacion;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -162,23 +164,28 @@ public class DataMock {
 
   }
 
-  private void insertarNotificaciones(){
-
+private void insertarNotificaciones() {
     logger.info("Insertando notificaciones...");
 
-    List<Long> hogaresIDs = jdbcTemplate.query("SELECT id FROM Hogar",
-              (rs, rowNum) -> rs.getLong("id"));
+    List<Long> hogaresIDs = jdbcTemplate.query(
+        "SELECT id FROM Hogar",
+        (rs, rowNum) -> rs.getLong("id")
+    );
 
     LocalDateTime hoy = LocalDateTime.now();
 
     for (Long hogarId : hogaresIDs) {
-        jdbcTemplate.update(
-            "INSERT INTO Notificacion (hogar_id, mensaje, fecha_envio, titulo, leido, tipo) VALUES (?, ?, ?, ?, ?, ?)",
-            hogarId, "Notificacion de prueba AquaVision", hoy, "Notificacion", false, 0);
-
+        TipoNotificacion tipo = (hogarId % 2 == 0) ? TipoNotificacion.ALERTA : TipoNotificacion.INFORME;
+        String titulo = (tipo == TipoNotificacion.ALERTA) ? "Alerta" : "Recompensa";
+        String mensaje = (tipo == TipoNotificacion.ALERTA) 
+            ? "Notificación de alerta para el hogar " + hogarId
+            : "¡Felicidades! Has recibido una recompensa en el hogar " + hogarId;
+      jdbcTemplate.update(
+          "INSERT INTO Notificacion (hogar_id, mensaje, fecha_envio, titulo, leido, tipo) VALUES (?, ?, ?, ?, ?, ?)",
+          hogarId, mensaje, hoy, titulo, false, tipo.name()
+      );
     }
-
-  }
+}
 
   private void insertarEventos(){
 

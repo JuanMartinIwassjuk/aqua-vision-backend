@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
+import com.app.aquavision.entities.domain.Hogar;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table
 public class Notificacion {
@@ -14,13 +17,14 @@ public class Notificacion {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private Long id;
 
-    @Column
+    @Column(nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
     private TipoNotificacion tipo;
 
-    @Column
+    @Column(nullable = false)
     private String mensaje;
 
-    @Column
+    @Column(nullable = false)
     private String titulo;
 
     @Column
@@ -28,6 +32,11 @@ public class Notificacion {
 
     @Column
     private LocalDateTime fechaEnvio = LocalDateTime.now();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hogar_id", nullable = false)
+    @JsonBackReference
+    private Hogar hogar;
 
     public Notificacion(TipoNotificacion tipo, String titulo, String mensaje) {
         this.tipo = tipo;
@@ -88,6 +97,14 @@ public class Notificacion {
 
     public void leer() {
         this.setLeido(true);
+    }
+
+    public Hogar getHogar() {
+        return hogar;
+    }
+
+    public void setHogar(Hogar hogar) {
+        this.hogar = hogar;
     }
 
 }
