@@ -108,4 +108,17 @@ public class UserController {
         return id_hogar;
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @GetMapping("/me")
+    public ResponseEntity<?> getAuthenticatedUser() {
+        try {
+            User user = service.getAuthenticatedUser();
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap("error", e.getMessage()));
+        }
+    }
+
+
 }

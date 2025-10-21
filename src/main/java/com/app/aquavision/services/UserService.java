@@ -24,4 +24,6 @@ public interface UserService {
 
     User updateLastLogin(Long id);
 
+    User getAuthenticatedUser();
+
 }
