@@ -5,6 +5,7 @@ import com.app.aquavision.entities.domain.gamification.EstadoEvento;
 import com.app.aquavision.entities.domain.Medicion;
 import com.app.aquavision.entities.domain.Sector;
 import com.app.aquavision.repositories.AquaEventoRepository;
+import com.app.aquavision.repositories.MedicionRepository;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
@@ -25,6 +26,9 @@ public class AquaEventoService {
 
     @Autowired
     private AquaEventoRepository repository;
+
+    @Autowired
+    private MedicionRepository medicionRepository;
 
 
     @PostConstruct
@@ -47,10 +51,54 @@ public class AquaEventoService {
 
     @Transactional
     public AquaEvento save(AquaEvento evento) {
+
         if (evento.getEstado() == EstadoEvento.EN_PROCESO && evento.getFechaInicio() == null) {
- 
             evento.setFechaInicio(LocalDateTime.now(ZONA_ARG));
         }
+
+        if (evento.getEstado() == EstadoEvento.FINALIZADO) {
+
+            LocalDateTime start = evento.getFechaInicio();
+            LocalDateTime end = evento.getFechaFin();
+
+            if (start == null && end == null) {
+
+                start = LocalDateTime.now(ZONA_ARG);
+                end = start;
+                evento.setFechaInicio(start);
+                evento.setFechaFin(end);
+            } else if (start == null) {
+
+                start = end;
+                evento.setFechaInicio(start);
+            } else if (end == null) {
+            
+                end = LocalDateTime.now(ZONA_ARG);
+                evento.setFechaFin(end);
+            }
+
+   
+            if (start.isAfter(end)) {
+                LocalDateTime tmp = start;
+                start = end;
+                end = tmp;
+                evento.setFechaInicio(start);
+                evento.setFechaFin(end);
+            }
+
+        
+            Sector sector = evento.getSector();
+            if (sector != null) {
+                Long sumaFlow = medicionRepository.sumFlowBySectorAndTimestampBetween(sector, start, end);
+         
+                evento.setLitrosConsumidos(sumaFlow != null ? sumaFlow.doubleValue() : 0.0);
+            } else {
+       
+                evento.setLitrosConsumidos(0.0);
+            }
+        }
+
+  
         return repository.save(evento);
     }
 
