@@ -18,8 +18,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -158,41 +161,84 @@ public class ReporteService {
         return consumoMensualHogarDTO;
     }
 
-    //Exportar Reportes
-    @Autowired
-    private TemplateEngine templateEngine;
+@Autowired
+private TemplateEngine templateEngine;
 
-    public byte[] generarPdfReporte(Long hogarId, LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
-        Hogar hogar = this.findByIdWithSectoresAndMediciones(hogarId, fechaDesde, fechaHasta);
-        if (hogar == null) {
-            throw new NoSuchElementException("Hogar no encontrado con id: " + hogarId);
-        }
+public byte[] generarPdfReporte(Long hogarId, LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
 
-        ConsumoTotalHogarDTO dto = new ConsumoTotalHogarDTO(hogar, fechaDesde, fechaHasta);
-
-        DateTimeFormatter fechaFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        DateTimeFormatter fechaHoraFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-
-        Context context = new Context();
-        context.setVariable("fechaDesde", fechaDesde != null ? fechaDesde.format(fechaFormatter) : "");
-        context.setVariable("fechaHasta", fechaHasta != null ? fechaHasta.format(fechaFormatter) : "");
-        context.setVariable("fechaGeneracion", dto.getFechaGeneracion() != null ? dto.getFechaGeneracion().format(fechaHoraFormatter) : "");
-        context.setVariable("consumoTotal",  dto.getConsumoTotal() != null ? dto.getConsumoTotal() : 0);
-        context.setVariable("consumoPromedio", dto.getConsumoPromedio() != null ? dto.getConsumoPromedio() : 0);
-        context.setVariable("consumoPico", dto.getConsumoPico() != null ? dto.getConsumoPico() : 0);
-        context.setVariable("consumosPorSector", dto.getConsumosPorSector() != null ? dto.getConsumosPorSector() : Collections.emptyList());
-
-        String htmlContent = templateEngine.process("historical-report", context);
-
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            PdfRendererBuilder builder = new PdfRendererBuilder();
-            builder.withHtmlContent(htmlContent, "");
-            builder.toStream(baos);
-            builder.run();
-            return baos.toByteArray();
-        } catch (Exception e) {
-            throw new RuntimeException("Error generando PDF", e);
-        }
+    if (hogarId == null) {
+        throw new NoSuchElementException("Hogar id es null");
     }
+
+    Hogar hogar = this.findByIdWithSectoresAndMediciones(hogarId, fechaDesde, fechaHasta);
+    if (hogar == null) {
+        throw new NoSuchElementException("Hogar no encontrado con id: " + hogarId);
+    }
+
+    double costoPorLitro = 3.0;
+    List<ReporteDiarioSectorDTO> sectores = new ArrayList<>();
+
+    int consumoTotal = 0;
+    for (Sector s : hogar.getSectores()) {
+        int consumo = s.totalConsumo();
+        float promedio = s.promedioConsumo();
+        float pico = s.picoConsumo();
+        double costo = consumo * costoPorLitro;
+
+        sectores.add(new ReporteDiarioSectorDTO(
+                s.getNombre(),
+                consumo,
+                promedio,
+                pico,
+                costo
+        ));
+
+        consumoTotal += consumo;
+    }
+
+    double costoTotal = consumoTotal * costoPorLitro;
+
+    ReporteDiarioHogarDTO dto = new ReporteDiarioHogarDTO(
+            hogar.getId(),
+            hogar.getLocalidad(),
+            hogar.getMiembros(),
+            fechaDesde,
+            fechaHasta,
+            consumoTotal,
+            costoTotal,
+            sectores
+    );
+
+    // --- Contexto Thymeleaf ---
+    DateTimeFormatter fechaFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    DateTimeFormatter fechaHoraFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    Context context = new Context();
+    context.setVariable("localidad", dto.getLocalidad());
+    context.setVariable("miembros", dto.getMiembros());
+    context.setVariable("consumoTotal", dto.getConsumoTotal());
+    context.setVariable("costoTotal", String.format("%.2f", dto.getCostoTotal()));
+    context.setVariable("fechaDesde", dto.getFechaDesde().format(fechaFormatter));
+    context.setVariable("fechaHasta", dto.getFechaHasta().format(fechaFormatter));
+    context.setVariable("fechaGeneracion", dto.getFechaGeneracion().format(fechaHoraFormatter));
+
+    // Detalle por sector
+    context.setVariable("consumosPorSector", dto.getConsumosPorSector());
+
+    // --- Renderizar HTML ---
+    String htmlContent = templateEngine.process("historical-report", context);
+
+    // --- Generar PDF ---
+    try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+        PdfRendererBuilder builder = new PdfRendererBuilder();
+        builder.withHtmlContent(htmlContent, "");
+        builder.toStream(baos);
+        builder.run();
+        return baos.toByteArray();
+    } catch (Exception e) {
+        throw new RuntimeException("Error generando PDF", e);
+    }
+}
+
 
 }
