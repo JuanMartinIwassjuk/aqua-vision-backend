@@ -35,6 +35,9 @@ public class Hogar {
     private String nombre = "hogar";
 
     @Column
+    private String direccion = "direccion";
+
+    @Column
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private int rachaDiaria = 0;
 
@@ -156,6 +159,14 @@ public class Hogar {
 
     public void setLocalidad(String localidad) {
         this.localidad = localidad;
+    }
+
+    public String getDireccion() {
+    return direccion;
+    }
+
+    public void getDireccion(String direccion) {
+        this.direccion = direccion;
     }
 
     public Long getId() {

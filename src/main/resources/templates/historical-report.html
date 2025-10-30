@@ -16,6 +16,8 @@
         table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
         th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
         th { background-color: #00aaff; color: white; }
+        .small { font-size: 12px; color: #555; }
+        .highlight { font-weight: 700; color: #073B5C; }
     </style>
 </head>
 <body>
@@ -24,17 +26,14 @@
     <h1>Reporte de Consumo</h1>
     <p th:text="${fechaDesde != null and fechaHasta != null and fechaDesde.equals(fechaHasta) 
         ? 'Reporte del día ' + fechaDesde 
-        : 'Desde ' + (fechaDesde != null ? fechaDesde : '') + ' hasta ' + (fechaHasta != null ? fechaHasta : '')}">
-    </p>
+        : 'Desde ' + (fechaDesde != null ? fechaDesde : '') + ' hasta ' + (fechaHasta != null ? fechaHasta : '')}"> </p>
 </header>
 
-
 <section class="info-hogar">
-    <div class="info-item"><strong>Localidad:</strong> <span th:text="${localidad != null ? localidad : '-'}"></span></div>
-    <div class="info-item"><strong>Miembros del hogar:</strong> <span th:text="${miembros != null ? miembros : 0}"></span></div>
-    <div class="info-item"><strong>Consumo total:</strong> <span th:text="|${consumoTotal != null ? consumoTotal : 0} litros|"></span></div>
-    <div class="info-item"><strong>Consumo promedio:</strong> <span th:text="|${consumoPromedio != null ? consumoPromedio : 0} litros|"></span></div>
-    <div class="info-item"><strong>Consumo pico:</strong> <span th:text="|${consumoPico != null ? consumoPico : 0} litros|"></span></div>
+    <div class="info-item"><strong>Localidad:</strong> <span th:text="${localidad != null ? localidad : '-'}">-</span></div>
+    <div class="info-item"><strong>Miembros del hogar:</strong> <span th:text="${miembros != null ? miembros : 0}">0</span></div>
+    <div class="info-item"><strong>Consumo total:</strong> <span th:text="${consumoTotal != null ? consumoTotal + ' L' : '0 L'}">0 L</span></div>
+    <div class="info-item"><strong>Costo total estimado:</strong> <span th:text="${costoTotal != null ? '$' + costoTotal : '$0.00'}">$0.00</span></div>
     <div class="info-item"><strong>Fecha de generación:</strong> <span th:text="${fechaGeneracion != null ? fechaGeneracion : ''}"></span></div>
 </section>
 
@@ -44,19 +43,16 @@
         <tr>
             <th>Sector</th>
             <th>Consumo Total (L)</th>
-            <th>Consumo Promedio (L)</th>
-            <th>Consumo Pico (L)</th>
+            <th>Costo Estimado ($)</th>
         </tr>
     </thead>
-        <tbody>
-            <tr th:each="consumoSector : ${consumosPorSector}">
-                <td th:text="${consumoSector.sector != null ? consumoSector.sector.nombre : '-'}"></td>
-                <td th:text="${consumoSector.consumoTotal}"></td>
-                <td th:text="${consumoSector.consumoPromedio}"></td>
-                <td th:text="${consumoSector.consumoPico}"></td>
+    <tbody>
+            <tr th:each="sector : ${consumosPorSector}">
+                <td th:text="${sector.nombreSector}">-</td>
+                <td th:text="${sector.consumoTotal}">0</td>
+                <td th:text="${'$' + #numbers.formatDecimal(sector.costo, 1, 2)}">$0.00</td>
             </tr>
-        </tbody>
-
+    </tbody>
 </table>
 
 </body>
