@@ -35,7 +35,7 @@ public class ProyeccionService {
     @Autowired
     private HogarRepository hogarRepository;
 
-    private final double precioPorUnidad = 0.5;
+    private final double precioPorUnidad = 3;
 
     private static final Logger logger = LoggerFactory.getLogger(ProyeccionService.class);
 
@@ -130,15 +130,20 @@ public class ProyeccionService {
         return tendenciaPromedio;
     }
 
-    private List<ProyeccionPuntosDTO> generarPuntosProyeccion(LocalDate hoy, Map<Integer, Double> consumoActualMap, Map<Integer, Double> consumoHistoricoMap, List<Double> ewmaConsumo, double tendenciaPromedio) {
+    private List<ProyeccionPuntosDTO> generarPuntosProyeccion(
+            LocalDate hoy,
+            Map<Integer, Double> consumoActualMap,
+            Map<Integer, Double> consumoHistoricoMap,
+            List<Double> ewmaConsumo,
+            double tendenciaPromedio
+    ) {
         List<ProyeccionPuntosDTO> puntos = new ArrayList<>();
         int diasEnMes = hoy.lengthOfMonth();
         double variacion = 0.2;
 
-        Double valorProyectadoAnterior = (hoy.getDayOfMonth() > 0) ? ewmaConsumo.get(ewmaConsumo.size() - 1) : consumoActualMap.getOrDefault(1, 0.0);
-
-        // Total proyectado para hallazgos
-        double consumoProyectadoTotal = 0.0;
+        Double valorProyectadoAnterior = (hoy.getDayOfMonth() > 0)
+                ? ewmaConsumo.get(ewmaConsumo.size() - 1)
+                : consumoActualMap.getOrDefault(1, 0.0);
 
         for (int dia = 1; dia <= diasEnMes; dia++) {
             Double consumoDiaHistorico = consumoHistoricoMap.getOrDefault(dia, 0.0);
@@ -146,23 +151,22 @@ public class ProyeccionService {
             Double consumoProyectado;
 
             if (dia <= hoy.getDayOfMonth()) {
-                // Días pasados y el día actual: usamos el valor suavizado real
+                // ✅ Días pasados o el día actual → usar datos reales
                 consumoProyectado = ewmaConsumo.get(dia - 1);
             } else {
-                // Días futuros: proyectamos el valor anterior más la tendencia
+                // 🚫 Días futuros → dejar consumo actual nulo para cortar línea
+                consumoDelDia = null;
+
+                // Calcular proyección para la línea proyectada
                 consumoProyectado = valorProyectadoAnterior + tendenciaPromedio;
                 if (consumoProyectado < 0) consumoProyectado = 0.0;
 
-                // ✨ APLICAMOS LA IRREGULARIDAD HISTÓRICA ANTES DE ACTUALIZAR EL VALOR ANTERIOR ✨
-                double factorEstacionalidad = (consumoDiaHistorico - consumoHistoricoMap.getOrDefault(dia - 1, 0.0)) * 0.1;
+                double factorEstacionalidad =
+                        (consumoDiaHistorico - consumoHistoricoMap.getOrDefault(dia - 1, 0.0)) * 0.1;
                 consumoProyectado += factorEstacionalidad;
             }
 
-            // Actualizamos el valor para la siguiente iteración, ahora con la irregularidad incluida
             valorProyectadoAnterior = consumoProyectado;
-
-            // Sumamos al total proyectado, incluyendo todos los días del mes para el cálculo del gasto
-            consumoProyectadoTotal += consumoProyectado;
 
             Double tendenciaMin = consumoProyectado * (1 - variacion);
             Double tendenciaMax = consumoProyectado * (1 + variacion);
@@ -170,7 +174,7 @@ public class ProyeccionService {
             puntos.add(new ProyeccionPuntosDTO(
                     dia,
                     consumoDiaHistorico,
-                    consumoDelDia,
+                    consumoDelDia,       // incluye el día actual, null en días futuros
                     consumoProyectado,
                     tendenciaMin,
                     tendenciaMax
@@ -180,62 +184,107 @@ public class ProyeccionService {
         return puntos;
     }
 
-    private List<String> analizarConsumo(Map<Integer, Double> consumoActualMap, Map<Integer, Double> consumoHistoricoMap, double consumoProyectadoTotal) {
-        List<String> hallazgos = new ArrayList<>();
 
-        // Obtenemos el día actual para comparar periodos
+
+
+    private List<String> analizarConsumo(
+            Map<Integer, Double> consumoActualMap,
+            Map<Integer, Double> consumoHistoricoMap,
+            double consumoProyectadoTotal
+    ) {
+        List<String> hallazgos = new ArrayList<>();
         LocalDate hoy = LocalDate.now();
 
-        // 1. Calcular el consumo actual (acumulado hasta hoy)
         double consumoActualPeriodo = consumoActualMap.values().stream().mapToDouble(Double::doubleValue).sum();
-
-        // 2. Calcular el consumo histórico (acumulado hasta el mismo día del mes pasado)
         double consumoHistoricoPeriodo = 0.0;
         for (int i = 1; i <= hoy.getDayOfMonth(); i++) {
             consumoHistoricoPeriodo += consumoHistoricoMap.getOrDefault(i, 0.0);
         }
 
-        // Calcular el consumo total del mes pasado para el análisis final
         double consumoTotalHistorico = consumoHistoricoMap.values().stream().mapToDouble(Double::doubleValue).sum();
-
-        // Cálculo de gastos
-        double gastoActual = consumoActualPeriodo * precioPorUnidad;
         double gastoEstimado = consumoProyectadoTotal * precioPorUnidad;
 
-        hallazgos.add("💸 Gasto actual: $" + String.format("%.2f", gastoActual));
-        hallazgos.add("💰 Gasto proyectado (fin de mes): $" + String.format("%.2f", gastoEstimado));
+        // 1️⃣ Tendencia general
+        List<Double> consumosOrdenados = consumoActualMap.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
 
-        // Análisis de consumo periodo-a-periodo
-        if (consumoActualPeriodo > consumoHistoricoPeriodo) {
-            hallazgos.add("📈 ¡Cuidado! El consumo actual va " + String.format("%.0f", (consumoActualPeriodo / consumoHistoricoPeriodo - 1) * 100) + "% por encima del mes pasado en esta misma fecha.");
-        } else if (consumoActualPeriodo < consumoHistoricoPeriodo) {
-            hallazgos.add("📉 ¡Excelente! El consumo de este mes es un " + String.format("%.0f", (1 - consumoActualPeriodo / consumoHistoricoPeriodo) * 100) + "% menor al que llevabas el mes pasado.");
-        } else {
-            hallazgos.add("📊 El consumo de este mes es similar al que llevabas el mes pasado en este mismo periodo.");
+        String tendenciaGeneral = "estable";
+        if (consumosOrdenados.size() >= 4) {
+            double promedioInicio = consumosOrdenados.subList(0, consumosOrdenados.size() / 2)
+                    .stream().mapToDouble(Double::doubleValue).average().orElse(0);
+            double promedioFinal = consumosOrdenados.subList(consumosOrdenados.size() / 2, consumosOrdenados.size())
+                    .stream().mapToDouble(Double::doubleValue).average().orElse(0);
+
+            if (promedioFinal > promedioInicio * 1.15) {
+                tendenciaGeneral = "creciente";
+            } else if (promedioFinal < promedioInicio * 0.85) {
+                tendenciaGeneral = "decreciente";
+            }
         }
 
-        // Análisis de picos y ahorros diarios
+        switch (tendenciaGeneral) {
+            case "creciente" ->
+                    hallazgos.add("El consumo general muestra una tendencia creciente en los últimos días.");
+            case "decreciente" ->
+                    hallazgos.add("El consumo presenta una tendencia descendente, reflejando un mejor control en el uso.");
+            default ->
+                    hallazgos.add("El consumo se mantiene estable sin grandes variaciones recientes.");
+        }
+
+        // 2️⃣ Identificar el pico más alto (consumo absoluto actual)
+        int diaMayorConsumo = consumoActualMap.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(-1);
+        if (diaMayorConsumo > 0) {
+            hallazgos.add("El día " + diaMayorConsumo + " registró el mayor consumo del mes, con un uso de agua elevado.");
+        }
+
+        // 3️⃣ Detectar el mayor ahorro relativo (solo días con histórico válido)
+        int diaMayorAhorro = -1;
+        double mayorAhorroRelativo = 0;
         for (Map.Entry<Integer, Double> entry : consumoActualMap.entrySet()) {
             int dia = entry.getKey();
             double consumo = entry.getValue();
             double consumoHistorico = consumoHistoricoMap.getOrDefault(dia, 0.0);
 
-            if (consumoHistorico > 0 && consumo > consumoHistorico * 1.5) {
-                hallazgos.add("🔥 El día " + dia + " hubo un pico de consumo. Fue un " + String.format("%.0f", (consumo / consumoHistorico - 1) * 100) + "% más que en el mes anterior.");
-            }
-
-            if (consumoHistorico > 0 && consumo > 0 && consumo < consumoHistorico * 0.75) {
-                hallazgos.add("✅ El día " + dia + " se logró un gran ahorro. ¡El consumo fue un " + String.format("%.0f", (1 - consumo / consumoHistorico) * 100) + "% menor que en el mes pasado!");
+            if (consumoHistorico > 50) { // evitamos sesgos con históricos muy pequeños
+                double variacion = (consumo - consumoHistorico) / consumoHistorico;
+                if (variacion < -0.25) {
+                    double ahorroRelativo = -variacion;
+                    if (ahorroRelativo > mayorAhorroRelativo || (Math.abs(ahorroRelativo - mayorAhorroRelativo) < 0.05 && dia > diaMayorAhorro)) {
+                        mayorAhorroRelativo = ahorroRelativo;
+                        diaMayorAhorro = dia;
+                    }
+                }
             }
         }
 
-        // Análisis del consumo acumulado vs. el total del mes pasado
+        if (diaMayorAhorro > 0) {
+            if (mayorAhorroRelativo > 0.5) {
+                hallazgos.add("El día " + diaMayorAhorro + " fue el más eficiente del mes, con un ahorro destacado respecto al histórico.");
+            } else {
+                hallazgos.add("El día " + diaMayorAhorro + " presentó un ahorro moderado en comparación con el mes anterior.");
+            }
+        }
+
+        // 4️⃣ Gasto proyectado
+        hallazgos.add("De mantenerse este ritmo, el gasto estimado para el final del mes será de $" + String.format("%.2f", gastoEstimado) + ".");
+
+        // 5️⃣ Situación acumulada
         if (consumoActualPeriodo > consumoTotalHistorico) {
-            hallazgos.add("🚨 ¡Atención! El consumo actual (" + String.format("%.2f", consumoActualPeriodo) + ") ya superó el consumo total del mes pasado (" + String.format("%.2f", consumoTotalHistorico) + ").");
+            hallazgos.add("El consumo acumulado ya supera el total del mes pasado, se recomienda revisar posibles fugas o excesos.");
+        } else if (consumoActualPeriodo < consumoTotalHistorico * 0.8) {
+            hallazgos.add("El consumo acumulado se mantiene por debajo del total del mes pasado, indicando un uso más eficiente.");
         }
 
         return hallazgos;
     }
+
+
+
 
     public ProyeccionHogarDTO calcularProyeccion(Long hogarId) {
 
