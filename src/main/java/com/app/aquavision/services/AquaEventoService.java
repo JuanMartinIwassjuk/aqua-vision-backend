@@ -49,6 +49,7 @@ public class AquaEventoService {
         return optionalEvento.orElse(null);
     }
 
+
     @Transactional
     public AquaEvento save(AquaEvento evento) {
 
@@ -56,28 +57,29 @@ public class AquaEventoService {
             evento.setFechaInicio(LocalDateTime.now(ZONA_ARG));
         }
 
-        if (evento.getEstado() == EstadoEvento.FINALIZADO) {
 
+        if (evento.getEstado() == EstadoEvento.FINALIZADO) {
+        
             LocalDateTime start = evento.getFechaInicio();
             LocalDateTime end = evento.getFechaFin();
 
             if (start == null && end == null) {
-
+       
                 start = LocalDateTime.now(ZONA_ARG);
                 end = start;
                 evento.setFechaInicio(start);
                 evento.setFechaFin(end);
             } else if (start == null) {
-
+           
                 start = end;
                 evento.setFechaInicio(start);
             } else if (end == null) {
-            
+        
                 end = LocalDateTime.now(ZONA_ARG);
                 evento.setFechaFin(end);
             }
 
-   
+      
             if (start.isAfter(end)) {
                 LocalDateTime tmp = start;
                 start = end;
@@ -86,21 +88,23 @@ public class AquaEventoService {
                 evento.setFechaFin(end);
             }
 
-        
+  
             Sector sector = evento.getSector();
             if (sector != null) {
                 Long sumaFlow = medicionRepository.sumFlowBySectorAndTimestampBetween(sector, start, end);
-         
+     
                 evento.setLitrosConsumidos(sumaFlow != null ? sumaFlow.doubleValue() : 0.0);
             } else {
-       
+        
                 evento.setLitrosConsumidos(0.0);
             }
         }
 
-  
+
         return repository.save(evento);
     }
+
+
 
     @Transactional
     public void deleteById(Long id) {
