@@ -78,7 +78,7 @@ public class DataMock {
 
                 //Insert medidor
                 int numeroSerie;
-                if (hogarId == 1 && j == 0) {
+                if (hogarId == 5 && j == 0) {
                     numeroSerie = 11000780; // fijo para el primer medidor del primer hogar
                 } else {
                     numeroSerie = 100000 + hogarId * 1000 + j;

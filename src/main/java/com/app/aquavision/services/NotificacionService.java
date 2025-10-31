@@ -73,8 +73,16 @@ public class NotificacionService {
             notif.setId(null);
             notif.setLeido(false);
             notif.setFechaEnvio(LocalDateTime.now());
+
+            // 🔹 Primero establecer la relación con el hogar
+            notif.setHogar(hogar);
+
+            // 🔹 Luego agregarla a la lista de notificaciones del hogar
             hogar.getNotificaciones().add(notif);
+
+            // 🔹 Guardar el hogar (cascadeará la notificación si está mapeado así)
             hogarRepository.save(hogar);
+
             return notif;
         }).orElseThrow(() -> new EntityNotFoundException("Hogar no encontrado"));
     }

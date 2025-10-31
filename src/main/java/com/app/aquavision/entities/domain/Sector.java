@@ -36,6 +36,12 @@ public class Sector {
     @JoinColumn(name = "medidor_id")
     private Medidor medidor;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hogar_id")
+    @JsonIgnore
+    private Hogar hogar;
+
+
     public Sector() {
         // Constructor por defecto
     }
@@ -44,6 +50,13 @@ public class Sector {
         this.nombre = nombre;
         this.categoriaSector = categoriaSector;
         this.medidor = medidor;
+    }
+    public Hogar getHogar() {
+        return hogar;
+    }
+
+    public void setHogar(Hogar hogar) {
+        this.hogar = hogar;
     }
 
     public String getNombre() {

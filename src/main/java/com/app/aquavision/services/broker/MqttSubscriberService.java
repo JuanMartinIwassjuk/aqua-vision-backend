@@ -1,12 +1,15 @@
 package com.app.aquavision.services.broker;
 
 import com.app.aquavision.dto.MedicionDTO;
+import com.app.aquavision.entities.domain.EstadoMedidor;
 import com.app.aquavision.entities.domain.Medicion;
 import com.app.aquavision.entities.domain.Medidor;
-import com.app.aquavision.entities.domain.EstadoMedidor;
+import com.app.aquavision.entities.domain.notifications.Notificacion;
+import com.app.aquavision.entities.domain.notifications.TipoNotificacion;
 import com.app.aquavision.repositories.MedicionRepository;
 import com.app.aquavision.repositories.MedidorRepository;
 import com.app.aquavision.repositories.SectorRepository;
+import com.app.aquavision.services.NotificacionService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
@@ -19,7 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,6 +36,10 @@ public class MqttSubscriberService {
     @Autowired private SectorRepository sectorRepository;
     @Autowired private MedidorRepository medidorRepository;
     @Autowired private ObjectMapper objectMapper;
+
+    @Autowired
+    private NotificacionService notificacionService;
+
 
     private String broker;
     private String clientId;
@@ -90,13 +98,16 @@ public class MqttSubscriberService {
                             if ("online".equalsIgnoreCase(evt)) {
                                 t.zeroStreak.set(0);
                                 setEstadoIfChanged(medidor, EstadoMedidor.IDLE);
+                                crearNotificacionCambioEstado(medidor, "El medidor se ha reconectado y está nuevamente en línea.", TipoNotificacion.INFORME);
                                 logger.info("🟢 Medidor {} ONLINE", numeroSerie);
 
                             } else if ("offline".equalsIgnoreCase(evt)) {
                                 t.zeroStreak.set(0);
                                 setEstadoIfChanged(medidor, EstadoMedidor.OFFLINE);
+                                crearNotificacionCambioEstado(medidor, "El medidor se ha desconectado y está fuera de línea.",TipoNotificacion.ALERTA);
                                 logger.info("🔴 Medidor {} OFFLINE", numeroSerie);
                             }
+
 
                             medidorRepository.save(medidor);
                         }, () -> logger.error("❌ Medidor numeroSerie {} no encontrado", numeroSerie));
@@ -186,6 +197,32 @@ public class MqttSubscriberService {
             return Math.abs(deviceId.hashCode());
         }
     }
+    private void crearNotificacionCambioEstado(Medidor medidor, String mensaje, TipoNotificacion tipo) {
+        try {
+            Optional<Long> hogarOpt = sectorRepository.findHogarIdByNumeroSerie(medidor.getNumeroSerie());
+            if (hogarOpt.isEmpty()) {
+                logger.warn("⚠️ No se encontró hogar asociado al medidor {}.", medidor.getNumeroSerie());
+                return;
+            }
+
+            Long hogarId = hogarOpt.get();
+            logger.info("🏠 Medidor {} pertenece al hogar {}", medidor.getNumeroSerie(), hogarId);
+
+            Notificacion notif = new Notificacion();
+            notif.setTitulo("Estado del medidor");
+            notif.setMensaje(mensaje);
+            notif.setFechaEnvio(LocalDateTime.now());
+            notif.setTipo(tipo);
+            notif.setLeido(false);
+
+            notificacionService.createNotification(hogarId, notif);
+            logger.info("📩 Notificación creada para hogar {}: {}", hogarId, mensaje);
+
+        } catch (Exception e) {
+            logger.error("❌ Error al crear notificación para medidor {}: {}", medidor.getNumeroSerie(), e.getMessage(), e);
+        }
+    }
+
 
     // getters/setters para propiedades de app.mqtt
     public String getBroker() { return broker; }
@@ -198,4 +235,6 @@ public class MqttSubscriberService {
     public void setPassword(String password) { this.password = password; }
     public String getTopic() { return topic; }
     public void setTopic(String topic) { this.topic = topic; }
+
+
 }
