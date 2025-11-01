@@ -30,6 +30,8 @@ public class DataMock {
   @Autowired
   private PasswordEncoder passwordEncoder;
 
+  private final int cantidadHogares = 20;
+
   private static final Logger logger = LoggerFactory.getLogger(DataMock.class);
 
   @EventListener(ApplicationReadyEvent.class)
@@ -41,6 +43,9 @@ public class DataMock {
     }
 
     logger.info("Comienzo de inserción de datos mock");
+
+    insertarLogrosYMedallas();
+    insertarPlanes();
 
     insertarHogares();
     insertarMediciones();
@@ -60,7 +65,6 @@ public class DataMock {
       logger.info("Insertando hogares, sectores y medidores...");
 
         int medidorId = 1;
-        int cantidadHogares = 20;
         Random random = new Random();
 
         for (int hogarId = 1; hogarId <= cantidadHogares; hogarId++) {
@@ -68,8 +72,18 @@ public class DataMock {
             int cantidadMiembros = random.nextInt(5) + 1;
             int cantidadSectores = random.nextInt(3) + 1;
 
-            jdbcTemplate.update("INSERT INTO Hogar (miembros, localidad, email, racha_diaria, puntos, puntaje_ranking, nombre) VALUES (?, ?, ?, 0, 10, ?, ?)",
-                    cantidadMiembros, randomLocalidad(), "hogar" + hogarId + "@example.com", 10 + hogarId, "hogar" + hogarId);
+            //Insertar facturacion
+            jdbcTemplate.update("INSERT INTO facturacion (plan_id, medio_de_pago) VALUES (?, ?);",
+                    1, "TARJETA_CREDITO");
+
+            jdbcTemplate.update("INSERT INTO Hogar (miembros, localidad, direccion, ambientes, tiene_patio, tiene_pileta, tipo_hogar, facturacion_id, email, racha_diaria, puntos, puntaje_ranking, nombre) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 10, ?, ?)",
+                    cantidadMiembros, randomLocalidad(), "Medrano 191", 2, true, false, "CASA", hogarId,"hogar" + hogarId + "@example.com", 10 + hogarId, "hogar" + hogarId);
+
+            //Insertar logros y medallas
+            jdbcTemplate.update("INSERT INTO hogar_medallas (hogar_id, medalla_id) VALUES (?, ?);",
+                    hogarId, 1);
+            jdbcTemplate.update("INSERT INTO hogar_logros (hogar_id, logro_id) VALUES (?, ?);",
+                    hogarId, 1);
 
             List<String> categorias = getCategorias(cantidadSectores);
             for (int j = 0; j < cantidadSectores; j++) {
@@ -164,6 +178,26 @@ public class DataMock {
 
   }
 
+  private void insertarLogrosYMedallas() {
+    logger.info("Insertando logros y medallas...");
+
+    jdbcTemplate.update("INSERT INTO Logro (nombre, descripcion) VALUES (?, ?)", "Registro", "Te registraste en AquaVision");
+
+    jdbcTemplate.update("INSERT INTO Medalla (nombre, descripcion) VALUES (?, ?)", "Hogar sustentable", "Redujiste el consumo usando AquaVision");
+
+  }
+
+  private void insertarPlanes(){
+      logger.info("Insertando planes...");
+
+      jdbcTemplate.update("INSERT INTO Plan (tipo_plan, costo_mensual) VALUES (?, ?)", "BASICO", 2000.0);
+      jdbcTemplate.update("INSERT INTO Plan (tipo_plan, costo_mensual) VALUES (?, ?)", "PREMIUM", 5000.0);
+      jdbcTemplate.update("INSERT INTO Plan (tipo_plan, costo_mensual) VALUES (?, ?)", "FULL", 7000.0);
+
+
+
+  }
+
 private void insertarNotificaciones() {
     logger.info("Insertando notificaciones...");
 
@@ -177,7 +211,7 @@ private void insertarNotificaciones() {
     for (Long hogarId : hogaresIDs) {
         TipoNotificacion tipo = TipoNotificacion.ALERTA;
         String titulo = (tipo == TipoNotificacion.ALERTA) ? "Alerta" : "Recompensa";
-        String mensaje = (tipo == TipoNotificacion.ALERTA) 
+        String mensaje = (tipo == TipoNotificacion.ALERTA)
             ? "Notificación de alerta para el hogar " + hogarId
             : "¡Felicidades! Has recibido una recompensa en el hogar " + hogarId;
       jdbcTemplate.update(

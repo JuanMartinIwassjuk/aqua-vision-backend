@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,11 @@ import com.app.aquavision.services.UserService;
 
 import jakarta.validation.Valid;
 
-@Hidden
+//@Hidden
+@Tag(
+        name = "Usuarios",
+        description = "Operaciones para crear, consultar y gestionar usuarios"
+)
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -43,7 +48,7 @@ public class UserController {
         return service.findAll();
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    //@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {
         try {

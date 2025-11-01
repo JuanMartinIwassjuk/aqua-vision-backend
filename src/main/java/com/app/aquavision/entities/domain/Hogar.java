@@ -1,9 +1,8 @@
 package com.app.aquavision.entities.domain;
 
-import com.app.aquavision.entities.domain.gamification.EstadoRecompensa;
-import com.app.aquavision.entities.domain.gamification.Recompensa;
-import com.app.aquavision.entities.domain.gamification.RecompensaHogar;
+import com.app.aquavision.entities.domain.gamification.*;
 import com.app.aquavision.entities.domain.notifications.Notificacion;
+import com.app.aquavision.entities.payments.Facturacion;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -34,8 +33,23 @@ public class Hogar {
     @Column
     private String nombre = "hogar";
 
+    @Enumerated(EnumType.STRING)
+    private TipoHogar tipoHogar;
+
     @Column
     private String direccion = "direccion";
+
+    @Column
+    private int ambientes = 1;
+
+    @Column
+    private boolean tienePatio = false;
+
+    @Column
+    private boolean tienePileta = false;
+
+    @OneToOne
+    private Facturacion facturacion;
 
     @Column
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
@@ -52,8 +66,21 @@ public class Hogar {
     @JsonManagedReference
     private List<Notificacion> notificaciones = new ArrayList<>();
 
+    @ManyToMany
+    @JoinTable(
+        name = "hogar_medallas",
+        joinColumns = @JoinColumn(name = "hogar_id"),
+        inverseJoinColumns = @JoinColumn(name = "medalla_id")
+    )
+    private final List<Medalla> medallas = new ArrayList<>();
 
-
+    @ManyToMany
+    @JoinTable(
+        name = "hogar_logros",
+        joinColumns = @JoinColumn(name = "hogar_id"),
+        inverseJoinColumns = @JoinColumn(name = "logro_id")
+    )
+    private final List<Logro> logros = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn (name = "hogar_id", referencedColumnName = "id")
@@ -213,4 +240,51 @@ public class Hogar {
         this.nombre = nombre;
     }
 
+    public List<Logro> getLogros() {
+        return logros;
+    }
+
+    public List<Medalla> getMedallas() {
+        return medallas;
+    }
+
+    public TipoHogar getTipoHogar() {
+        return tipoHogar;
+    }
+
+    public void setTipoHogar(TipoHogar tipoHogar) {
+        this.tipoHogar = tipoHogar;
+    }
+
+    public int getAmbientes() {
+        return ambientes;
+    }
+
+    public void setAmbientes(int ambientes) {
+        this.ambientes = ambientes;
+    }
+
+    public boolean tienePatio() {
+        return tienePatio;
+    }
+
+    public void setTienePatio(boolean tienePatio) {
+        this.tienePatio = tienePatio;
+    }
+
+    public boolean tienePileta() {
+        return tienePileta;
+    }
+
+    public void setTienePileta(boolean tienePileta) {
+        this.tienePileta = tienePileta;
+    }
+
+    public Facturacion getFacturacion() {
+        return facturacion;
+    }
+
+    public void setFacturacion(Facturacion facturacion) {
+        this.facturacion = facturacion;
+    }
 }
