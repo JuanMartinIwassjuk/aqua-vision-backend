@@ -1,19 +1,18 @@
 package com.app.aquavision.services;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
+import com.app.aquavision.entities.Role;
+import com.app.aquavision.entities.User;
+import com.app.aquavision.repositories.RoleRepository;
+import com.app.aquavision.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.app.aquavision.entities.Role;
-import com.app.aquavision.entities.User;
-import com.app.aquavision.repositories.RoleRepository;
-import com.app.aquavision.repositories.UserRepository;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService{
@@ -145,6 +144,11 @@ public class UserServiceImpl implements UserService{
         existingUser.setLastLogin(java.time.LocalDateTime.now());
 
         return repository.save(existingUser);
+    }
+
+    public User findByHogarId(Long hogarId) {
+        return repository.findByHogar_Id(hogarId)
+                .orElseThrow(() -> new RuntimeException("User not found with Hogar ID: " + hogarId));
     }
     
 }

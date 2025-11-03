@@ -26,4 +26,5 @@ public interface UserService {
 
     User getAuthenticatedUser();
 
+    User findByHogarId(Long hogarId);
 }
