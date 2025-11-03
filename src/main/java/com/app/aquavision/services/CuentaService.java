@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +34,7 @@ public class CuentaService {
         }
         UsuarioDTO usuarioDTO = new UsuarioDTO()
                 .setNombreUsuario(usuario.getUsername())
-                .setApellido("TODOO")
+                .setApellido("TODOO") //TODO
                 .setNombre(usuario.getUsername())//TODO
                 .setCuentaActiva(true) // TODO
                 .setCorreo(hogar.getEmail())
@@ -69,10 +68,6 @@ public class CuentaService {
         if (hogar == null) {
             return null;
         }
-        /*    private String planActual;
-    private double monto;
-    private LocalDate fechaProxVencimiento;
-    private String metodoPago;*/
         Facturacion facturacionHogar = hogar.getFacturacion();
         FacturacionDTO facturacionDTO = new FacturacionDTO()
                 .setPlanActual(facturacionHogar.getTipoPlan().getPlan())
@@ -94,7 +89,9 @@ public class CuentaService {
                 SensorDTO sensorDTO = new SensorDTO()
                         .setNombreSensor(sector.getNombre())
                         .setEstadoActual(sector.getMedidor().getEstado())
-                        .setUltimaMedicion(LocalDateTime.now().minusMinutes(1))
+                        .setUltimaMedicion(sector.getMediciones().stream().findFirst()
+                                .map(Medicion::getTimestamp)
+                                .orElse(null))
                         .setConsumoActual(sector.getMediciones().stream().mapToInt(Medicion::getFlow).sum());
                 sensores.add(sensorDTO);
             }
