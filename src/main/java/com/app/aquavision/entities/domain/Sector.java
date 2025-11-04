@@ -147,6 +147,24 @@ public class Sector {
         return picoConsumo;
     }
 
+    public float getProyeccionHasta(LocalDateTime hasta){
+        LocalDateTime hoy = LocalDateTime.now();
+        int diferenciaDeDias = hasta.getDayOfMonth() - hoy.getDayOfMonth();
+
+        return diferenciaDeDias * this.promedioConsumo(); //TODO: Ver de usar una proyeccion mas precisa
+    }
+
+    public boolean tienePerdidaAguaReciente() { //TODO: Ver de validarlo con mayor precision
+        // Una pérdida de agua se define como un consumo continuo de 1hora o más
+
+        LocalDateTime ahora = LocalDateTime.now();
+        LocalDateTime haceUnaHora = ahora.minusHours(1);
+
+        int consumoTotalHora = consumoTotalPorFecha(haceUnaHora, ahora);
+
+        return consumoTotalHora > this.getUmbralMensual() / 720; // Suponiendo 720 horas en un mes
+    }
+
     public CategoriaSector getCategoria() {
         return categoriaSector;
     }

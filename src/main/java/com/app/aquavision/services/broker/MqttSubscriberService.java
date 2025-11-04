@@ -216,6 +216,7 @@ public class MqttSubscriberService {
             notif.setLeido(false);
 
             notificacionService.createNotification(hogarId, notif);
+            //TODO: Agregar envio de email
             logger.info("📩 Notificación creada para hogar {}: {}", hogarId, mensaje);
 
         } catch (Exception e) {

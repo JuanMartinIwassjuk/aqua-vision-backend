@@ -62,6 +62,7 @@ public class Hogar {
     @Column()
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private int puntaje_ranking = 0;
+
     @OneToMany(mappedBy = "hogar", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Notificacion> notificaciones = new ArrayList<>();
@@ -230,6 +231,10 @@ public class Hogar {
 
     public void setNotificaciones(List<Notificacion> notificaciones) {
         this.notificaciones = notificaciones;
+    }
+
+    public void agregarNotificacion(Notificacion notificacion) {
+        this.notificaciones.add(notificacion);
     }
 
     public int getPuntaje_ranking() {
