@@ -1,6 +1,7 @@
 package com.app.aquavision.repositories;
 
 import com.app.aquavision.entities.domain.Hogar;
+import com.app.aquavision.entities.domain.TipoHogar;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -27,5 +28,18 @@ public interface HogarRepository extends CrudRepository<Hogar, Long>{
         order by h.puntaje_ranking desc
     """)
     List<Hogar> findAllByOrderByPuntajeDesc();
+
+    @Query("""
+        SELECT h
+        FROM Hogar h
+        WHERE (:localidad IS NULL OR h.localidad = :localidad)
+          AND (:miembros IS NULL OR h.miembros >= :miembros)
+          AND (:tipoHogar IS NULL OR h.tipoHogar = :tipoHogar)
+    """)
+    List<Hogar> buscarHogaresPorFiltros(
+            @Param("localidad") String localidad,
+            @Param("miembros") Integer miembros,
+            @Param("tipoHogar") TipoHogar tipoHogar
+    );
 
 }

@@ -22,7 +22,7 @@ public class Hogar {
     private Long id;
 
     @Column
-    private int miembros = 1;
+    private Integer miembros = 1;
 
     @Column
     private String localidad = "";
@@ -113,6 +113,14 @@ public class Hogar {
         int consumoTotal = 0;
         for (Sector sector : sectores) {
             consumoTotal += sector.totalConsumo(hora);
+        }
+        return consumoTotal;
+    }
+
+    public float consumoTotalFechas(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
+        float consumoTotal = 0;
+        for (Sector sector : sectores) {
+            consumoTotal += sector.consumoTotalPorFecha(fechaInicio, fechaFin);
         }
         return consumoTotal;
     }
