@@ -30,7 +30,7 @@ public class DataMock {
   @Autowired
   private PasswordEncoder passwordEncoder;
 
-  private final int cantidadHogares = 20;
+  private final int cantidadHogares = 11;
 
   private static final Logger logger = LoggerFactory.getLogger(DataMock.class);
 
@@ -127,8 +127,9 @@ public class DataMock {
 
       for (int i = 1; i <= totalMediciones; i++) {
           int flow = random.nextInt(100);
-          Timestamp ts = Timestamp.valueOf(
-                  LocalDateTime.now().minusMinutes(random.nextInt(100000)));
+          LocalDateTime time = LocalDateTime.now().plusMonths(2); //Genera pasadas y futuras
+          Timestamp ts = Timestamp.valueOf(time.minusMinutes(random.nextInt(150000)));
+                  //LocalDateTime.now().minusMinutes(random.nextInt(100000)));
           Long sectorId = sectorIds.get(random.nextInt(sectorIds.size()));
 
           batch.add(new Object[]{flow, ts, sectorId});
@@ -269,7 +270,7 @@ private void insertarNotificaciones() {
     usuarios.put("agus", false);
     usuarios.put("agusadmin", true);
 
-    for (int i = 1; i <= 10; i++) {
+    for (int i = 1; usuarios.size() < cantidadHogares; i++) {
       usuarios.put("user" + i, false);
     }
 
