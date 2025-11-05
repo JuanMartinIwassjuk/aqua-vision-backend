@@ -131,8 +131,7 @@ public class MonitoringTask {
                         .append(" - Consumo: ").append(consumoSector).append(" litros.\n");
             }
 
-            cuerpo.append("\nConsumo total del hogar en el último mes: ")
-                    .append(consumoHogar).append(" litros.\n\nSaludos,\nEl equipo de AquaVision.");
+            cuerpo.append("\nConsumo total del hogar en el último mes: ").append(consumoHogar).append(" litros.");
 
             emailService.enviarNotificacionConsumos(hogar, cuerpo.toString());
             hogarService.save(hogar);

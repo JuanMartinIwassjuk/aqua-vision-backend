@@ -28,6 +28,8 @@ COPY --from=builder /app/target/*.jar app.jar
 # Exponer el puerto
 EXPOSE 8080
 
+ENV TZ=America/Argentina/Buenos_Aires
+
 # Configuración JVM para entornos livianos
 # - Usa SerialGC (menos threads, menos consumo)
 # - Limita el uso de RAM al 60% del contenedor

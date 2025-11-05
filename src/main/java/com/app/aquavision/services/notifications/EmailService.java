@@ -21,52 +21,49 @@ public class EmailService {
     }
 
     public void enviarMail(String destinatario, String asunto, String mensaje) {
+
+        String firma = "\n\n--\n💧 AquaVision - Gestión Inteligente del Agua 💧";
+
         SimpleMailMessage email = new SimpleMailMessage();
         email.setTo(destinatario);
         email.setSubject(asunto);
-        email.setText(mensaje);
+        email.setText(mensaje + firma);
         mailSender.send(email);
         logger.info("Email enviado a: " + destinatario + ". Asunto: " + asunto);
     }
 
-    public void enviarNotificacion(Notificacion notificacion, String destinatario) {
-        this.enviarMail(destinatario, notificacion.getTitulo(), notificacion.getMensaje());
+    public void enviarNotificacionHogar(Notificacion notificacion, Hogar hogar) {
+        this.enviarMail(hogar.getEmail(), notificacion.getTitulo(), notificacion.getMensaje());
+        hogar.agregarNotificacion(notificacion);
+        notificacion.setHogar(hogar);
     }
 
     public void enviarNotificacionConsumos(Hogar hogar, String cuerpo) {
         String titulo = "📊💧 Informe de Consumo Mensual - AquaVision 💧📊";
         Notificacion notificacion = new Notificacion(TipoNotificacion.INFORME, titulo, cuerpo);
 
-        this.enviarMail(hogar.getEmail(), titulo, cuerpo);
-        hogar.agregarNotificacion(notificacion);
-        notificacion.setHogar(hogar);
+        this.enviarNotificacionHogar(notificacion, hogar);
     }
 
     public void enviarNotificacionSobrepasoUmbrales(Hogar hogar, String cuerpo) {
         String titulo = "⚠️ Alerta de validacion de umbrales - AquaVision ⚠️";
         Notificacion notificacion = new Notificacion(TipoNotificacion.ALERTA, titulo, cuerpo);
 
-        this.enviarMail(hogar.getEmail(), titulo, cuerpo);
-        hogar.agregarNotificacion(notificacion);
-        notificacion.setHogar(hogar);
+        this.enviarNotificacionHogar(notificacion, hogar);
     }
 
     public void enviarNotificacionSensorInactivo(Hogar hogar, String cuerpo) {
         String titulo = "🚨 Alerta de sensor inactivo - AquaVision 🚨";
         Notificacion notificacion = new Notificacion(TipoNotificacion.ALERTA, titulo, cuerpo);
 
-        this.enviarMail(hogar.getEmail(), titulo, cuerpo);
-        hogar.agregarNotificacion(notificacion);
-        notificacion.setHogar(hogar);
+        this.enviarNotificacionHogar(notificacion, hogar);
     }
 
     public void enviarNotificacionFugaAgua(Hogar hogar, String cuerpo) {
         String titulo = "🚨💧 Alerta de fuga de agua detectada - AquaVision 💧🚨";
         Notificacion notificacion = new Notificacion(TipoNotificacion.ALERTA, titulo, cuerpo);
 
-        this.enviarMail(hogar.getEmail(), titulo, cuerpo);
-        hogar.agregarNotificacion(notificacion);
-        notificacion.setHogar(hogar);
+        this.enviarNotificacionHogar(notificacion, hogar);
     }
 
 
