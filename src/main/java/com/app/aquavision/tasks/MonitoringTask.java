@@ -28,6 +28,7 @@ public class MonitoringTask {
 
     // cada hora
     @Scheduled(cron = "0 0 * * * *", zone = "America/Argentina/Buenos_Aires")
+    //@Scheduled(cron = "0 * * * * *")
     @Transactional
     public void wasteAnalysis() {
 
@@ -60,6 +61,7 @@ public class MonitoringTask {
 
     // 1 vez cada 15 dia a las 3am
     @Scheduled(cron = "0 0 3 15 * ?", zone = "America/Argentina/Buenos_Aires")
+    //@Scheduled(cron = "0 * * * * *")
     @Transactional
     public void validateUmbrals() {
 
@@ -104,6 +106,7 @@ public class MonitoringTask {
 
     // El primer día del mes a las 3am
     @Scheduled(cron = "0 0 3 1 * *", zone = "America/Argentina/Buenos_Aires")
+    //@Scheduled(cron = "0 * * * * *")
     @Transactional
     public void notificateConsumptions() {
 

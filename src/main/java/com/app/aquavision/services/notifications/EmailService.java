@@ -26,7 +26,7 @@ public class EmailService {
         email.setSubject(asunto);
         email.setText(mensaje);
         mailSender.send(email);
-        logger.info("Email enviado a: " + email + ". Asunto: " + asunto);
+        logger.info("Email enviado a: " + destinatario + ". Asunto: " + asunto);
     }
 
     public void enviarNotificacion(Notificacion notificacion, String destinatario) {
@@ -39,6 +39,7 @@ public class EmailService {
 
         this.enviarMail(hogar.getEmail(), titulo, cuerpo);
         hogar.agregarNotificacion(notificacion);
+        notificacion.setHogar(hogar);
     }
 
     public void enviarNotificacionSobrepasoUmbrales(Hogar hogar, String cuerpo) {
@@ -47,6 +48,7 @@ public class EmailService {
 
         this.enviarMail(hogar.getEmail(), titulo, cuerpo);
         hogar.agregarNotificacion(notificacion);
+        notificacion.setHogar(hogar);
     }
 
     public void enviarNotificacionSensorInactivo(Hogar hogar, String cuerpo) {
@@ -55,6 +57,7 @@ public class EmailService {
 
         this.enviarMail(hogar.getEmail(), titulo, cuerpo);
         hogar.agregarNotificacion(notificacion);
+        notificacion.setHogar(hogar);
     }
 
     public void enviarNotificacionFugaAgua(Hogar hogar, String cuerpo) {
@@ -63,6 +66,7 @@ public class EmailService {
 
         this.enviarMail(hogar.getEmail(), titulo, cuerpo);
         hogar.agregarNotificacion(notificacion);
+        notificacion.setHogar(hogar);
     }
 
 
