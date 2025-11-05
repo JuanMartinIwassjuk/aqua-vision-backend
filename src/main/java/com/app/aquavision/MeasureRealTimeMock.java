@@ -3,7 +3,6 @@ package com.app.aquavision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -15,20 +14,19 @@ public class MeasureRealTimeMock {
 
     private static final Logger logger = LoggerFactory.getLogger(MeasureRealTimeMock.class);
 
+    private static final long periodoEjecucion = 10_000; //segundos
+    //private static final float probablidadDeMedicion = 0.1f; //segundos
+
+    private static final String url = System.getenv("DB_URL");
+
     public static void main(String[] args) {
         try {
-            String url = System.getenv("DB_URL");
-            String user = System.getenv("DB_USERNAME");
-            String pass = System.getenv("DB_PASSWORD");
-            int ejecucion = 1;
 
-            Random random = new Random();
-            
+            int nro_ejecucion = 1;
             List<String> usuarios = List.of("matif", "agus", "juan", "matip", "erik");
 
-            try (Connection conn = DriverManager.getConnection(url, user, pass)) {
+            try (Connection conn = DriverManager.getConnection(url)) {
                 logger.info("Conexión con DB establecida correctamente");
-
 
                 Map<String, List<SectorInfo>> sectoresPorUsuario = new HashMap<>();
                 for (String usuarioSimulado : usuarios) {
@@ -42,14 +40,13 @@ public class MeasureRealTimeMock {
 
                 while (true) {
                     Timestamp ts = Timestamp.valueOf(LocalDateTime.now());
-                    logger.info("--------------------------------------------------------------------------------------------");
-                    logger.info("------------------------------------- Ejecucion N°: {} --------------------------------------", ejecucion);
-                    logger.info("--------------------------------------------------------------------------------------------");
+                    loggearEjecucion(nro_ejecucion);
+
                     for (Map.Entry<String, List<SectorInfo>> entry : sectoresPorUsuario.entrySet()) {
                         List<SectorInfo> sectores = entry.getValue();
 
                         for (SectorInfo sector : sectores) {
-                            int flow = medicionRandom(random);
+                            int flow = obtenerMedicion();
 
                             try (PreparedStatement stmt = conn.prepareStatement(
                                     "INSERT INTO Medicion (flow, timestamp, sector_id) VALUES (?, ?, ?)")) {
@@ -58,29 +55,27 @@ public class MeasureRealTimeMock {
                                 stmt.setLong(3, sector.id);
                                 stmt.executeUpdate();
 
-
-                            logger.info("Caudal registrado: {} m³ --- Usuario: {} --- Sector: {} -- ID Hogar {} -- Fecha: {}",
+                                logger.info("Caudal registrado: {} m³ --- Usuario: {} --- Sector: {} -- ID Hogar {} -- Fecha: {}",
                                         flow, sector.username, sector.categoriaSector, sector.hogarId, ts);
                             }
-
                         }
                         logger.info("----------------------------------------------------------------------------------");
                     }
-                    ejecucion++;
-                    Thread.sleep(5_000); // cada 10 segundos
+                    nro_ejecucion++;
+                    Thread.sleep(periodoEjecucion);
                 }
             }
         } catch (Exception e) {
-            logger.error("Error ejecutando mock", e);
+            logger.error("Error ejecutando mock: {}", e.getMessage());
         }
     }
 
     private static List<SectorInfo> getSectorInfoForUser(Connection conn, String username) {
         String sql = """
-            SELECT s.id, s.categoriaSector, h.id AS hogar_id, u.username
-            FROM Sector s
-            JOIN Hogar h ON s.hogar_id = h.id
-            JOIN User_ u ON u.hogar_id = h.id
+            SELECT s.id, s.categoria_sector, h.id AS hogar_id, u.username
+            FROM sector s
+            JOIN hogar h ON s.hogar_id = h.id
+            JOIN user_ u ON u.hogar_id = h.id
             WHERE u.username = ?
         """;
         List<SectorInfo> sectores = new ArrayList<>();
@@ -90,21 +85,26 @@ public class MeasureRealTimeMock {
             while (rs.next()) {
                 sectores.add(new SectorInfo(
                         rs.getLong("id"),
-                        rs.getString("categoriaSector"),
+                        rs.getString("categoria_sector"),
                         rs.getLong("hogar_id"),
                         rs.getString("username")
                 ));
             }
         } catch (Exception e) {
-            logger.error("Error obteniendo sectores del usuario {}", username, e);
+            logger.error("Error obteniendo sectores del usuario {}, {}", username, e.getMessage());
         }
         return sectores;
     }
 
-    private static int medicionRandom(Random random) {
-        if (random.nextDouble() < 0.1) {
-            return 0;
-        }
+    private static void loggearEjecucion(int ejecucion){
+        logger.info("--------------------------------------------------------------------------------------------");
+        logger.info("------------------------------------- Ejecucion N°: {} --------------------------------------", ejecucion);
+        logger.info("--------------------------------------------------------------------------------------------");
+    }
+
+    private static int obtenerMedicion() {
+        Random random = new Random();
+        //if (random.nextDouble() < probablidadDeMedicion) {return 0; }
         return random.nextInt(99) + 1;
     }
 
