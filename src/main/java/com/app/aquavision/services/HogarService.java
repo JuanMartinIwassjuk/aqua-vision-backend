@@ -141,4 +141,10 @@ public class HogarService {
 
     }
 
+    @Transactional
+    public int getPuntosHogar(Long hogarId) {
+        Optional<Hogar> optionalHogar = repository.findById(hogarId);
+        return optionalHogar.map(Hogar::getPuntos).orElse(0);
+    }
+
 }

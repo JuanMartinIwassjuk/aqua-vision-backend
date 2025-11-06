@@ -1,5 +1,6 @@
 package com.app.aquavision.controllers;
 
+import com.app.aquavision.dto.gamificacion.PuntosDTO;
 import com.app.aquavision.dto.gamificacion.RankingDTO;
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.entities.domain.gamification.Recompensa;
@@ -196,6 +197,29 @@ public class GamificationController {
     public RankingDTO getRanking() {
 
         return new RankingDTO(service.getRanking());
+    }
+
+    @GetMapping("/{id}/puntos")
+    @Operation(
+            summary = "Obtener los puntos del hogar por puntos",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "puntos obtenidos correctamente",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(implementation = PuntosDTO.class))
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Hogar no encontrado"
+                    )
+            }
+    )
+    public PuntosDTO getPuntos(@Parameter(description = "ID del hogar", example = "1") @PathVariable Long id) {
+        int puntos = service.getPuntosHogar(id);
+        return new PuntosDTO(id,puntos);
     }
 
 }
