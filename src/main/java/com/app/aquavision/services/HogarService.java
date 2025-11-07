@@ -1,7 +1,10 @@
 package com.app.aquavision.services;
 
+import com.app.aquavision.dto.gamificacion.PuntosReclamadosDTO;
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.entities.domain.Sector;
+import com.app.aquavision.entities.domain.gamification.Minijuego;
+import com.app.aquavision.entities.domain.gamification.PuntosReclamados;
 import com.app.aquavision.entities.domain.gamification.Recompensa;
 import com.app.aquavision.entities.domain.notifications.Notificacion;
 import com.app.aquavision.repositories.HogarRepository;
@@ -10,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,7 +70,7 @@ public class HogarService {
     }
 
     @Transactional
-    public List<Recompensa> getRecompensasDisponibles(){
+    public List<Recompensa> getRecompensasDisponibles() {
         return (List<Recompensa>) recompensaRepository.findAll();
     }
 
@@ -102,7 +106,7 @@ public class HogarService {
                     .filter(s -> s.getId().equals(sectorId))
                     .findFirst()
                     .orElse(null);
-            if (sector != null){
+            if (sector != null) {
                 sector.setUmbralMensual(nuevoUmbral);
             } else {
                 return null;
@@ -123,7 +127,7 @@ public class HogarService {
                     .filter(n -> n.getId().equals(notificacionId))
                     .findFirst()
                     .orElse(null);
-            if (notificacion != null){
+            if (notificacion != null) {
                 notificacion.leer();
             } else {
                 return null;
@@ -135,8 +139,7 @@ public class HogarService {
     }
 
     @Transactional
-    public List<Hogar> getRanking(){
-
+    public List<Object[]> getRanking() {
         return repository.findAllByOrderByPuntajeDesc();
 
     }
@@ -147,4 +150,30 @@ public class HogarService {
         return optionalHogar.map(Hogar::getPuntos).orElse(0);
     }
 
+    @Transactional
+    public int getTotalDePuntosReclamadosDelHogar(Long hogarId) {
+        Optional<Hogar> optionalHogar = repository.findById(hogarId);
+        if (optionalHogar.isPresent()) {
+            Hogar hogar = optionalHogar.get();
+            return hogar.getPuntosReclamados().stream().map(PuntosReclamados::getPuntos).mapToInt(Integer::intValue).sum();
+        }
+        return 0;
+    }
+
+
+    @Transactional
+    public Hogar registrarPuntosReclamados(Long hogarId, PuntosReclamadosDTO dto) {
+        Hogar hogar = repository.findById(hogarId)
+                .orElseThrow(() -> new IllegalArgumentException("No se encontro el hogar con el id " + hogarId));
+
+        PuntosReclamados pr = new PuntosReclamados();
+        pr.setPuntos(dto.getPuntos());
+        pr.setFecha(LocalDateTime.now());
+        pr.setMiniJuego(Minijuego.valueOf(dto.getMinijuego()));
+
+        hogar.getPuntosReclamados().add(pr);
+        repository.save(hogar);
+
+        return hogar;
+    }
 }

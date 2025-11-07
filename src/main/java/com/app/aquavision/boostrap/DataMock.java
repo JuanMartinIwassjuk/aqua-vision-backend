@@ -1,6 +1,7 @@
 package com.app.aquavision.boostrap;
 
 import com.app.aquavision.entities.domain.EstadoMedidor;
+import com.app.aquavision.entities.domain.gamification.Minijuego;
 import com.app.aquavision.entities.domain.notifications.TipoNotificacion;
 
 import org.slf4j.Logger;
@@ -52,6 +53,7 @@ public class DataMock {
     insertarRecompensas();
     insertarNotificaciones();
     insertarEventos();
+    insertPuntosReclamados();
 
     insertarRoles();
     insertarUsuarios();
@@ -253,6 +255,25 @@ private void insertarNotificaciones() {
       }
     }
   }
+
+
+  private void insertPuntosReclamados() {
+    logger.info("Insertando puntos reclamados...");
+
+      List<Long> hogaresIDs = jdbcTemplate.query(
+              "SELECT id FROM Hogar",
+              (rs, rowNum) -> rs.getLong("id")
+      );
+
+      LocalDateTime fecha = LocalDateTime.now();
+
+      for (Long hogarId : hogaresIDs) {
+          String minijuego = Minijuego.AQUA_MATCH.name();
+          int puntos = 15;
+          jdbcTemplate.update("INSERT INTO puntos_reclamados (fecha, mini_juego, puntos, hogar_id) VALUES (?, ?, ?, ?)", fecha, minijuego, puntos, hogarId);
+      }
+  }
+
 
   private void insertarUsuarios() {
 

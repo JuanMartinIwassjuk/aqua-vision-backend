@@ -23,11 +23,13 @@ public interface HogarRepository extends CrudRepository<Hogar, Long>{
     Optional<Hogar> findByIdWithSectores(@Param("id") Long id);
 
     @Query("""
-        select distinct h
-        from Hogar h
-        order by h.puntaje_ranking desc
+    SELECT h AS hogar, SUM(pr.puntos) AS totalPuntos
+        FROM Hogar h
+        LEFT JOIN h.puntosReclamados pr
+        GROUP BY h.id
+    ORDER BY SUM(pr.puntos) DESC
     """)
-    List<Hogar> findAllByOrderByPuntajeDesc();
+    List<Object[]> findAllByOrderByPuntajeDesc();
 
     @Query("""
         SELECT h

@@ -1,6 +1,7 @@
 package com.app.aquavision.controllers;
 
 import com.app.aquavision.dto.gamificacion.PuntosDTO;
+import com.app.aquavision.dto.gamificacion.PuntosReclamadosDTO;
 import com.app.aquavision.dto.gamificacion.RankingDTO;
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.entities.domain.gamification.Recompensa;
@@ -195,7 +196,6 @@ public class GamificationController {
             }
     )
     public RankingDTO getRanking() {
-
         return new RankingDTO(service.getRanking());
     }
 
@@ -218,8 +218,36 @@ public class GamificationController {
             }
     )
     public PuntosDTO getPuntos(@Parameter(description = "ID del hogar", example = "1") @PathVariable Long id) {
-        int puntos = service.getPuntosHogar(id);
-        return new PuntosDTO(id,puntos);
+        //int puntos = service.getPuntosHogar(id);
+        int puntosTotales = service.getTotalDePuntosReclamadosDelHogar(id);
+        return new PuntosDTO(id,puntosTotales);
+    }
+
+
+
+    @PostMapping("/{id}/reclamar-puntos")
+    @Operation(
+            summary = "Registrar puntos obtenidos en un minijuego",
+            responses = {
+                    @ApiResponse(responseCode = "201",
+                            description = "Puntos registrados correctamente"),
+                    @ApiResponse(responseCode = "400",
+                            description = "Solicitud inválida")
+            }
+    )
+    public ResponseEntity<?> registrarPuntosReclamados(
+            @PathVariable Long id,
+            @RequestBody PuntosReclamadosDTO dto) {
+
+        logger.info("Registrando " + dto.getPuntos() + " puntos para hogar ID: " + id + " en minijuego " + dto.getMinijuego());
+
+        try {
+            Hogar hogar = service.registrarPuntosReclamados(id, dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(hogar);
+        } catch (IllegalArgumentException e) {
+            logger.warning("Error al registrar puntos: " + e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 }

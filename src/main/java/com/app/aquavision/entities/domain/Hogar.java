@@ -92,6 +92,10 @@ public class Hogar {
     @JoinColumn (name = "hogar_id", referencedColumnName = "id")
     private List<Sector> sectores = new ArrayList<>();
 
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn (name = "hogar_id", referencedColumnName = "id")
+    private List<PuntosReclamados> puntosReclamados = new ArrayList<>();
+
     public Hogar() {
         // Constructor por defecto
     }
@@ -299,5 +303,13 @@ public class Hogar {
 
     public void setFacturacion(Facturacion facturacion) {
         this.facturacion = facturacion;
+    }
+
+    public List<PuntosReclamados> getPuntosReclamados() {
+        return puntosReclamados;
+    }
+
+    public void setPuntosReclamados(List<PuntosReclamados> puntosReclamados) {
+        this.puntosReclamados = puntosReclamados;
     }
 }

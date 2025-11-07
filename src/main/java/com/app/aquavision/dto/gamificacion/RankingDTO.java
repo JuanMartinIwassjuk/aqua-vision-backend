@@ -11,10 +11,13 @@ public class RankingDTO {
     public RankingDTO () {
     }
 
-    public RankingDTO (List<Hogar> hogares) {
-        for (int i = 1; i <= hogares.size(); i++) {
-            Hogar hogar = hogares.get(i-1);
-            this.hogares.add(new HogarRankingDTO(hogar.getNombre(),hogar.getPuntaje_ranking(), i));
+    public RankingDTO (List<Object[]> hogaresConMediciones) {
+        int i = 0;
+        for (Object[] row : hogaresConMediciones) {
+            Hogar hogar = (Hogar) row[0];
+            Long totalPuntos = (Long) row[1];
+            i++;
+            this.hogares.add(new HogarRankingDTO(hogar.getNombre(),totalPuntos.intValue(), i));
         }
     }
 
