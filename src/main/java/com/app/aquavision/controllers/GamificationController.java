@@ -6,6 +6,7 @@ import com.app.aquavision.dto.gamificacion.PuntosReclamadosDTO;
 import com.app.aquavision.dto.gamificacion.RankingDTO;
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.entities.domain.gamification.DesafioHogar;
+import com.app.aquavision.entities.domain.gamification.Logro;
 import com.app.aquavision.entities.domain.gamification.Recompensa;
 import com.app.aquavision.services.HogarService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -204,7 +205,7 @@ public class GamificationController {
 
     @GetMapping("/{id}/puntos")
     @Operation(
-            summary = "Obtener los puntos del hogar por puntos",
+            summary = "Obtener los puntos del hogar",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -304,6 +305,29 @@ public class GamificationController {
 
 
         return new DesafiosHogarDTO(id,desafios);
+    }
+
+    @GetMapping("/{id}/logros")
+    @Operation(
+            summary = "Obtener los logros del hogar",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Logros obtenidos correctamente",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(implementation = List.class))
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Hogar no encontrado"
+                    )
+            }
+    )
+    public List<Logro> getLogros(@Parameter(description = "ID del hogar", example = "1") @PathVariable Long id) {
+
+        return service.getLogrosHogar(id);
     }
 
 }

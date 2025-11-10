@@ -3,10 +3,7 @@ package com.app.aquavision.services;
 import com.app.aquavision.dto.gamificacion.PuntosReclamadosDTO;
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.entities.domain.Sector;
-import com.app.aquavision.entities.domain.gamification.DesafioHogar;
-import com.app.aquavision.entities.domain.gamification.Minijuego;
-import com.app.aquavision.entities.domain.gamification.PuntosReclamados;
-import com.app.aquavision.entities.domain.gamification.Recompensa;
+import com.app.aquavision.entities.domain.gamification.*;
 import com.app.aquavision.entities.domain.notifications.Notificacion;
 import com.app.aquavision.repositories.HogarRepository;
 import com.app.aquavision.repositories.PuntosReclamadosRepository;
@@ -200,6 +197,16 @@ public class HogarService {
         if (optionalHogar.isPresent()) {
             Hogar hogar = optionalHogar.get();
             return hogar.getDesafios();
+        }
+        return null;
+    }
+
+    @Transactional
+    public List<Logro> getLogrosHogar(Long hogarId) {
+        Optional<Hogar> optionalHogar = repository.findById(hogarId);
+        if (optionalHogar.isPresent()) {
+            Hogar hogar = optionalHogar.get();
+            return hogar.getLogros();
         }
         return null;
     }
