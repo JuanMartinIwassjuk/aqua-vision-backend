@@ -16,6 +16,7 @@ public class DesafioHogar {
     @JoinColumn(name = "desafio_id", referencedColumnName = "id")
     private Desafio desafio;
 
+    @Column
     private int progreso = 0; // 0-100
 
 

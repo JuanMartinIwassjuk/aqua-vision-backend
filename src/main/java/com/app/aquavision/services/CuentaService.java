@@ -34,11 +34,11 @@ public class CuentaService {
         }
         UsuarioDTO usuarioDTO = new UsuarioDTO()
                 .setNombreUsuario(usuario.getUsername())
-                .setApellido("TODOO") //TODO
-                .setNombre(usuario.getUsername())//TODO
-                .setCuentaActiva(true) // TODO
+                .setApellido(usuario.getSurname())
+                .setNombre(usuario.getName())
+                .setCuentaActiva(true) // TODO: Ver si modificarlo
                 .setCorreo(hogar.getEmail())
-                .setCorreoVerificado(true) // TODO
+                .setCorreoVerificado(true) // TODO: Default si
                 .setUltimoLogin(usuario.getLastLogin());
 
     return usuarioDTO;
@@ -52,14 +52,12 @@ public class CuentaService {
         HogarInfoDTO hogarInfoDTO = new HogarInfoDTO()
                 .setNombreHogar(hogar.getNombre())
                 .setDireccion(hogar.getDireccion())
-                .setCiudad("Buenos Aires") // TODO
+                .setCiudad(hogar.getLocalidad())
                 .setTipoHogar(hogar.getTipoHogar())
-                .setCantidadBanos(hogar.getAmbientes())// TODO
+                .setCantidadBanos(hogar.getAmbientes())// TODO: Poner ambientes solo
                 .setCantidadIntegrantes(hogar.getMiembros())
-                .setTienePatio(false)//TODO
-                .setTienePileta(false)//TODO
-                .setTieneTanquePropio(false)//TODO
-                .setTieneTermotanqueElectrico(false);//TODO
+                .setTienePatio(hogar.tienePatio())
+                .setTienePileta(hogar.tienePileta());
         return hogarInfoDTO;
     }
 

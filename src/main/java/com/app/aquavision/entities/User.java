@@ -48,6 +48,12 @@ public class User {
     private String password;
 
     @Column
+    private String name = "";
+
+    @Column
+    private String surname = "";
+
+    @Column
     private LocalDateTime lastLogin;
 
     @JsonIgnoreProperties({"users", "handler", "hibernateLazyInitializer"})
@@ -173,5 +179,21 @@ public class User {
 
     public void setLastLogin(LocalDateTime lastLogin) {
         this.lastLogin = lastLogin;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 }

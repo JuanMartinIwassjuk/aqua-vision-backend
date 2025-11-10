@@ -339,8 +339,8 @@ private void insertarNotificaciones() {
       Integer existe = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM User_ WHERE username = ?", Integer.class, username);
       if (existe > 0) continue;
 
-      jdbcTemplate.update("INSERT INTO User_ (username, password, enabled, hogar_id) VALUES (?, ?, ?, ?)",
-          username, passwordEncoder.encode("test123"), true, hogarId);
+      jdbcTemplate.update("INSERT INTO User_ (username, password, name, surname, enabled, hogar_id) VALUES (?, ?, ?, ?, ?, ?)",
+          username, passwordEncoder.encode("test123"), username, "perez", true, hogarId);
 
       Long userId = jdbcTemplate.queryForObject("SELECT id FROM User_ WHERE username = ?", Long.class, username);
       jdbcTemplate.update("INSERT INTO Usuarios_Roles (user_id, role_id) VALUES (?, ?)",

@@ -45,7 +45,7 @@ public class TagEventoInitializer implements CommandLineRunner {
         if (!tagEventoRepository.findByNombre(nombre).isPresent()) {
             TagEvento tag = new TagEvento(nombre, color);
             tagEventoRepository.save(tag);
-            logger.info("Tag creado: {}", nombre);
+            //logger.info("Tag creado: {}", nombre);
         }
     }
 }
