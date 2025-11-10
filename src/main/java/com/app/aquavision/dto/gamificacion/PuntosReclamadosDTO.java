@@ -8,6 +8,7 @@ public class PuntosReclamadosDTO {
     private int puntos;
     private LocalDateTime fecha;
     private String minijuego;    //Revisar
+    private String escena;
 
 
     public Long getHogarId() {
@@ -40,5 +41,13 @@ public class PuntosReclamadosDTO {
 
     public void setMinijuego(String minujuego) {
         this.minijuego = minujuego;
+    }
+
+    public String getEscena() {
+        return escena;
+    }
+
+    public void setEscena(String escena) {
+        this.escena = escena;
     }
 }

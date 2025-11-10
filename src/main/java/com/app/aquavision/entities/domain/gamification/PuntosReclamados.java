@@ -23,6 +23,9 @@ public class PuntosReclamados {
     @Enumerated(EnumType.STRING)
     Minijuego miniJuego;
 
+    @Column
+    String escena;
+
 
     public Long getId() {
         return id;
@@ -54,5 +57,13 @@ public class PuntosReclamados {
 
     public void setMiniJuego(Minijuego miniJuego) {
         this.miniJuego = miniJuego;
+    }
+
+    public String getEscena() {
+        return escena;
+    }
+
+    public void setEscena(String escena) {
+        this.escena = escena;
     }
 }

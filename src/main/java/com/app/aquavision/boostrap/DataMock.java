@@ -78,8 +78,8 @@ public class DataMock {
             jdbcTemplate.update("INSERT INTO facturacion (plan_id, medio_de_pago) VALUES (?, ?);",
                     1, "TARJETA_CREDITO");
 
-            jdbcTemplate.update("INSERT INTO Hogar (miembros, localidad, direccion, ambientes, tiene_patio, tiene_pileta, tipo_hogar, facturacion_id, email, racha_diaria, puntos, puntaje_ranking, nombre) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 10, ?, ?)",
-                    cantidadMiembros, randomLocalidad(), "Medrano 191", 2, true, false, "CASA", hogarId,"hogar" + hogarId + "@example.com", 10 + hogarId, "hogar" + hogarId);
+            jdbcTemplate.update("INSERT INTO Hogar (miembros, localidad, direccion, ambientes, tiene_patio, tiene_pileta, tipo_hogar, facturacion_id, email, racha_diaria, puntos_disponibles, nombre) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+                    cantidadMiembros, randomLocalidad(), "Medrano 191", 2, true, false, "CASA", hogarId, "hogar" + hogarId + "@example.com", 0, 10, "hogar" + hogarId);
 
             //Insertar logros y medallas
             jdbcTemplate.update("INSERT INTO hogar_medallas (hogar_id, medalla_id) VALUES (?, ?);",
@@ -266,11 +266,12 @@ private void insertarNotificaciones() {
       );
 
       LocalDateTime fecha = LocalDateTime.now();
+      String escena = null;
 
       for (Long hogarId : hogaresIDs) {
           String minijuego = Minijuego.AQUA_MATCH.name();
           int puntos = 15;
-          jdbcTemplate.update("INSERT INTO puntos_reclamados (fecha, mini_juego, puntos, hogar_id) VALUES (?, ?, ?, ?)", fecha, minijuego, puntos, hogarId);
+          jdbcTemplate.update("INSERT INTO puntos_reclamados (fecha, mini_juego, escena, puntos, hogar_id) VALUES (?, ?, ?, ?,?)", fecha, minijuego, null, puntos, hogarId);
       }
   }
 

@@ -8,6 +8,7 @@ import com.app.aquavision.entities.domain.gamification.PuntosReclamados;
 import com.app.aquavision.entities.domain.gamification.Recompensa;
 import com.app.aquavision.entities.domain.notifications.Notificacion;
 import com.app.aquavision.repositories.HogarRepository;
+import com.app.aquavision.repositories.PuntosReclamadosRepository;
 import com.app.aquavision.repositories.RecompensaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,9 @@ public class HogarService {
 
     @Autowired
     private RecompensaRepository recompensaRepository;
+
+    @Autowired
+    private PuntosReclamadosRepository puntosReclamadosRepository;
 
     @Transactional()
     public List<Hogar> findAll() {
@@ -47,7 +51,7 @@ public class HogarService {
         Optional<Hogar> optionalHogar = repository.findById(id);
         if (optionalHogar.isPresent()) {
             Hogar hogar = optionalHogar.get();
-            hogar.sumarPuntos(puntos);
+            hogar.sumarPuntosDisponibles(puntos);
             repository.save(hogar);
         }
         return optionalHogar.orElse(null);
@@ -170,10 +174,22 @@ public class HogarService {
         pr.setPuntos(dto.getPuntos());
         pr.setFecha(LocalDateTime.now());
         pr.setMiniJuego(Minijuego.valueOf(dto.getMinijuego()));
+        pr.setEscena(dto.getEscena());
+
+        hogar.sumarPuntosDisponibles(dto.getPuntos());
 
         hogar.getPuntosReclamados().add(pr);
         repository.save(hogar);
 
         return hogar;
+    }
+
+    @Transactional
+    public LocalDateTime getUltimoReclamoSegunMinijuego(Long hogarId, String minijuego, String escena) {
+        Hogar hogar = repository.findById(hogarId)
+                .orElseThrow(() -> new IllegalArgumentException("No se encontro el hogar con el id " + hogarId));
+
+        return this.puntosReclamadosRepository.getUltimaFechaReclamo(hogarId,minijuego,escena);
+
     }
 }

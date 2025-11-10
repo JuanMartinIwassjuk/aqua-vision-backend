@@ -57,11 +57,8 @@ public class Hogar {
 
     @Column
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-    private int puntos = 0;
+    private int puntosDisponibles = 0;
 
-    @Column()
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-    private int puntaje_ranking = 0;
 
     @OneToMany(mappedBy = "hogar", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -104,14 +101,14 @@ public class Hogar {
         this.miembros = miembros;
         this.localidad = localidad;
         this.sectores = sectores;
-        this.puntos=0;
+        this.puntosDisponibles=0;
     }
 
     public Hogar(int miembros, String localidad, String email) {
         this.miembros = miembros;
         this.localidad = localidad;
         this.email = email;
-        this.puntos=0;
+        this.puntosDisponibles=0;
     }
 
     public int consumoTotalHora(int hora){
@@ -140,7 +137,7 @@ public class Hogar {
 
     public void reclamarRecompensa(Recompensa recompensa) {
         if (this.puedeCanjearRecompensa(recompensa)) {
-            this.puntos -= recompensa.getPuntosNecesarios();
+            this.puntosDisponibles -= recompensa.getPuntosNecesarios();
             RecompensaHogar recompensaHogar = new RecompensaHogar(recompensa, EstadoRecompensa.DISPONIBLE, LocalDateTime.now().toLocalDate());
             this.agregarRecompensa(recompensaHogar);
         } else {
@@ -149,24 +146,23 @@ public class Hogar {
     }
 
     public boolean puedeCanjearRecompensa(Recompensa recompensa) {
-        return this.puntos >= recompensa.getPuntosNecesarios();
+        return this.puntosDisponibles >= recompensa.getPuntosNecesarios();
     }
 
     public void agregarRecompensa(RecompensaHogar recompensa) {
         this.recompensas.add(recompensa);
     }
 
-    public void sumarPuntos(int puntos) {
-        this.puntaje_ranking += puntos;
-        this.puntos += puntos;
+    public void sumarPuntosDisponibles(int puntos) {
+        this.puntosDisponibles += puntos;
     }
 
     public int getPuntos() {
-        return puntos;
+        return puntosDisponibles;
     }
 
-    public void setPuntos(int puntos) {
-        this.puntos = puntos;
+    public void setPuntos(int puntosDisponibles) {
+        this.puntosDisponibles = puntosDisponibles;
     }
 
     public List<RecompensaHogar> getRecompensas() {
@@ -239,14 +235,6 @@ public class Hogar {
 
     public void agregarNotificacion(Notificacion notificacion) {
         this.notificaciones.add(notificacion);
-    }
-
-    public int getPuntaje_ranking() {
-        return puntaje_ranking;
-    }
-
-    public void setPuntaje_ranking(int puntaje_ranking) {
-        this.puntaje_ranking = puntaje_ranking;
     }
 
     public String getNombre() {

@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -33,7 +34,7 @@ public class GamificationController {
 
     @Autowired
     private HogarService service;
-
+/*
     @PostMapping("/{id}/puntos/{puntos}")
     @Operation(
             summary = "Agregar o restar puntos a un hogar",
@@ -60,7 +61,7 @@ public class GamificationController {
         Hogar hogar = service.addPuntosToHogar(id, puntos);
 
         return ResponseEntity.ok(hogar);
-    }
+    }*/
 
     @PostMapping("/{id}/recompensas/{recompensaId}")
     @Operation(
@@ -218,7 +219,6 @@ public class GamificationController {
             }
     )
     public PuntosDTO getPuntos(@Parameter(description = "ID del hogar", example = "1") @PathVariable Long id) {
-        //int puntos = service.getPuntosHogar(id);
         int puntosTotales = service.getTotalDePuntosReclamadosDelHogar(id);
         return new PuntosDTO(id,puntosTotales);
     }
@@ -248,6 +248,34 @@ public class GamificationController {
             logger.warning("Error al registrar puntos: " + e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+
+
+
+    @GetMapping("/{id}/ultimo-puntaje-reclamado")
+    @Operation(
+            summary = "Obtener la fecha del ultimo puntaje reclamado",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(implementation = PuntosDTO.class))
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Hogar no encontrado"
+                    )
+            }
+    )
+    public LocalDateTime getUltimaFechaPuntosReclamados(
+            @PathVariable Long id,
+            @RequestParam String minijuego,
+            @RequestParam(required = false) String escena) {
+        return service.getUltimoReclamoSegunMinijuego(id, minijuego, escena);
     }
 
 }
