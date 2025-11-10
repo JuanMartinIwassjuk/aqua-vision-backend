@@ -87,6 +87,11 @@ public class Hogar {
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn (name = "hogar_id", referencedColumnName = "id")
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    private List<DesafioHogar> desafios = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn (name = "hogar_id", referencedColumnName = "id")
     private List<Sector> sectores = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL)
@@ -299,5 +304,13 @@ public class Hogar {
 
     public void setPuntosReclamados(List<PuntosReclamados> puntosReclamados) {
         this.puntosReclamados = puntosReclamados;
+    }
+
+    public List<DesafioHogar> getDesafios() {
+        return desafios;
+    }
+
+    public void setDesafios(List<DesafioHogar> desafios) {
+        this.desafios = desafios;
     }
 }

@@ -25,46 +25,47 @@ import java.util.Random;
 @Order(1)
 public class DataMock {
 
-  @Autowired
-  private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
-  @Autowired
-  private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-  private final int cantidadHogares = 11;
+    private final int cantidadHogares = 11;
 
-  private static final Logger logger = LoggerFactory.getLogger(DataMock.class);
+    private static final Logger logger = LoggerFactory.getLogger(DataMock.class);
 
-  @EventListener(ApplicationReadyEvent.class)
-  public void generarDatos() {
+    @EventListener(ApplicationReadyEvent.class)
+    public void generarDatos() {
 
-    if (this.datosMockInsertados()) {
-      logger.info("Datos mock ya insertados, no se ejecutará la inserción.");
-      return;
+        if (this.datosMockInsertados()) {
+            logger.info("Datos mock ya insertados, no se ejecutará la inserción.");
+            return;
+        }
+
+        logger.info("Comienzo de inserción de datos mock");
+
+        insertarLogrosYMedallas();
+        insertarPlanes();
+
+        insertarHogares();
+        insertarMediciones();
+        insertarRecompensas();
+        insertarDesafios();
+        insertarNotificaciones();
+        insertarEventos();
+        insertPuntosReclamados();
+
+        insertarRoles();
+        insertarUsuarios();
+
+        logger.info("Datos mock insertados correctamente");
+
     }
 
-    logger.info("Comienzo de inserción de datos mock");
+    private void insertarHogares() {
 
-    insertarLogrosYMedallas();
-    insertarPlanes();
-
-    insertarHogares();
-    insertarMediciones();
-    insertarRecompensas();
-    insertarNotificaciones();
-    insertarEventos();
-    insertPuntosReclamados();
-
-    insertarRoles();
-    insertarUsuarios();
-
-    logger.info("Datos mock insertados correctamente");
-
-  }
-
-  private void insertarHogares() {
-
-      logger.info("Insertando hogares, sectores y medidores...");
+        logger.info("Insertando hogares, sectores y medidores...");
 
         int medidorId = 1;
         Random random = new Random();
@@ -112,74 +113,97 @@ public class DataMock {
 
         }
 
-  }
-
-  private void insertarMediciones(){
-
-      logger.info("Insertando mediciones...");
-
-      Random random = new Random();
-
-      List<Long> sectorIds = jdbcTemplate.query("SELECT id FROM Sector",
-              (rs, rowNum) -> rs.getLong("id"));
-
-      int totalMediciones = 15000;
-      int batchSize = 5000;
-      List<Object[]> batch = new ArrayList<>(batchSize);
-
-      for (int i = 1; i <= totalMediciones; i++) {
-          int flow = random.nextInt(100);
-          LocalDateTime time = LocalDateTime.now().plusMonths(2); //Genera pasadas y futuras
-          Timestamp ts = Timestamp.valueOf(time.minusMinutes(random.nextInt(150000)));
-                  //LocalDateTime.now().minusMinutes(random.nextInt(100000)));
-          Long sectorId = sectorIds.get(random.nextInt(sectorIds.size()));
-
-          batch.add(new Object[]{flow, ts, sectorId});
-
-          if (i % batchSize == 0) {
-              jdbcTemplate.batchUpdate(
-                      "INSERT INTO Medicion (flow, timestamp, sector_id) VALUES (?, ?, ?)", batch);
-              batch.clear();
-              logger.info("Insertadas {} mediciones", i);
-          }
-      }
-
-      if (!batch.isEmpty()) {
-          jdbcTemplate.batchUpdate(
-                  "INSERT INTO Medicion (flow, timestamp, sector_id) VALUES (?, ?, ?)", batch);
-      }
-  }
-
-  private void insertarRecompensas(){
-
-    logger.info("Insertando recompensas...");
-
-    List<Map<String, Object>> recompensas = List.of(
-        Map.of("descripcion", "Descuento del 10% en medidor", "puntos", 50),
-        Map.of("descripcion", "Descuento del 20% en medidor", "puntos", 90),
-        Map.of("descripcion", "Descuento del 5% en mantenimiento", "puntos", 300)
-    );
-
-    for (Map<String, Object> recompensa : recompensas) {
-      String descripcion = (String) recompensa.get("descripcion");
-      int puntos = (int) recompensa.get("puntos");
-      jdbcTemplate.update(
-            "INSERT INTO Recompensa (descripcion, puntos_necesarios) VALUES (?, ?)",
-            descripcion, puntos);
     }
 
-    List<Long> hogaresIDs = jdbcTemplate.query("SELECT id FROM Hogar",
-              (rs, rowNum) -> rs.getLong("id"));
+    private void insertarMediciones() {
 
-    LocalDateTime hoy = LocalDateTime.now();
+        logger.info("Insertando mediciones...");
 
-    for (Long hogarId : hogaresIDs) {
-      jdbcTemplate.update(
-            "INSERT INTO recompensa_hogar (hogar_id, recompensa_id, estado, fecha_de_reclamo) VALUES (?, ?, ?, ?)",
-            hogarId, 1, "DISPONIBLE", hoy);
+        Random random = new Random();
+
+        List<Long> sectorIds = jdbcTemplate.query("SELECT id FROM Sector",
+                (rs, rowNum) -> rs.getLong("id"));
+
+        int totalMediciones = 15000;
+        int batchSize = 5000;
+        List<Object[]> batch = new ArrayList<>(batchSize);
+
+        for (int i = 1; i <= totalMediciones; i++) {
+            int flow = random.nextInt(100);
+            LocalDateTime time = LocalDateTime.now().plusMonths(2); //Genera pasadas y futuras
+            Timestamp ts = Timestamp.valueOf(time.minusMinutes(random.nextInt(150000)));
+            //LocalDateTime.now().minusMinutes(random.nextInt(100000)));
+            Long sectorId = sectorIds.get(random.nextInt(sectorIds.size()));
+
+            batch.add(new Object[]{flow, ts, sectorId});
+
+            if (i % batchSize == 0) {
+                jdbcTemplate.batchUpdate(
+                        "INSERT INTO Medicion (flow, timestamp, sector_id) VALUES (?, ?, ?)", batch);
+                batch.clear();
+                logger.info("Insertadas {} mediciones", i);
+            }
+        }
+
+        if (!batch.isEmpty()) {
+            jdbcTemplate.batchUpdate(
+                    "INSERT INTO Medicion (flow, timestamp, sector_id) VALUES (?, ?, ?)", batch);
+        }
     }
 
-  }
+    private void insertarRecompensas() {
+
+        logger.info("Insertando recompensas...");
+
+        List<Map<String, Object>> recompensas = List.of(
+                Map.of("descripcion", "Descuento del 10% en medidor", "puntos", 50),
+                Map.of("descripcion", "Descuento del 20% en medidor", "puntos", 90),
+                Map.of("descripcion", "Descuento del 5% en mantenimiento", "puntos", 300)
+        );
+
+        for (Map<String, Object> recompensa : recompensas) {
+            String descripcion = (String) recompensa.get("descripcion");
+            int puntos = (int) recompensa.get("puntos");
+            jdbcTemplate.update(
+                    "INSERT INTO Recompensa (descripcion, puntos_necesarios) VALUES (?, ?)",
+                    descripcion, puntos);
+        }
+
+        List<Long> hogaresIDs = jdbcTemplate.query("SELECT id FROM Hogar",
+                (rs, rowNum) -> rs.getLong("id"));
+
+        LocalDateTime hoy = LocalDateTime.now();
+
+        for (Long hogarId : hogaresIDs) {
+            jdbcTemplate.update(
+                    "INSERT INTO recompensa_hogar (hogar_id, recompensa_id, estado, fecha_de_reclamo) VALUES (?, ?, ?, ?)",
+                    hogarId, 1, "DISPONIBLE", hoy);
+        }
+
+    }
+
+    private void insertarDesafios(){
+        logger.info("Insertando desafíos...");
+
+        jdbcTemplate.update("INSERT INTO desafio (titulo, descripcion, puntos_recompensa) VALUES (?, ?, ?)",
+                "Desafío Semanal", "Reduce tu consumo en un 10% esta semana", 100);
+        jdbcTemplate.update("INSERT INTO desafio (titulo, descripcion, puntos_recompensa) VALUES (?, ?, ?)",
+                "Inicio de sesion", "inicia sesion todos los dias de la semana", 200);
+        jdbcTemplate.update("INSERT INTO desafio (titulo, descripcion, puntos_recompensa) VALUES (?, ?, ?)",
+                "Juega un minijuego", "Jugar un minijuego de AquaQuest", 50);
+
+        List<Long> hogaresIDs = jdbcTemplate.query("SELECT id FROM Hogar",
+                (rs, rowNum) -> rs.getLong("id"));
+
+        LocalDateTime hoy = LocalDateTime.now();
+
+        for (Long hogarId : hogaresIDs) {
+            jdbcTemplate.update(
+                    "INSERT INTO desafio_hogar (hogar_id, desafio_id, progreso) VALUES (?, ?, ?)",
+                    hogarId, 1, 50);
+        }
+    }
+
 
   private void insertarLogrosYMedallas() {
     logger.info("Insertando logros y medallas...");

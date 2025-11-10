@@ -3,6 +3,7 @@ package com.app.aquavision.services;
 import com.app.aquavision.dto.gamificacion.PuntosReclamadosDTO;
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.entities.domain.Sector;
+import com.app.aquavision.entities.domain.gamification.DesafioHogar;
 import com.app.aquavision.entities.domain.gamification.Minijuego;
 import com.app.aquavision.entities.domain.gamification.PuntosReclamados;
 import com.app.aquavision.entities.domain.gamification.Recompensa;
@@ -192,4 +193,15 @@ public class HogarService {
         return this.puntosReclamadosRepository.getUltimaFechaReclamo(hogarId,minijuego,escena);
 
     }
+
+    @Transactional
+    public List<DesafioHogar> getDesafiosHogar(Long hogarId) {
+        Optional<Hogar> optionalHogar = repository.findById(hogarId);
+        if (optionalHogar.isPresent()) {
+            Hogar hogar = optionalHogar.get();
+            return hogar.getDesafios();
+        }
+        return null;
+    }
+
 }

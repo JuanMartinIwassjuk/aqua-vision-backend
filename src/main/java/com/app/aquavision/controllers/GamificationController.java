@@ -1,9 +1,11 @@
 package com.app.aquavision.controllers;
 
+import com.app.aquavision.dto.gamificacion.DesafiosHogarDTO;
 import com.app.aquavision.dto.gamificacion.PuntosDTO;
 import com.app.aquavision.dto.gamificacion.PuntosReclamadosDTO;
 import com.app.aquavision.dto.gamificacion.RankingDTO;
 import com.app.aquavision.entities.domain.Hogar;
+import com.app.aquavision.entities.domain.gamification.DesafioHogar;
 import com.app.aquavision.entities.domain.gamification.Recompensa;
 import com.app.aquavision.services.HogarService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -276,6 +278,32 @@ public class GamificationController {
             @RequestParam String minijuego,
             @RequestParam(required = false) String escena) {
         return service.getUltimoReclamoSegunMinijuego(id, minijuego, escena);
+    }
+
+    @GetMapping("/{id}/desafios")
+    @Operation(
+            summary = "Obtener los desafios del hogar",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "desafios obtenidos correctamente",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(implementation = DesafiosHogarDTO.class))
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Hogar no encontrado"
+                    )
+            }
+    )
+    public DesafiosHogarDTO getDesafios(@Parameter(description = "ID del hogar", example = "1") @PathVariable Long id) {
+
+        List<DesafioHogar> desafios  = service.getDesafiosHogar(id);
+
+
+        return new DesafiosHogarDTO(id,desafios);
     }
 
 }
