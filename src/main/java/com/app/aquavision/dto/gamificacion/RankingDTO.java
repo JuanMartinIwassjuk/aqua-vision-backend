@@ -16,8 +16,12 @@ public class RankingDTO {
         for (Object[] row : hogaresConMediciones) {
             Hogar hogar = (Hogar) row[0];
             Long totalPuntos = (Long) row[1];
+            String nombreHogar  = hogar.getNombre();
+            if(totalPuntos == null){
+                totalPuntos = 0L;
+            }
             i++;
-            this.hogares.add(new HogarRankingDTO(hogar.getNombre(),totalPuntos.intValue(), i));
+            this.hogares.add(new HogarRankingDTO(nombreHogar,totalPuntos.intValue(), i));
         }
     }
 
