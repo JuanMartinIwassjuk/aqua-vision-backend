@@ -289,11 +289,11 @@ private void insertarNotificaciones() {
               (rs, rowNum) -> rs.getLong("id")
       );
 
-      LocalDateTime fecha = LocalDateTime.now();
+      LocalDateTime fecha = LocalDateTime.now().minusDays(7); //Un par de dias de base
       String escena = null;
 
       for (Long hogarId : hogaresIDs) {
-          String minijuego = Minijuego.AQUA_MATCH.name();
+          String minijuego = Minijuego.AQUA_CARDS.name();
           int puntos = 15;
           jdbcTemplate.update("INSERT INTO puntos_reclamados (fecha, mini_juego, escena, puntos, hogar_id) VALUES (?, ?, ?, ?,?)", fecha, minijuego, null, puntos, hogarId);
       }
