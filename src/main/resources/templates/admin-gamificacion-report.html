@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reporte Gamificación — Admin</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:20px;color:#222}
+    header{ text-align:center; border-bottom:2px solid #073B5C; padding-bottom:10px; margin-bottom:16px;}
+    h1{color:#073B5C;margin:0}
+    .meta{font-size:12px;color:#555;margin-top:6px}
+    .summary{display:flex;gap:12px;margin:14px 0}
+    .kpi{background:#f6fbff;padding:10px;border-radius:6px;flex:1;border:1px solid #e8f3ff}
+    .kpi .label{font-size:12px;color:#666}
+    .kpi .value{font-weight:700;font-size:18px;color:#073B5C;margin-top:6px}
+    table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px}
+    th,td{border:1px solid #ddd;padding:8px;text-align:left}
+    th{background:#073B5C;color:#fff}
+    .small{font-size:11px;color:#666}
+    .chart-mock{margin:12px 0;padding:10px;background:#fff;border:1px dashed #ddd;text-align:center;color:#888}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Reporte Gamificación — Administrador</h1>
+    <div class="meta" th:text="'Periodo: ' + ${fechaDesde} + ' → ' + ${fechaHasta}">Periodo</div>
+    <div class="meta small" th:text="'Generado: ' + ${fechaGeneracion}">Generado</div>
+  </header>
+
+  <section class="summary">
+    <div class="kpi">
+      <div class="label">Hogares</div>
+      <div class="value" th:text="${#lists.size(topPuntos) > 0 ? 'Ver Top' : '—'}">—</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Puntos totales</div>
+      <div class="value" th:text="${resumen != null ? resumen.total : 0}">0</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Media diaria</div>
+      <div class="value" th:text="${resumen != null ? resumen.media + ' pts' : '0 pts'}">0 pts</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Mejor racha</div>
+      <div class="value" th:text="${resumen != null ? resumen.mejorRacha + ' d' : '0 d'}">0 d</div>
+    </div>
+  </section>
+
+  <h2>Puntos por día</h2>
+  <div class="chart-mock">(Gráfico de puntos por día - para PDF se muestra tabla resumida)</div>
+
+  <table>
+    <thead>
+      <tr><th>Fecha</th><th>Puntos</th></tr>
+    </thead>
+    <tbody>
+      <tr th:each="p : ${puntosPorDia}">
+        <td th:text="${p.fecha}">2025-01-01</td>
+        <td th:text="${p.puntos}">0</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Top Hogares — Puntos</h2>
+  <table>
+    <thead><tr><th>#</th><th>Hogar</th><th>Puntos</th><th>Puntaje ranking</th></tr></thead>
+    <tbody>
+      <tr th:each="h, iterStat : ${topPuntos}">
+        <td th:text="${iterStat.index + 1}">1</td>
+        <td th:text="${h.nombre}">Hogar</td>
+        <td th:text="${h.puntos}">0</td>
+        <td th:text="${h.puntajeRanking}">0</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Top Hogares — Rachas</h2>
+  <table>
+    <thead><tr><th>#</th><th>Hogar</th><th>Racha (d)</th><th>Puntos</th></tr></thead>
+    <tbody>
+      <tr th:each="h, iterStat : ${topRachas}">
+        <td th:text="${iterStat.index + 1}">1</td>
+        <td th:text="${h.nombre}">Hogar</td>
+        <td th:text="${h.racha}">0</td>
+        <td th:text="${h.puntos}">0</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <footer style="margin-top:16px">
+    <div class="small">Reporte generado por el sistema</div>
+  </footer>
+</body>
+</html>

@@ -8,14 +8,20 @@ import com.app.aquavision.dto.admin.eventos.EventTagDTO;
 import com.app.aquavision.dto.admin.eventos.ReporteEventosAdminDTO;
 import com.app.aquavision.dto.admin.eventos.ResumenEventosDTO;
 import com.app.aquavision.dto.admin.eventos.TagRankingDTO;
+import com.app.aquavision.dto.admin.gamification.HogarRankingDTO;
+import com.app.aquavision.dto.admin.gamification.MedallasHogarDTO;
+import com.app.aquavision.dto.admin.gamification.PuntosDiaDTO;
+import com.app.aquavision.dto.admin.gamification.ResumenGamificacionDTO;
 import com.app.aquavision.dto.admin.localidad.LocalidadSummaryDTO;
 import com.app.aquavision.dto.admin.localidad.ReporteLocalidadDTO;
 import com.app.aquavision.dto.consumos.*;
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.entities.domain.Medicion;
 import com.app.aquavision.entities.domain.Sector;
+import com.app.aquavision.entities.domain.gamification.PuntosReclamados;
 import com.app.aquavision.repositories.HogarRepository;
 import com.app.aquavision.repositories.MedicionRepository;
+import com.app.aquavision.repositories.PuntosReclamadosRepository;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +30,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.io.ByteArrayOutputStream;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -39,11 +46,17 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 
 @Service
 public class ReporteService {
+
+    private final double costoPorPunto = 1.0;
+
+    @Autowired
+    private  PuntosReclamadosRepository puntosReclamadosRepository;
 
     @Autowired
     private HogarRepository hogarRepository;
@@ -492,7 +505,117 @@ private int calcularTagsActivos(List<AquaEventDTO> eventos) {
         }
     }
 
+    @Transactional(readOnly = true)
+      public List<PuntosDiaDTO> getPuntosPorPeriodo(LocalDate desde, LocalDate hasta) {
+        if (desde == null || hasta == null) return Collections.emptyList();
 
+        // rango inclusive: desde 00:00:00 hasta 23:59:59.999
+        LocalDateTime from = desde.atStartOfDay();
+        LocalDateTime to = hasta.atTime(23, 59, 59, 999_999_999);
 
+        List<PuntosReclamados> rows = puntosReclamadosRepository.findByFechaBetween(from, to);
+
+        // Agrupar por fecha (yyyy-MM-dd) y sumar puntos
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        Map<String, Long> byDay = rows.stream()
+            .filter(r -> r.getFecha() != null)
+            .collect(Collectors.groupingBy(
+                r -> r.getFecha().toLocalDate().format(fmt),
+                Collectors.summingLong(r -> r.getPuntos())
+            ));
+
+        // Queremos devolver una lista ordenada por fecha asc
+        List<String> orderedDates = new ArrayList<>(byDay.keySet());
+        orderedDates.sort(Comparator.naturalOrder());
+
+        List<PuntosDiaDTO> result = new ArrayList<>();
+        for (String date : orderedDates) {
+            result.add(new PuntosDiaDTO(date, byDay.getOrDefault(date, 0L)));
+        }
+
+        return result;
+    }
+
+    // --- Resumen gamificacion ---
+    @Transactional(readOnly = true)
+    public ResumenGamificacionDTO getResumenGamificacion(LocalDate desde, LocalDate hasta) {
+        List<Hogar> hogares = hogarRepository.findAll();
+        long total = hogares.stream().mapToLong(h -> (long) h.getPuntos()).sum();
+
+        long dias = Duration.between(desde.atStartOfDay(), hasta.atTime(LocalTime.MAX)).toDays() + 1;
+        double media = dias > 0 ? Math.round(((double) total / dias) * 10.0) / 10.0 : 0.0;
+
+        int mejorRacha = hogares.stream().mapToInt(h -> h.getRachaDiaria()).max().orElse(0);
+        return new ResumenGamificacionDTO(total, media, mejorRacha);
+    }
+
+    // --- Ranking por puntos (usa puntosDisponibles) ---
+    @Transactional(readOnly = true)
+    public List<HogarRankingDTO> getRankingPuntos(LocalDate desde, LocalDate hasta) {
+        return hogarRepository.findAll().stream()
+            .map(h -> new HogarRankingDTO(h.getId(), h.getNombre(), h.getPuntos(), 0.0, h.getRachaDiaria()))
+            .sorted(Comparator.comparingLong(HogarRankingDTO::getPuntos).reversed())
+            .collect(Collectors.toList());
+    }
+
+    // --- Ranking por rachas ---
+    @Transactional(readOnly = true)
+    public List<HogarRankingDTO> getRankingRachas(LocalDate desde, LocalDate hasta) {
+        return hogarRepository.findAll().stream()
+            .map(h -> new HogarRankingDTO(h.getId(), h.getNombre(), h.getPuntos(), 0.0, h.getRachaDiaria()))
+            .sorted(Comparator.comparingInt(HogarRankingDTO::getRacha).reversed())
+            .collect(Collectors.toList());
+    }
+
+    // --- listado simple de hogares (para front) ---
+    @Transactional(readOnly = true)
+    public List<HogarRankingDTO> getHogaresSummary() {
+        return hogarRepository.findAll().stream()
+                .map(h -> new HogarRankingDTO(h.getId(), h.getNombre(), h.getPuntos(), 0.0, h.getRachaDiaria()))
+                .collect(Collectors.toList());
+    }
+
+    // --- Medallas por hogar (usa la relación ManyToMany) ---
+    @Transactional(readOnly = true)
+    public MedallasHogarDTO getMedallasPorHogar(Long hogarId) {
+        Optional<Hogar> oh = hogarRepository.findById(hogarId);
+        if (oh.isEmpty()) return new MedallasHogarDTO(hogarId, "—", Collections.emptyList());
+        Hogar h = oh.get();
+        List<String> medallas = h.getMedallas().stream()
+                .map(m -> m.getNombre()) // tu entity Medalla tiene getNombre()
+                .collect(Collectors.toList());
+        return new MedallasHogarDTO(h.getId(), h.getNombre(), medallas);
+    }
+
+    // --- Generar PDF igual que antes pero usando los nuevos métodos ---
+    @Transactional(readOnly = true)
+    public byte[] generarPdfReporteGamificacion(LocalDate desde, LocalDate hasta) {
+        List<PuntosDiaDTO> puntos = getPuntosPorPeriodo(desde, hasta);
+        ResumenGamificacionDTO resumen = getResumenGamificacion(desde, hasta);
+        List<HogarRankingDTO> topPuntos = getRankingPuntos(desde, hasta).stream().limit(20).collect(Collectors.toList());
+        List<HogarRankingDTO> topRachas = getRankingRachas(desde, hasta).stream().limit(20).collect(Collectors.toList());
+
+        Context context = new Context();
+        DateTimeFormatter fh = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        context.setVariable("fechaDesde", desde.toString());
+        context.setVariable("fechaHasta", hasta.toString());
+        context.setVariable("fechaGeneracion", LocalDateTime.now().format(fh));
+        context.setVariable("puntosPorDia", puntos);
+        context.setVariable("resumen", resumen);
+        context.setVariable("topPuntos", topPuntos);
+        context.setVariable("topRachas", topRachas);
+
+        String html = templateEngine.process("admin-gamificacion-report", context);
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            com.openhtmltopdf.pdfboxout.PdfRendererBuilder builder = new com.openhtmltopdf.pdfboxout.PdfRendererBuilder();
+            builder.withHtmlContent(html, "");
+            builder.toStream(baos);
+            builder.run();
+            return baos.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException("Error generando PDF gamificación", e);
+        }
+    }
 
 }
