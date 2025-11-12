@@ -1,4 +1,4 @@
-package com.app.aquavision.dto.admin;
+package com.app.aquavision.dto.admin.consumo;
 
 public class HogarConsumoDTO {
     private Long hogarId;

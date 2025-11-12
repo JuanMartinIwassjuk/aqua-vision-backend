@@ -1,7 +1,7 @@
-package com.app.aquavision.dto.admin;
+package com.app.aquavision.dto.admin.consumo;
 
 public class ResumenConsumoGlobalDTO {
-    
+
     private Double total;
     private Double media;
     private Double pico;

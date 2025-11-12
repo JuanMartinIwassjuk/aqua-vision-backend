@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("/reportes/admin")
@@ -40,6 +41,31 @@ public class ReportAdminController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @GetMapping("/eventos/descargar-pdf")
+public ResponseEntity<byte[]> descargarReporteEventosPdf(
+        @RequestParam String fechaInicio,
+        @RequestParam String fechaFin,
+        @RequestParam(required = false) List<Integer> tagIds // opcional
+) {
+    try {
+        LocalDate desde = LocalDate.parse(fechaInicio);
+        LocalDate hasta = LocalDate.parse(fechaFin);
+
+        byte[] pdfBytes = reporteService.generarPdfReporteEventosAdmin(
+                desde.atStartOfDay(), hasta.atTime(LocalTime.MAX), tagIds);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(ContentDisposition.builder("attachment")
+                .filename("reporte_eventos_admin_" + fechaInicio + "_a_" + fechaFin + ".pdf")
+                .build());
+
+        return ResponseEntity.ok().headers(headers).body(pdfBytes);
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+}
 
 
 }

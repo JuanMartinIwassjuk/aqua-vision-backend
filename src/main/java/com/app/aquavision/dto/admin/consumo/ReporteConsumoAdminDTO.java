@@ -1,4 +1,4 @@
-package com.app.aquavision.dto.admin;
+package com.app.aquavision.dto.admin.consumo;
 
 
 import java.time.LocalDateTime;

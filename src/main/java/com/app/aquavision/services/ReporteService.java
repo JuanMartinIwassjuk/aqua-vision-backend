@@ -1,8 +1,13 @@
 package com.app.aquavision.services;
 
-import com.app.aquavision.dto.admin.HogarConsumoDTO;
-import com.app.aquavision.dto.admin.ReporteConsumoAdminDTO;
-import com.app.aquavision.dto.admin.ResumenConsumoGlobalDTO;
+import com.app.aquavision.dto.admin.consumo.HogarConsumoDTO;
+import com.app.aquavision.dto.admin.consumo.ReporteConsumoAdminDTO;
+import com.app.aquavision.dto.admin.consumo.ResumenConsumoGlobalDTO;
+import com.app.aquavision.dto.admin.eventos.AquaEventDTO;
+import com.app.aquavision.dto.admin.eventos.EventTagDTO;
+import com.app.aquavision.dto.admin.eventos.ReporteEventosAdminDTO;
+import com.app.aquavision.dto.admin.eventos.ResumenEventosDTO;
+import com.app.aquavision.dto.admin.eventos.TagRankingDTO;
 import com.app.aquavision.dto.consumos.*;
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.entities.domain.Medicion;
@@ -22,12 +27,17 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -301,6 +311,102 @@ public byte[] generarPdfReporte(Long hogarId, LocalDateTime fechaDesde, LocalDat
         list.add(new HogarConsumoDTO(3L, "Hogar C", "Caballito", 2, 345.0, Math.round(345.0*0.18*100.0)/100.0));
         return list;
     }
+
+   public byte[] generarPdfReporteEventosAdmin(LocalDateTime fechaDesde, LocalDateTime fechaHasta, List<Integer> tagIds) {
+    // 1) Obtener eventos filtrados -> reemplazar mocks con query real
+    List<AquaEventDTO> eventos = generarEventosMock(fechaDesde, fechaHasta, tagIds); // o consulta real
+
+    // 2) Calcular resumen
+    int totalEventos = eventos.size();
+    double totalLitros = eventos.stream().mapToDouble(e -> e.getLitrosConsumidos() == null ? 0.0 : e.getLitrosConsumidos()).sum();
+    double totalCosto = eventos.stream().mapToDouble(e -> e.getCosto() == null ? 0.0 : e.getCosto()).sum();
+
+    // 3) Calcular ranking por tag (count y avg litros)
+    // Usaremos Map<tagNombre, {count, sumLitros, idOptional}>
+    Map<String, Integer> counts = new HashMap<>();
+    Map<String, Double> sumLitros = new HashMap<>();
+    Map<String, Integer> tagIdMap = new HashMap<>();
+
+    for (AquaEventDTO e : eventos) {
+        int litros = e.getLitrosConsumidos() == null ? 0 : e.getLitrosConsumidos();
+        if (e.getTags() == null) continue;
+        for (EventTagDTO t : e.getTags()) {
+            String key = t.getNombre() != null ? t.getNombre() : ("tag-" + t.getId());
+            counts.put(key, counts.getOrDefault(key, 0) + 1);
+            sumLitros.put(key, sumLitros.getOrDefault(key, 0.0) + litros);
+            if (t.getId() != null) tagIdMap.put(key, t.getId());
+        }
+    }
+
+    List<TagRankingDTO> tagRanking = counts.entrySet().stream()
+            .map(entry -> {
+                String nombre = entry.getKey();
+                Integer cnt = entry.getValue();
+                Double sum = sumLitros.getOrDefault(nombre, 0.0);
+                Double avg = cnt > 0 ? Math.round((sum / cnt) * 100.0) / 100.0 : 0.0;
+                Integer id = tagIdMap.get(nombre);
+                return new TagRankingDTO(id, nombre, cnt, avg);
+            })
+            .sorted(Comparator.comparing(TagRankingDTO::getCount, Comparator.nullsLast(Comparator.reverseOrder())))
+            .collect(Collectors.toList());
+
+    ResumenEventosDTO resumen = new ResumenEventosDTO(totalEventos,
+            Math.round(totalLitros * 100.0) / 100.0,
+            Math.round(totalCosto * 100.0) / 100.0,
+            tagRanking.size());
+
+    ReporteEventosAdminDTO dto = new ReporteEventosAdminDTO();
+    dto.setFechaGeneracion(LocalDateTime.now());
+    dto.setFechaDesde(fechaDesde.toLocalDate().toString());
+    dto.setFechaHasta(fechaHasta.toLocalDate().toString());
+    dto.setResumen(resumen);
+    dto.setEventos(eventos);
+
+    // Thymeleaf context
+    DateTimeFormatter fechaHoraFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    Context context = new Context();
+    context.setVariable("fechaDesde", dto.getFechaDesde());
+    context.setVariable("fechaHasta", dto.getFechaHasta());
+    context.setVariable("fechaGeneracion", dto.getFechaGeneracion().format(fechaHoraFormatter));
+    context.setVariable("resumen", dto.getResumen());
+    context.setVariable("eventos", dto.getEventos());
+    context.setVariable("tagRanking", tagRanking); // <-- paso el ranking al template
+
+    String html = templateEngine.process("admin-eventos-report", context);
+
+    try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+        PdfRendererBuilder builder = new PdfRendererBuilder();
+        builder.withHtmlContent(html, "");
+        builder.toStream(baos);
+        builder.run();
+        return baos.toByteArray();
+    } catch (Exception e) {
+        throw new RuntimeException("Error generando PDF eventos admin", e);
+    }
+}
+
+// Helpers mocks (reemplazar)
+private List<AquaEventDTO> generarEventosMock(LocalDateTime desde, LocalDateTime hasta, List<Integer> tagIds) {
+    List<AquaEventDTO> list = new ArrayList<>();
+    // ejemplo simple
+    AquaEventDTO a = new AquaEventDTO();
+    a.setId(1L); a.setTitulo("Riego Jardin"); a.setDescripcion("Riego automatico"); a.setFechaInicio(desde.plusDays(1));
+    a.setEstado("COMPLETADO"); a.setLitrosConsumidos(120); a.setCosto(21.6); a.setLocalidad("Palermo"); a.setHogarId(1L);
+    a.setTags(Arrays.asList(new EventTagDTO(3,"Riego","#F2C94C")));
+    list.add(a);
+    // ... agregar más mocks si querés
+    return list;
+}
+
+private int calcularTagsActivos(List<AquaEventDTO> eventos) {
+    Set<Integer> set = new HashSet<>();
+    for (AquaEventDTO e : eventos) {
+        if (e.getTags() == null) continue;
+        for (EventTagDTO t : e.getTags()) set.add(t.getId());
+    }
+    return set.size();
+}
+
 
 
 }
