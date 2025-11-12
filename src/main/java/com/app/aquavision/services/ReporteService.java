@@ -8,6 +8,8 @@ import com.app.aquavision.dto.admin.eventos.EventTagDTO;
 import com.app.aquavision.dto.admin.eventos.ReporteEventosAdminDTO;
 import com.app.aquavision.dto.admin.eventos.ResumenEventosDTO;
 import com.app.aquavision.dto.admin.eventos.TagRankingDTO;
+import com.app.aquavision.dto.admin.localidad.LocalidadSummaryDTO;
+import com.app.aquavision.dto.admin.localidad.ReporteLocalidadDTO;
 import com.app.aquavision.dto.consumos.*;
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.entities.domain.Medicion;
@@ -406,6 +408,90 @@ private int calcularTagsActivos(List<AquaEventDTO> eventos) {
     }
     return set.size();
 }
+
+
+ @Transactional(readOnly = true)
+    public List<LocalidadSummaryDTO> getConsumoPorLocalidad(LocalDateTime desde, LocalDateTime hasta) {
+        List<Medicion> mediciones = medicionRepository.findAllWithSectorAndHogarBetween(desde, hasta);
+
+        // agrupación por localidad (tomada desde sector.hogar.localidad)
+        Map<String, LocalAgg> agg = new HashMap<>();
+        for (Medicion m : mediciones) {
+            Sector s = m.getSector();
+            Hogar h = (s != null) ? s.getHogar() : null;
+            String loc = (h != null && h.getLocalidad() != null && !h.getLocalidad().isEmpty())
+                    ? h.getLocalidad()
+                    : "Sin Localidad";
+
+            LocalAgg a = agg.computeIfAbsent(loc, k -> new LocalAgg());
+            double litros = m.getFlow(); 
+            a.total += litros;
+            a.count++;
+            a.costo += litros * 3.0; 
+            if (h != null && h.getId() != null) a.hogares.add(h.getId());
+        }
+
+        // convertir a DTO
+        List<LocalidadSummaryDTO> result = agg.entrySet().stream()
+                .map(en -> {
+                    String localidad = en.getKey();
+                    LocalAgg a = en.getValue();
+                    double total = Math.round(a.total * 100.0) / 100.0;
+                    double media = a.count > 0 ? Math.round((a.total / a.count) * 100.0) / 100.0 : 0.0;
+                    double costo = Math.round(a.costo * 100.0) / 100.0;
+                    int hogares = a.hogares.size();
+                    return new LocalidadSummaryDTO(localidad, total, media, costo, hogares);
+                })
+                .sorted(Comparator.comparing(LocalidadSummaryDTO::getTotal, Comparator.reverseOrder()))
+                .collect(Collectors.toList());
+
+        return result;
+    }
+
+    private static class LocalAgg {
+        double total = 0.0;
+        int count = 0;
+        double costo = 0.0;
+        Set<Long> hogares = new HashSet<>();
+    }
+
+
+        @Transactional(readOnly = true)
+    public byte[] generarPdfReporteLocalidad(LocalDateTime desde, LocalDateTime hasta) {
+        List<LocalidadSummaryDTO> resumen = getConsumoPorLocalidad(desde, hasta);
+        double totalGlobal = resumen.stream().mapToDouble(r -> r.getTotal() != null ? r.getTotal() : 0.0).sum();
+
+        ReporteLocalidadDTO dto = new ReporteLocalidadDTO();
+        dto.setFechaGeneracion(LocalDateTime.now());
+        dto.setFechaDesde(desde.toLocalDate().toString());
+        dto.setFechaHasta(hasta.toLocalDate().toString());
+        dto.setResumenPorLocalidad(resumen);
+        dto.setCantidadLocalidades(resumen.size());
+        dto.setTotalGlobal(Math.round(totalGlobal * 100.0) / 100.0);
+
+        // Thymeleaf context
+        DateTimeFormatter fechaHoraFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        Context context = new Context();
+        context.setVariable("fechaDesde", dto.getFechaDesde());
+        context.setVariable("fechaHasta", dto.getFechaHasta());
+        context.setVariable("fechaGeneracion", dto.getFechaGeneracion().format(fechaHoraFormatter));
+        context.setVariable("resumenPorLocalidad", dto.getResumenPorLocalidad());
+        context.setVariable("totalGlobal", dto.getTotalGlobal());
+        context.setVariable("cantidadLocalidades", dto.getCantidadLocalidades());
+
+        String htmlContent = templateEngine.process("admin-localidad-report", context);
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            com.openhtmltopdf.pdfboxout.PdfRendererBuilder builder = new com.openhtmltopdf.pdfboxout.PdfRendererBuilder();
+            builder.withHtmlContent(htmlContent, "");
+            builder.toStream(baos);
+            builder.run();
+            return baos.toByteArray();
+        } catch (Exception ex) {
+            throw new RuntimeException("Error generando PDF localidad", ex);
+        }
+    }
+
 
 
 
