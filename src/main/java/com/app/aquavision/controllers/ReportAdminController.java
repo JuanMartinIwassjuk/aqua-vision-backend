@@ -1,0 +1,45 @@
+package com.app.aquavision.controllers;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
+@RestController
+@RequestMapping("/reportes/admin")
+public class ReportAdminController {
+
+    @Autowired
+    private com.app.aquavision.services.ReporteService reporteService;
+
+    @GetMapping("/consumo/descargar-pdf")
+    public ResponseEntity<byte[]> descargarReporteConsumoPdf(
+            @RequestParam String fechaInicio,
+            @RequestParam String fechaFin) {
+        try {
+            LocalDate desde = LocalDate.parse(fechaInicio);
+            LocalDate hasta = LocalDate.parse(fechaFin);
+
+            byte[] pdfBytes = reporteService.generarPdfReporteConsumoAdmin(
+                    desde.atStartOfDay(), hasta.atTime(LocalTime.MAX));
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDisposition(ContentDisposition.builder("attachment")
+                    .filename("reporte_consumo_admin_" + fechaInicio + "_a_" + fechaFin + ".pdf")
+                    .build());
+
+            return ResponseEntity.ok().headers(headers).body(pdfBytes);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
+}

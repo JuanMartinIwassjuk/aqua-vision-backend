@@ -1,5 +1,8 @@
 package com.app.aquavision.services;
 
+import com.app.aquavision.dto.admin.HogarConsumoDTO;
+import com.app.aquavision.dto.admin.ReporteConsumoAdminDTO;
+import com.app.aquavision.dto.admin.ResumenConsumoGlobalDTO;
 import com.app.aquavision.dto.consumos.*;
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.entities.domain.Medicion;
@@ -239,6 +242,65 @@ public byte[] generarPdfReporte(Long hogarId, LocalDateTime fechaDesde, LocalDat
         throw new RuntimeException("Error generando PDF", e);
     }
 }
+
+  public byte[] generarPdfReporteConsumoAdmin(LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
+        // 1) Obtén datos globales: resumen y lista de hogares con consumo.
+        // Aquí debes reemplazar la lógica mock por llamadas reales a repositorios.
+        ResumenConsumoGlobalDTO resumen = calcularResumenMock(fechaDesde, fechaHasta);
+        List<HogarConsumoDTO> hogares = generarHogaresMock(fechaDesde, fechaHasta);
+
+        // 2) Crear DTO para Thymeleaf
+        ReporteConsumoAdminDTO dto = new ReporteConsumoAdminDTO(
+                LocalDateTime.now(),
+                fechaDesde.toLocalDate().toString(),
+                fechaHasta.toLocalDate().toString(),
+                resumen,
+                hogares
+        );
+
+        // 3) Context Thymeleaf
+        DateTimeFormatter fechaHoraFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        Context context = new Context();
+        context.setVariable("fechaDesde", dto.getFechaDesde());
+        context.setVariable("fechaHasta", dto.getFechaHasta());
+        context.setVariable("fechaGeneracion", dto.getFechaGeneracion().format(fechaHoraFormatter));
+        context.setVariable("resumen", dto.getResumen());
+        context.setVariable("hogares", dto.getHogares());
+
+        String html = templateEngine.process("admin-consumo-report", context);
+
+        // 4) Render to PDF
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            PdfRendererBuilder builder = new PdfRendererBuilder();
+            builder.withHtmlContent(html, "");
+            builder.toStream(baos);
+            builder.run();
+            return baos.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException("Error generando PDF admin", e);
+        }
+    }
+
+    // --- XLSX ---
+    
+
+    // --- MOCK helpers (reemplazar por lógica real) ---
+    private ResumenConsumoGlobalDTO calcularResumenMock(LocalDateTime desde, LocalDateTime hasta) {
+        // mock simple
+        double total = 12345.0;
+        double media = 345.3;
+        double pico = 820.0;
+        double costo = total * 0.18;
+        return new ResumenConsumoGlobalDTO(total, media, pico, Math.round(costo*100.0)/100.0);
+    }
+
+    private List<HogarConsumoDTO> generarHogaresMock(LocalDateTime desde, LocalDateTime hasta) {
+        List<HogarConsumoDTO> list = new ArrayList<>();
+        list.add(new HogarConsumoDTO(1L, "Hogar A", "Palermo", 3, 1234.0, Math.round(1234.0*0.18*100.0)/100.0));
+        list.add(new HogarConsumoDTO(2L, "Hogar B", "Belgrano", 4, 2345.0, Math.round(2345.0*0.18*100.0)/100.0));
+        list.add(new HogarConsumoDTO(3L, "Hogar C", "Caballito", 2, 345.0, Math.round(345.0*0.18*100.0)/100.0));
+        return list;
+    }
 
 
 }
