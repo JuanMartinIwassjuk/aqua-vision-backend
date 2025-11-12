@@ -44,4 +44,6 @@ public interface HogarRepository extends CrudRepository<Hogar, Long>{
             @Param("tipoHogar") TipoHogar tipoHogar
     );
 
+     List<Hogar> findAll();
+
 }

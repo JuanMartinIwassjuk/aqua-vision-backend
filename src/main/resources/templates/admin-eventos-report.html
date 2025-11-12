@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reporte de Eventos — Admin</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin:20px; color:#333; }
+    header { text-align:center; border-bottom:2px solid #073B5C; padding-bottom:10px; margin-bottom:18px; }
+    header h1 { margin:0; color:#073B5C; }
+    .meta { font-size:13px; color:#555; margin-top:6px; }
+    .resumen { display:flex; gap:12px; margin:14px 0; flex-wrap:wrap; }
+    .kpi { background:#f6fbff; padding:10px; border-radius:8px; flex:1; border:1px solid #e8f3ff; min-width:150px; }
+    .kpi .label { font-size:12px; color:#666; }
+    .kpi .value { font-weight:700; font-size:18px; color:#073B5C; margin-top:6px; }
+    .ranking { margin-top:8px; display:flex; gap:12px; flex-wrap:wrap; }
+    .ranking-card { background:#fff; padding:10px; border-radius:8px; border:1px solid #eee; min-width:260px; }
+    table { width:100%; border-collapse:collapse; margin-top:12px; font-size:13px; word-break:break-word; }
+    th, td { border:1px solid #ddd; padding:8px; text-align:left; vertical-align:top; }
+    th { background:#073B5C; color:#fff; font-weight:600; }
+    .small { font-size:12px; color:#666; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Reporte de Eventos — Administrador</h1>
+    <div class="meta"
+         th:if="${fechaDesde != null or fechaHasta != null}"
+         th:text="${'Periodo: ' + (fechaDesde != null ? fechaDesde : '') + ( (fechaDesde != null or fechaHasta != null) ? ' \u2192 ' : '' ) + (fechaHasta != null ? fechaHasta : '')}">
+      Periodo
+    </div>
+    <div class="meta small" th:text="${'Generado: ' + (fechaGeneracion != null ? fechaGeneracion : '')}">Generado</div>
+  </header>
+
+  <section class="resumen">
+    <div class="kpi">
+      <div class="label">Eventos</div>
+      <div class="value" th:text="${resumen != null && resumen.totalEventos != null ? resumen.totalEventos : 0}">0</div>
+    </div>
+
+    <div class="kpi">
+      <div class="label">Litros totales</div>
+      <div class="value"
+           th:text="${resumen != null && resumen.totalLitros != null ? #numbers.formatDecimal(resumen.totalLitros,1,2) + ' L' : '0 L'}">0 L</div>
+    </div>
+
+    <div class="kpi">
+      <div class="label">Costo total</div>
+      <div class="value"
+           th:text="${resumen != null && resumen.totalCosto != null ? '$' + #numbers.formatDecimal(resumen.totalCosto,1,2) : '$0.00'}">$0.00</div>
+    </div>
+
+    <div class="kpi">
+      <div class="label">Tags activos</div>
+      <div class="value" th:text="${resumen != null && resumen.tagsActivos != null ? resumen.tagsActivos : 0}">0</div>
+    </div>
+  </section>
+
+  <!-- RANKING DE TAGS -->
+  <section th:if="${tagRanking != null && !#lists.isEmpty(tagRanking)}" style="margin-bottom:14px;">
+    <h3>Ranking de Tags (por cantidad de eventos)</h3>
+    <div class="ranking">
+      <div class="ranking-card" th:each="t : ${tagRanking}">
+        <div style="font-weight:700;" th:text="${t.nombre != null ? t.nombre : 'Tag'}">Tag</div>
+        <div class="small">Eventos: <span th:text="${t.count != null ? t.count : 0}">0</span></div>
+        <div class="small">Promedio L: <span th:text="${t.avgLitros != null ? #numbers.formatDecimal(t.avgLitros,1,2) : '0.00'}">0.00</span></div>
+      </div>
+    </div>
+  </section>
+
+  <h2>Listado de Eventos</h2>
+
+  <div th:if="${eventos == null or #lists.isEmpty(eventos)}" style="padding:12px; background:#fff8f0; border:1px solid #ffe6cc; border-radius:6px;">
+    No hay eventos para el período seleccionado.
+  </div>
+
+  <table th:if="${eventos != null and !#lists.isEmpty(eventos)}">
+    <thead>
+      <tr>
+        <th>Título</th>
+        <th>Fecha Inicio</th>
+        <th>Litros (L)</th>
+        <th>Costo ($)</th>
+        <th>Tags</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="e : ${eventos}">
+        <td th:text="${e.titulo != null ? e.titulo : '-'}">-</td>
+        <td th:text="${e.fechaInicio != null
+                      ? (e.fechaInicio instanceof T(java.time.LocalDateTime)
+                          ? #temporals.format(e.fechaInicio, 'dd/MM/yyyy HH:mm')
+                          : (e.fechaInicio instanceof T(java.time.LocalDate) ? #temporals.format(e.fechaInicio, 'dd/MM/yyyy') : e.fechaInicio))
+                      : '-'}">-</td>
+        <td th:text="${e.litrosConsumidos != null ? e.litrosConsumidos : 0}">0</td>
+        <td th:text="${e.costo != null ? ('$' + #numbers.formatDecimal(e.costo,1,2)) : '$0.00'}">$0.00</td>
+        <td>
+          <span th:if="${e.tags == null or #lists.isEmpty(e.tags)}">-</span>
+          <span th:each="t, iterStat : ${e.tags}">
+            <span th:text="${t != null && t.nombre != null ? t.nombre : 'Tag'}">Tag</span><span th:if="${!iterStat.last}">, </span>
+          </span>
+        </td>
+
+      </tr>
+    </tbody>
+  </table>
+
+  <footer style="margin-top:16px;">
+    <div class="small">Reporte generado por el sistema</div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Reporte Consumo — Administrador</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+        header { text-align: center; border-bottom: 2px solid #073B5C; padding-bottom: 12px; margin-bottom: 18px; }
+        header h1 { margin: 0; color: #073B5C; }
+        .meta { margin-top: 6px; font-size: 13px; color: #555; }
+        .resumen { display:flex; gap:12px; margin: 18px 0; }
+        .kpi { background:#f5f9ff; padding:12px; border-radius:8px; flex:1; border:1px solid #e6f2ff; }
+        .kpi .label { font-size:12px; color:#777; }
+        .kpi .value { font-size:20px; font-weight:700; color:#073B5C; margin-top:6px; }
+        table { width:100%; border-collapse:collapse; margin-top:18px; font-size:13px; }
+        th, td { border:1px solid #ddd; padding:8px; text-align:left; }
+        th { background:#073B5C; color:white; font-weight:600; }
+        .small { font-size:12px; color:#666; }
+        .right { text-align:right; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Reporte de Consumo — Administrador</h1>
+    <div class="meta" th:text="'Periodo: ' + ${fechaDesde} + ' → ' + ${fechaHasta}">Periodo</div>
+    <div class="meta small" th:text="'Generado: ' + ${fechaGeneracion}">Generado</div>
+</header>
+
+<section class="resumen">
+    <div class="kpi">
+        <div class="label">Consumo total</div>
+        <div class="value" th:text="${resumen != null ? #numbers.formatDecimal(resumen.total,1,2) + ' L' : '0 L'}">0 L</div>
+    </div>
+    <div class="kpi">
+        <div class="label">Media diaria</div>
+        <div class="value" th:text="${resumen != null ? #numbers.formatDecimal(resumen.media,1,2) + ' L' : '0 L'}">0 L</div>
+    </div>
+    <div class="kpi">
+        <div class="label">Pico</div>
+        <div class="value" th:text="${resumen != null ? #numbers.formatDecimal(resumen.pico,1,2) + ' L' : '0 L'}">0 L</div>
+    </div>
+    <div class="kpi">
+        <div class="label">Costo total estimado</div>
+        <div class="value" th:text="${resumen != null ? '$' + #numbers.formatDecimal(resumen.costo,1,2) : '$0.00'}">$0.00</div>
+    </div>
+</section>
+
+
+<footer style="margin-top:20px;">
+    <div class="small">Reporte generado por el sistema</div>
+</footer>
+</body>
+</html>

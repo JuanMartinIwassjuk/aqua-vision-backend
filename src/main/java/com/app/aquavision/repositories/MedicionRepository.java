@@ -29,4 +29,13 @@ public interface MedicionRepository extends JpaRepository<Medicion, Long> {
         @Param("start") LocalDateTime start,
         @Param("end") LocalDateTime end
     );
+
+        @Query("SELECT DISTINCT m FROM Medicion m " +
+           "LEFT JOIN FETCH m.sector s " +
+           "LEFT JOIN FETCH s.hogar h " +
+           "WHERE m.timestamp >= :desde AND m.timestamp <= :hasta " +
+           "ORDER BY m.timestamp ASC")
+    List<Medicion> findAllWithSectorAndHogarBetween(
+            @Param("desde") LocalDateTime desde,
+            @Param("hasta") LocalDateTime hasta);
 }

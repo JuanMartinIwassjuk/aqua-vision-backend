@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Reporte por Localidad — Admin</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin:20px; color:#333; }
+    header { text-align:center; border-bottom:2px solid #073B5C; padding-bottom:10px; margin-bottom:18px; }
+    header h1 { margin:0; color:#073B5C; }
+    .meta { font-size:13px; color:#555; margin-top:6px; }
+    .kpis { display:flex; gap:12px; margin:14px 0; flex-wrap:wrap; }
+    .kpi { background:#f6fbff; padding:10px; border-radius:8px; flex:1; border:1px solid #e8f3ff; min-width:160px; }
+    .ranking { margin-top:8px; display:flex; gap:12px; flex-wrap:wrap; }
+    .card { padding:10px; border:1px solid #eee; border-radius:8px; background:#fff; min-width:220px; }
+    table { width:100%; border-collapse:collapse; margin-top:12px; font-size:13px; }
+    th, td { border:1px solid #ddd; padding:8px; text-align:left; vertical-align:top; }
+    th { background:#073B5C; color:#fff; font-weight:600; }
+    .small { font-size:12px; color:#666; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Reporte por Localidad — Administrador</h1>
+    <div class="meta" th:if="${fechaDesde != null or fechaHasta != null}"
+         th:text="${'Periodo: ' + (fechaDesde != null ? fechaDesde : '') + ( (fechaDesde != null or fechaHasta != null) ? ' \u2192 ' : '' ) + (fechaHasta != null ? fechaHasta : '')}">
+      Período
+    </div>
+    <div class="meta small" th:text="${'Generado: ' + (fechaGeneracion != null ? fechaGeneracion : '')}">Generado</div>
+  </header>
+
+  <section class="kpis">
+    <div class="kpi">
+      <div class="label">Localidades</div>
+      <div class="value" th:text="${cantidadLocalidades != null ? cantidadLocalidades : 0}">0</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Total global (L)</div>
+      <div class="value" th:text="${totalGlobal != null ? #numbers.formatDecimal(totalGlobal,1,2) + ' L' : '0 L'}">0 L</div>
+    </div>
+  </section>
+
+  <section th:if="${resumenPorLocalidad != null and !#lists.isEmpty(resumenPorLocalidad)}">
+    <h3>Top 5 Localidades (por total)</h3>
+    <div class="ranking">
+      <div class="card" th:each="r, iterStat : ${resumenPorLocalidad}">
+        <div th:if="${iterStat.index < 5}">
+          <div style="font-weight:700;" th:text="${r.localidad}">Localidad</div>
+          <div class="small">Total: <span th:text="${r.total != null ? #numbers.formatDecimal(r.total,1,2) + ' L' : '0 L'}">0 L</span></div>
+          <div class="small">Promedio: <span th:text="${r.media != null ? #numbers.formatDecimal(r.media,1,2) + ' L' : '0 L'}">0 L</span></div>
+          <div class="small">Hogares: <span th:text="${r.hogares != null ? r.hogares : 0}">0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:14px;">Detalle por Localidad</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Localidad</th>
+          <th>Total (L)</th>
+          <th>Promedio por evento (L)</th>
+          <th>Hogares</th>
+          <th>Costo ($)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="r : ${resumenPorLocalidad}">
+          <td th:text="${r.localidad != null ? r.localidad : '-'}">-</td>
+          <td th:text="${r.total != null ? #numbers.formatDecimal(r.total,1,2) : '0.00'}">0.00</td>
+          <td th:text="${r.media != null ? #numbers.formatDecimal(r.media,1,2) : '0.00'}">0.00</td>
+          <td th:text="${r.hogares != null ? r.hogares : 0}">0</td>
+          <td th:text="${r.costo != null ? ('$' + #numbers.formatDecimal(r.costo,1,2)) : '$0.00'}">$0.00</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer style="margin-top:16px;">
+    <div class="small">Reporte generado por el sistema</div>
+  </footer>
+</body>
+</html>
