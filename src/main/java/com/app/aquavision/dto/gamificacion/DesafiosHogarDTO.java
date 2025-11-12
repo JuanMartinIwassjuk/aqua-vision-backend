@@ -19,11 +19,11 @@ public class DesafiosHogarDTO {
         this.desafiosHogar = desafiosHogar;
     }
 
-    public List<DesafioHogar> getDesafisoHogar() {
+    public List<DesafioHogar> getDesafiosHogar() {
         return desafiosHogar;
     }
 
-    public void setDesafisoHogar(List<DesafioHogar> desafiosHogar) {
+    public void setDesafiosHogar(List<DesafioHogar> desafiosHogar) {
         this.desafiosHogar = desafiosHogar;
     }
 
