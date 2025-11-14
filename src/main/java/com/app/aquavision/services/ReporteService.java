@@ -1,8 +1,10 @@
 package com.app.aquavision.services;
 
+import com.app.aquavision.dto.admin.consumo.ConsumoDiaDTO;
 import com.app.aquavision.dto.admin.consumo.HogarConsumoDTO;
 import com.app.aquavision.dto.admin.consumo.ReporteConsumoAdminDTO;
 import com.app.aquavision.dto.admin.consumo.ResumenConsumoGlobalDTO;
+import com.app.aquavision.dto.admin.consumo.TopMesDTO;
 import com.app.aquavision.dto.admin.eventos.AquaEventDTO;
 import com.app.aquavision.dto.admin.eventos.EventTagDTO;
 import com.app.aquavision.dto.admin.eventos.ReporteEventosAdminDTO;
@@ -54,6 +56,8 @@ import java.util.stream.Collectors;
 public class ReporteService {
 
     private final double costoPorPunto = 1.0;
+
+    private  final double COSTO_POR_LITRO = 0.18; // o el real que uses
 
     @Autowired
     private  PuntosReclamadosRepository puntosReclamadosRepository;
@@ -267,44 +271,42 @@ public byte[] generarPdfReporte(Long hogarId, LocalDateTime fechaDesde, LocalDat
         throw new RuntimeException("Error generando PDF", e);
     }
 }
+public byte[] generarPdfReporteConsumoAdmin(LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
 
-  public byte[] generarPdfReporteConsumoAdmin(LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
-        // 1) Obtén datos globales: resumen y lista de hogares con consumo.
-        // Aquí debes reemplazar la lógica mock por llamadas reales a repositorios.
-        ResumenConsumoGlobalDTO resumen = calcularResumenMock(fechaDesde, fechaHasta);
-        List<HogarConsumoDTO> hogares = generarHogaresMock(fechaDesde, fechaHasta);
+    LocalDate d = fechaDesde.toLocalDate();
+    LocalDate h = fechaHasta.toLocalDate();
 
-        // 2) Crear DTO para Thymeleaf
-        ReporteConsumoAdminDTO dto = new ReporteConsumoAdminDTO(
-                LocalDateTime.now(),
-                fechaDesde.toLocalDate().toString(),
-                fechaHasta.toLocalDate().toString(),
-                resumen,
-                hogares
-        );
+    ResumenConsumoGlobalDTO resumen = getResumen(d, h);
+    List<HogarConsumoDTO> hogares = getConsumoPorHogar(d, h);
 
-        // 3) Context Thymeleaf
-        DateTimeFormatter fechaHoraFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        Context context = new Context();
-        context.setVariable("fechaDesde", dto.getFechaDesde());
-        context.setVariable("fechaHasta", dto.getFechaHasta());
-        context.setVariable("fechaGeneracion", dto.getFechaGeneracion().format(fechaHoraFormatter));
-        context.setVariable("resumen", dto.getResumen());
-        context.setVariable("hogares", dto.getHogares());
+    ReporteConsumoAdminDTO dto = new ReporteConsumoAdminDTO(
+            LocalDateTime.now(),
+            d.toString(),
+            h.toString(),
+            resumen,
+            hogares
+    );
 
-        String html = templateEngine.process("admin-consumo-report", context);
+    Context context = new Context();
+    context.setVariable("fechaDesde", dto.getFechaDesde());
+    context.setVariable("fechaHasta", dto.getFechaHasta());
+    context.setVariable("fechaGeneracion", dto.getFechaGeneracion().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+    context.setVariable("resumen", dto.getResumen());
+    context.setVariable("hogares", dto.getHogares());
 
-        // 4) Render to PDF
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            PdfRendererBuilder builder = new PdfRendererBuilder();
-            builder.withHtmlContent(html, "");
-            builder.toStream(baos);
-            builder.run();
-            return baos.toByteArray();
-        } catch (Exception e) {
-            throw new RuntimeException("Error generando PDF admin", e);
-        }
+    String html = templateEngine.process("admin-consumo-report", context);
+
+    try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+        PdfRendererBuilder builder = new PdfRendererBuilder();
+        builder.withHtmlContent(html, "");
+        builder.toStream(baos);
+        builder.run();
+        return baos.toByteArray();
+    } catch (Exception e) {
+        throw new RuntimeException("Error generando PDF admin", e);
     }
+}
+
 
     // --- XLSX ---
     
@@ -616,6 +618,78 @@ private int calcularTagsActivos(List<AquaEventDTO> eventos) {
         } catch (Exception e) {
             throw new RuntimeException("Error generando PDF gamificación", e);
         }
+    }
+
+
+   public List<ConsumoDiaDTO> getConsumoGlobalPorPeriodo(LocalDate desde, LocalDate hasta) {
+
+    LocalDateTime d = desde.atStartOfDay();
+    LocalDateTime h = hasta.atTime(23, 59, 59);
+
+    List<Object[]> rows = medicionRepository.sumFlowGroupByDay(d, h);
+
+    return rows.stream().map(r -> new ConsumoDiaDTO(
+            ((java.sql.Date) r[0]).toLocalDate(),                 // fecha
+            ((Number) r[1]).doubleValue(),      // total
+            0.0,                                 // promedio -> si lo necesitás
+            0.0                                  // máximo -> si lo necesitás
+    )).toList();
+}
+
+
+
+    public ResumenConsumoGlobalDTO getResumen(LocalDate desde, LocalDate hasta) {
+
+        LocalDateTime d = desde.atStartOfDay();
+        LocalDateTime h = hasta.atTime(23, 59, 59);
+
+        List<Object[]> rows = medicionRepository.sumFlowGroupByDay(d, h);
+
+        double total = rows.stream().mapToDouble(r -> ((Number) r[1]).doubleValue()).sum();
+        double pico  = rows.stream().mapToDouble(r -> ((Number) r[1]).doubleValue()).max().orElse(0);
+        double media = rows.isEmpty() ? 0 : total / rows.size();
+        double costo = total * COSTO_POR_LITRO;
+
+        return new ResumenConsumoGlobalDTO(
+                round(total), round(media), round(pico), round(costo)
+        );
+    }
+
+
+    public List<HogarConsumoDTO> getConsumoPorHogar(LocalDate desde, LocalDate hasta) {
+
+        LocalDateTime d = desde.atStartOfDay();
+        LocalDateTime h = hasta.atTime(23, 59, 59);
+
+        List<Object[]> rows = medicionRepository.consumoPorHogar(d, h);
+
+        return rows.stream().map(r -> new HogarConsumoDTO(
+                ((Number) r[0]).longValue(),  // id
+                (String) r[1],                // nombre
+                (String) r[2],                // localidad
+                ((Number) r[3]).intValue(),   // integrantes
+                ((Number) r[4]).doubleValue(), // total litros
+                round(((Number) r[4]).doubleValue() * COSTO_POR_LITRO)
+        )).toList();
+    }
+
+
+    public List<TopMesDTO> getTopMeses(LocalDate desde, LocalDate hasta) {
+        LocalDateTime d = desde.atStartOfDay();
+        LocalDateTime h = hasta.atTime(23, 59, 59);
+
+        List<Object[]> rows = medicionRepository.topMeses(d, h);
+
+        return rows.stream().map(r -> new TopMesDTO(
+                ((Number) r[0]).intValue(),         // mes
+                ((Number) r[1]).doubleValue(),       // total
+                round(((Number) r[1]).doubleValue() / 30) // media aproximada
+        )).toList();
+    }
+
+
+    private double round(double v) {
+        return Math.round(v * 100.0) / 100.0;
     }
 
 }

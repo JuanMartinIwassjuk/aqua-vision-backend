@@ -6,6 +6,9 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import com.app.aquavision.dto.admin.consumo.ConsumoDiaDTO;
+import com.app.aquavision.dto.admin.consumo.ConsumoPeriodoDTO;
+import com.app.aquavision.dto.admin.consumo.ResumenConsumoGlobalDTO;
 import com.app.aquavision.dto.admin.eventos.AquaEventDTO;
 import com.app.aquavision.dto.admin.eventos.ResumenEventosDTO;
 import com.app.aquavision.dto.admin.eventos.TagRankingDTO;
@@ -31,6 +34,55 @@ public class ReportAdminController {
 
     @Autowired
     private com.app.aquavision.services.ReportAdminService reporteAdminService;
+
+@GetMapping("/consumo/periodo")
+public ResponseEntity<List<ConsumoPeriodoDTO>> consumoPeriodo(
+        @RequestParam String fechaInicio,
+        @RequestParam String fechaFin) {
+    try {
+
+        LocalDate desde = LocalDate.parse(fechaInicio);
+        LocalDate hasta = LocalDate.parse(fechaFin);
+
+        List<ConsumoDiaDTO> consumoPorDia = reporteService.getConsumoGlobalPorPeriodo(desde, hasta);
+
+        double costoPorLitro = 0.18;
+
+        List<ConsumoPeriodoDTO> salida = consumoPorDia.stream().map(d -> {
+            ConsumoPeriodoDTO dto = new ConsumoPeriodoDTO();
+
+            String fecha = d.getFecha() != null ? d.getFecha().toString() : "";
+            double litros = d.getConsumoTotal() != null ? d.getConsumoTotal() : 0.0;
+
+            dto.setFecha(fecha);
+            dto.setTotalLitros(litros);
+            dto.setCosto(Math.round(litros * costoPorLitro * 100.0) / 100.0);
+
+            return dto;
+        }).toList();
+
+        return ResponseEntity.ok(salida);
+
+    } catch (Exception e) {
+        e.printStackTrace(); // <- agregalo para ver errores reales
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+}
+
+@GetMapping("/consumo/resumen")
+public ResponseEntity<ResumenConsumoGlobalDTO> consumoResumen(
+        @RequestParam String fechaInicio,
+        @RequestParam String fechaFin) {
+    try {
+        LocalDate desde = LocalDate.parse(fechaInicio);
+        LocalDate hasta = LocalDate.parse(fechaFin);
+
+        ResumenConsumoGlobalDTO resumen = reporteService.getResumen(desde, hasta);
+        return ResponseEntity.ok(resumen);
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+}
 
     @GetMapping("/consumo/descargar-pdf")
     public ResponseEntity<byte[]> descargarReporteConsumoPdf(

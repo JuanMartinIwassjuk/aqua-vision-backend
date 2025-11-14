@@ -38,4 +38,46 @@ public interface MedicionRepository extends JpaRepository<Medicion, Long> {
     List<Medicion> findAllWithSectorAndHogarBetween(
             @Param("desde") LocalDateTime desde,
             @Param("hasta") LocalDateTime hasta);
+
+
+            @Query("""
+    SELECT DATE(m.timestamp) AS fecha, SUM(m.flow) AS total
+    FROM Medicion m
+    WHERE m.timestamp BETWEEN :desde AND :hasta
+    GROUP BY DATE(m.timestamp)
+    ORDER BY fecha
+""")
+List<Object[]> sumFlowGroupByDay(
+        @Param("desde") LocalDateTime desde,
+        @Param("hasta") LocalDateTime hasta
+);
+
+@Query("""
+    SELECT h.id, h.nombre, h.localidad, SUM(m.flow)
+    FROM Medicion m
+    JOIN m.sector s
+    JOIN s.hogar h
+    WHERE m.timestamp BETWEEN :desde AND :hasta
+    GROUP BY h.id, h.nombre, h.localidad
+""")
+List<Object[]> consumoPorHogar(
+        @Param("desde") LocalDateTime desde,
+        @Param("hasta") LocalDateTime hasta
+);
+
+
+@Query("""
+    SELECT MONTH(m.timestamp) AS mes, SUM(m.flow) AS total
+    FROM Medicion m
+    WHERE m.timestamp BETWEEN :desde AND :hasta
+    GROUP BY MONTH(m.timestamp)
+    ORDER BY total DESC
+""")
+List<Object[]> topMeses(
+        @Param("desde") LocalDateTime desde,
+        @Param("hasta") LocalDateTime hasta
+);
+
+
+
 }
