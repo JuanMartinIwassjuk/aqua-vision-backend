@@ -6,6 +6,9 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import com.app.aquavision.dto.admin.eventos.AquaEventDTO;
+import com.app.aquavision.dto.admin.eventos.ResumenEventosDTO;
+import com.app.aquavision.dto.admin.eventos.TagRankingDTO;
 import com.app.aquavision.dto.admin.gamification.HogarRankingDTO;
 import com.app.aquavision.dto.admin.gamification.MedallasHogarDTO;
 import com.app.aquavision.dto.admin.gamification.PuntosDiaDTO;
@@ -15,7 +18,9 @@ import com.app.aquavision.dto.admin.localidad.LocalidadSummaryDTO;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/reportes/admin")
@@ -23,6 +28,9 @@ public class ReportAdminController {
 
     @Autowired
     private com.app.aquavision.services.ReporteService reporteService;
+
+    @Autowired
+    private com.app.aquavision.services.ReportAdminService reporteAdminService;
 
     @GetMapping("/consumo/descargar-pdf")
     public ResponseEntity<byte[]> descargarReporteConsumoPdf(
@@ -47,6 +55,76 @@ public class ReportAdminController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+// empieza eventos
+    @GetMapping("/eventos")
+    public ResponseEntity<List<AquaEventDTO>> obtenerEventos(
+            @RequestParam String fechaInicio,
+            @RequestParam String fechaFin,
+            @RequestParam(required = false) List<Integer> tagIds
+    ) {
+        LocalDateTime desde = LocalDate.parse(fechaInicio).atStartOfDay();
+        LocalDateTime hasta = LocalDate.parse(fechaFin).atTime(LocalTime.MAX);
+
+        List<AquaEventDTO> eventos = reporteAdminService.getEventos(desde, hasta, tagIds);
+        return ResponseEntity.ok(eventos);
+    }
+
+
+    @GetMapping("/eventos/resumen")
+    public ResponseEntity<ResumenEventosDTO> obtenerResumenEventos(
+            @RequestParam String fechaInicio,
+            @RequestParam String fechaFin,
+            @RequestParam(required = false) List<Integer> tagIds
+    ) {
+        LocalDateTime desde = LocalDate.parse(fechaInicio).atStartOfDay();
+        LocalDateTime hasta = LocalDate.parse(fechaFin).atTime(LocalTime.MAX);
+
+        List<AquaEventDTO> eventos = reporteAdminService.getEventos(desde, hasta, tagIds);
+        ResumenEventosDTO resumen = reporteAdminService.calcularResumen(eventos);
+
+        return ResponseEntity.ok(resumen);
+    }
+
+    @GetMapping("/eventos/ranking")
+    public ResponseEntity<List<TagRankingDTO>> obtenerRankingTags(
+            @RequestParam String fechaInicio,
+            @RequestParam String fechaFin,
+            @RequestParam(required = false) List<Integer> tagIds
+    ) {
+        LocalDateTime desde = LocalDate.parse(fechaInicio).atStartOfDay();
+        LocalDateTime hasta = LocalDate.parse(fechaFin).atTime(LocalTime.MAX);
+
+        List<AquaEventDTO> eventos = reporteAdminService.getEventos(desde, hasta, tagIds);
+        List<TagRankingDTO> ranking = reporteAdminService.calcularRankingTags(eventos);
+
+        return ResponseEntity.ok(ranking);
+    }
+
+    @GetMapping("/eventos/por-dia")
+    public ResponseEntity<List<Map<String, Object>>> obtenerEventosPorDia(
+            @RequestParam String fechaInicio,
+            @RequestParam String fechaFin,
+            @RequestParam(required = false) List<Integer> tagIds
+    ) {
+        LocalDateTime desde = LocalDate.parse(fechaInicio).atStartOfDay();
+        LocalDateTime hasta = LocalDate.parse(fechaFin).atTime(LocalTime.MAX);
+
+        List<AquaEventDTO> eventos = reporteAdminService.getEventos(desde, hasta, tagIds);
+        Map<String, Long> porDia = reporteAdminService.eventosPorDia(eventos);
+
+        List<Map<String, Object>> respuesta = porDia.entrySet().stream()
+                .map(e -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("fecha", e.getKey());
+                    map.put("count", e.getValue());
+                    return map;
+                })
+                .toList();
+
+        return ResponseEntity.ok(respuesta);
+    }
+
+
 
     @GetMapping("/eventos/descargar-pdf")
 public ResponseEntity<byte[]> descargarReporteEventosPdf(
@@ -73,6 +151,7 @@ public ResponseEntity<byte[]> descargarReporteEventosPdf(
     }
 }
 
+    //empieza localidad
 
     @GetMapping("/localidad")
     public ResponseEntity<List<LocalidadSummaryDTO>> consumoPorLocalidad(
