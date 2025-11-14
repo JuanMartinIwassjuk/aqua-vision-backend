@@ -136,7 +136,7 @@ public ResponseEntity<byte[]> descargarReporteEventosPdf(
         LocalDate desde = LocalDate.parse(fechaInicio);
         LocalDate hasta = LocalDate.parse(fechaFin);
 
-        byte[] pdfBytes = reporteService.generarPdfReporteEventosAdmin(
+        byte[] pdfBytes = reporteAdminService.generarPdfReporteEventos(
                 desde.atStartOfDay(), hasta.atTime(LocalTime.MAX), tagIds);
 
         HttpHeaders headers = new HttpHeaders();
