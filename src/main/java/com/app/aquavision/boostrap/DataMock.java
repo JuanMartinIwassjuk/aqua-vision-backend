@@ -324,10 +324,9 @@ public class DataMock {
     usuarios.add(new User("erik", "test123", "Erik", "Quispe", false));
     usuarios.add(new User("juan", "test123", "Juan", "Iwassjuk", false));
     usuarios.add(new User("agus", "test123", "Agustin", "Evans", false));
-    usuarios.add(new User("aquavision", "test123", "Aqua", "Vision", false));
     usuarios.add(new User("aquavision", "test123", "Aqua", "Vision", true));
 
-    for (int i = 1; usuarios.size() - 1 < cantidadHogares; i++) {
+    for (int i = 1; usuarios.size() < cantidadHogares; i++) {
       usuarios.add(new User("user" + i, "test123", "User" + i, "User" + i, false));
     }
 
@@ -345,13 +344,6 @@ public class DataMock {
     for (User usuario : usuarios) {
 
       Long hogarId = hogaresDisponibles.get(index);
-
-      Integer existe = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM User_ WHERE username = ?", Integer.class, usuario.getUsername());
-      if (existe > 0) continue;
-
-      if (usuario.isAdmin()) {
-        hogarId = null; // El admin no tiene hogar asignado
-      }
 
       jdbcTemplate.update("INSERT INTO User_ (username, password, name, surname, enabled, hogar_id) VALUES (?, ?, ?, ?, ?, ?)",
           usuario.getUsername(), passwordEncoder.encode(usuario.getPassword()), usuario.getName(), usuario.getSurname(), true, hogarId);
