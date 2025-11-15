@@ -34,6 +34,12 @@ public class AquaEventoController {
         return service.findAll();
     }
 
+    @GetMapping("/hogar/{hogarId}")
+    @Operation(summary = "Listar eventos por hogar ID")
+    public List<AquaEvento> listEventosHogar(@PathVariable Long hogarId) {
+        return service.findByHogarId(hogarId);
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Obtener evento por ID")
     public AquaEvento getById(@PathVariable Long id) {

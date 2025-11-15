@@ -49,6 +49,12 @@ public class AquaEventoService {
         return optionalEvento.orElse(null);
     }
 
+    @Transactional
+    public List<AquaEvento> findByHogarId(Long hogarId) {
+        return this.findAll().stream().filter(
+                evento -> evento.getSector().getHogar().getId().equals(hogarId)
+        ).collect(Collectors.toList());
+    }
 
     @Transactional
     public AquaEvento save(AquaEvento evento) {
