@@ -211,4 +211,14 @@ public class HogarService {
         return null;
     }
 
+    @Transactional
+    public List<Medalla> getMedallasHogar(Long hogarId) {
+        Optional<Hogar> optionalHogar = repository.findById(hogarId);
+        if (optionalHogar.isPresent()) {
+            Hogar hogar = optionalHogar.get();
+            return hogar.getMedallas();
+        }
+        return null;
+    }
+
 }

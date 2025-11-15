@@ -34,6 +34,10 @@ public class Logro {
         this.descripcion = descripcion;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public Logro(){
 
     }

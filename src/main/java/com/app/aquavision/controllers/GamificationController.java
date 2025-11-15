@@ -7,6 +7,7 @@ import com.app.aquavision.dto.gamificacion.RankingDTO;
 import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.entities.domain.gamification.DesafioHogar;
 import com.app.aquavision.entities.domain.gamification.Logro;
+import com.app.aquavision.entities.domain.gamification.Medalla;
 import com.app.aquavision.entities.domain.gamification.Recompensa;
 import com.app.aquavision.services.HogarService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 @Tag(
@@ -77,7 +79,8 @@ public class GamificationController {
                     ),
                     @ApiResponse(
                             responseCode = "400",
-                            description = "Solicitud inválida"
+                            description = "Solicitud inválida",
+                            content = @Content(schema = @Schema(implementation = String.class))
                     )
             }
     )
@@ -89,15 +92,17 @@ public class GamificationController {
 
         logger.info("Hogar with ID: " + id + " is attempting to redeem reward with ID: " + recompensaId);
 
-        try{
+        try {
             Hogar hogar = service.reclamarRecompensa(id, recompensaId);
             logger.info("Reward redeemed successfully for hogar ID: " + id);
             return ResponseEntity.status(HttpStatus.CREATED).body(hogar);
+
         } catch (IllegalArgumentException e) {
             logger.info(e.getMessage());
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity
+                    .badRequest()
+                    .body(Map.of("error", e.getMessage())); // <-- JSON automático
         }
-
     }
 
     @PostMapping("/{id}/racha/aumentar")
@@ -328,6 +333,29 @@ public class GamificationController {
     public List<Logro> getLogros(@Parameter(description = "ID del hogar", example = "1") @PathVariable Long id) {
 
         return service.getLogrosHogar(id);
+    }
+
+    @GetMapping("/{id}/medallas")
+    @Operation(
+            summary = "Obtener las medallas del hogar",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Medallas obtenidas correctamente",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(implementation = List.class))
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Hogar no encontrado"
+                    )
+            }
+    )
+    public List<Medalla> getMedallas(@Parameter(description = "ID del hogar", example = "1") @PathVariable Long id) {
+
+        return service.getMedallasHogar(id);
     }
 
 }
