@@ -70,10 +70,6 @@ public class User {
     @JoinColumn(name = "hogar_id")
     @JsonIgnore
     private Hogar hogar;
-    
-    public User() {
-        roles = new ArrayList<>();
-    }
 
     private boolean enabled;
 
@@ -85,6 +81,20 @@ public class User {
     public void prePersist() {
         enabled = true;
     }
+
+    public User() {
+        roles = new ArrayList<>();
+    }
+
+    public  User(String username, String password, String name, String surname, boolean admin) {
+        this.name = name;
+        this.surname = surname;
+        this.username = username;
+        this.password = password;
+        this.admin = admin;
+        this.roles = new ArrayList<>();
+    }
+
 
     public Long getId() {
         return id;

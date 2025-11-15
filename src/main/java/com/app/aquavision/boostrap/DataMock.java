@@ -1,5 +1,6 @@
 package com.app.aquavision.boostrap;
 
+import com.app.aquavision.entities.User;
 import com.app.aquavision.entities.domain.EstadoMedidor;
 import com.app.aquavision.entities.domain.gamification.Minijuego;
 import com.app.aquavision.entities.domain.notifications.TipoNotificacion;
@@ -31,7 +32,7 @@ public class DataMock {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private final int cantidadHogares = 11;
+    private final int cantidadHogares = 7;
 
     private static final Logger logger = LoggerFactory.getLogger(DataMock.class);
 
@@ -80,7 +81,7 @@ public class DataMock {
                     1, "TARJETA_CREDITO");
 
             jdbcTemplate.update("INSERT INTO Hogar (miembros, localidad, direccion, ambientes, tiene_patio, tiene_pileta, tipo_hogar, facturacion_id, email, racha_diaria, puntos_disponibles, nombre) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-                    cantidadMiembros, randomLocalidad(), "Medrano 191", 2, true, false, "CASA", hogarId, "hogar" + hogarId + "@example.com", 0, 10, "hogar" + hogarId);
+                    cantidadMiembros, randomLocalidad(), "Medrano 191", 2, true, false, "CASA", hogarId, "hogar" + hogarId + "@example.com", 0, 10, "MI HOGAR");
 
             //Insertar logros y medallas
             jdbcTemplate.update("INSERT INTO hogar_medallas (hogar_id, medalla_id) VALUES (?, ?);",
@@ -225,28 +226,42 @@ public class DataMock {
 
   }
 
-private void insertarNotificaciones() {
-    logger.info("Insertando notificaciones...");
+    private void insertarNotificaciones() {
+        logger.info("Insertando notificaciones...");
 
-    List<Long> hogaresIDs = jdbcTemplate.query(
-        "SELECT id FROM Hogar",
-        (rs, rowNum) -> rs.getLong("id")
-    );
+        List<Long> hogaresIDs = jdbcTemplate.query(
+            "SELECT id FROM Hogar",
+            (rs, rowNum) -> rs.getLong("id")
+        );
 
-    LocalDateTime hoy = LocalDateTime.now();
+        LocalDateTime hoy = LocalDateTime.now();
 
-    for (Long hogarId : hogaresIDs) {
-        TipoNotificacion tipo = TipoNotificacion.ALERTA;
-        String titulo = (tipo == TipoNotificacion.ALERTA) ? "Alerta" : "Recompensa";
-        String mensaje = (tipo == TipoNotificacion.ALERTA)
-            ? "Notificación de alerta para el hogar " + hogarId
-            : "¡Felicidades! Has recibido una recompensa en el hogar " + hogarId;
-      jdbcTemplate.update(
-          "INSERT INTO Notificacion (hogar_id, mensaje, fecha_envio, titulo, leido, tipo) VALUES (?, ?, ?, ?, ?, ?)",
-          hogarId, mensaje, hoy, titulo, false, tipo.name()
-      );
+        for (Long hogarId : hogaresIDs) {
+            TipoNotificacion tipo = TipoNotificacion.INFORME;
+            String titulo = "📊💧 Informe de Consumo Mensual 💧📊";
+            String mensaje = "Su consumo mensual de Noviembre ha sido de 5000 litros";
+          jdbcTemplate.update(
+              "INSERT INTO Notificacion (hogar_id, mensaje, fecha_envio, titulo, leido, tipo) VALUES (?, ?, ?, ?, ?, ?)",
+              hogarId, mensaje, hoy, titulo, false, tipo.name()
+          );
+
+          tipo = TipoNotificacion.ALERTA;
+          titulo = "🚨 Alerta de sensor inactivo 🚨";
+          mensaje = "Se ha detectado que uno de sus sensores se desconectó el dia: " + hoy.minusDays(2).toLocalDate();
+          jdbcTemplate.update(
+                  "INSERT INTO Notificacion (hogar_id, mensaje, fecha_envio, titulo, leido, tipo) VALUES (?, ?, ?, ?, ?, ?)",
+                  hogarId, mensaje, hoy, titulo, false, tipo.name()
+          );
+
+          tipo = TipoNotificacion.ALERTA;
+          titulo = "🚨💧 Alerta de fuga de agua detectada 💧🚨";
+          mensaje = "Se ha detectado una posible pérdidad en el sector BAÑO el dia: " + hoy.minusDays(2).toLocalDate();
+          jdbcTemplate.update(
+                  "INSERT INTO Notificacion (hogar_id, mensaje, fecha_envio, titulo, leido, tipo) VALUES (?, ?, ?, ?, ?, ?)",
+                  hogarId, mensaje, hoy, titulo, false, tipo.name()
+          );
+        }
     }
-}
 
   private void insertarEventos(){
 
@@ -259,8 +274,8 @@ private void insertarNotificaciones() {
 
     for (Long sectorId : sectoresIDs) {
         jdbcTemplate.update(
-            "INSERT INTO aqua_evento (costo, litros_consumidos, fecha_inicio, id, sector_id, descripcion, titulo, estado_evento) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                123, 3, hoy, sectorId, sectorId, "Evento de limpieza", "Limpieza", "EN_PROCESO");
+            "INSERT INTO aqua_evento (costo, litros_consumidos, fecha_inicio, fecha_fin, sector_id, descripcion, titulo, estado_evento) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                200, 3, hoy, hoy.plusMinutes(15), sectorId, "Evento de limpieza", "Limpieza", "FINALIZADO");
         jdbcTemplate.update(
                 "INSERT INTO evento_tags (evento_id, tag_id) VALUES (?, ?)",
                 sectorId, 1);
@@ -304,20 +319,17 @@ private void insertarNotificaciones() {
 
     logger.info("Insertando usuarios...");
 
-    Map<String, Boolean> usuarios = new LinkedHashMap<>();
-    usuarios.put("matif", false);
-    usuarios.put("matifadmin", true);
-    usuarios.put("matip", false);
-    usuarios.put("matipadmin", true);
-    usuarios.put("erik", false);
-    usuarios.put("erikadmin", true);
-    usuarios.put("juan", false);
-    usuarios.put("juanadmin", true);
-    usuarios.put("agus", false);
-    usuarios.put("agusadmin", true);
+    List<User> usuarios = new ArrayList<>();
+    usuarios.add(new User("matif", "test123", "Matias", "Fernandez", false));
+    usuarios.add(new User("matip", "test123", "Matias", "Planchuelo", false));
+    usuarios.add(new User("erik", "test123", "Erik", "Quispe", false));
+    usuarios.add(new User("juan", "test123", "Juan", "Iwassjuk", false));
+    usuarios.add(new User("agus", "test123", "Agustin", "Evans", false));
+    usuarios.add(new User("aquavision", "test123", "Aqua", "Vision", false));
+    usuarios.add(new User("aquavision", "test123", "Aqua", "Vision", true));
 
-    for (int i = 1; usuarios.size() < cantidadHogares; i++) {
-      usuarios.put("user" + i, false);
+    for (int i = 1; usuarios.size() - 1 < cantidadHogares; i++) {
+      usuarios.add(new User("user" + i, "test123", "User" + i, "User" + i, false));
     }
 
     Long roleUserId = jdbcTemplate.queryForObject("SELECT id FROM Role_ WHERE name = 'ROLE_USER'", Long.class);
@@ -326,25 +338,30 @@ private void insertarNotificaciones() {
     List<Long> hogaresDisponibles = jdbcTemplate.query("SELECT id FROM Hogar",
         (rs, rowNum) -> rs.getLong("id"));
 
-    if (hogaresDisponibles.size() < usuarios.size()) {
+    if (hogaresDisponibles.size() < usuarios.size() - 1) {
       throw new IllegalStateException("No hay suficientes hogares para asignar a todos los usuarios");
     }
 
     int index = 0;
-    for (Map.Entry<String, Boolean> entry : usuarios.entrySet()) {
-      String username = entry.getKey();
-      boolean esAdmin = entry.getValue();
-      Long hogarId = hogaresDisponibles.get(index++);
+    for (User usuario : usuarios) {
 
-      Integer existe = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM User_ WHERE username = ?", Integer.class, username);
+      Long hogarId = hogaresDisponibles.get(index);
+
+      Integer existe = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM User_ WHERE username = ?", Integer.class, usuario.getUsername());
       if (existe > 0) continue;
 
-      jdbcTemplate.update("INSERT INTO User_ (username, password, name, surname, enabled, hogar_id) VALUES (?, ?, ?, ?, ?, ?)",
-          username, passwordEncoder.encode("test123"), username, "perez", true, hogarId);
+      if (usuario.isAdmin()) {
+        hogarId = null; // El admin no tiene hogar asignado
+      }
 
-      Long userId = jdbcTemplate.queryForObject("SELECT id FROM User_ WHERE username = ?", Long.class, username);
+      jdbcTemplate.update("INSERT INTO User_ (username, password, name, surname, enabled, hogar_id) VALUES (?, ?, ?, ?, ?, ?)",
+          usuario.getUsername(), passwordEncoder.encode(usuario.getPassword()), usuario.getName(), usuario.getSurname(), true, hogarId);
+
+      Long userId = jdbcTemplate.queryForObject("SELECT id FROM User_ WHERE username = ?", Long.class, usuario.getUsername());
       jdbcTemplate.update("INSERT INTO Usuarios_Roles (user_id, role_id) VALUES (?, ?)",
-          userId, esAdmin ? roleAdminId : roleUserId);
+          userId, usuario.isAdmin() ? roleAdminId : roleUserId);
+
+      index++;
     }
   }
 

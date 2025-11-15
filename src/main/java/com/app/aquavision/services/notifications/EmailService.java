@@ -39,28 +39,28 @@ public class EmailService {
     }
 
     public void enviarNotificacionConsumos(Hogar hogar, String cuerpo) {
-        String titulo = "📊💧 Informe de Consumo Mensual - AquaVision 💧📊";
+        String titulo = "📊💧 Informe de Consumo Mensual 💧📊";
         Notificacion notificacion = new Notificacion(TipoNotificacion.INFORME, titulo, cuerpo);
 
         this.enviarNotificacionHogar(notificacion, hogar);
     }
 
     public void enviarNotificacionSobrepasoUmbrales(Hogar hogar, String cuerpo) {
-        String titulo = "⚠️ Alerta de validacion de umbrales - AquaVision ⚠️";
+        String titulo = "⚠️ Alerta de validacion de umbrales ⚠️";
         Notificacion notificacion = new Notificacion(TipoNotificacion.ALERTA, titulo, cuerpo);
 
         this.enviarNotificacionHogar(notificacion, hogar);
     }
 
     public void enviarNotificacionSensorInactivo(Hogar hogar, String cuerpo) {
-        String titulo = "🚨 Alerta de sensor inactivo - AquaVision 🚨";
+        String titulo = "🚨 Alerta de sensor inactivo 🚨";
         Notificacion notificacion = new Notificacion(TipoNotificacion.ALERTA, titulo, cuerpo);
 
         this.enviarNotificacionHogar(notificacion, hogar);
     }
 
     public void enviarNotificacionFugaAgua(Hogar hogar, String cuerpo) {
-        String titulo = "🚨💧 Alerta de fuga de agua detectada - AquaVision 💧🚨";
+        String titulo = "🚨💧 Alerta de fuga de agua detectada 💧🚨";
         Notificacion notificacion = new Notificacion(TipoNotificacion.ALERTA, titulo, cuerpo);
 
         this.enviarNotificacionHogar(notificacion, hogar);
