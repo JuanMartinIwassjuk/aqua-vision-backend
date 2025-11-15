@@ -307,6 +307,9 @@ public class Hogar {
     }
 
     public List<DesafioHogar> getDesafios() {
+        for (DesafioHogar desafioHogar : desafios) {
+            desafioHogar.getDesafio().actualizarProgreso(desafioHogar, this);
+        }
         return desafios;
     }
 

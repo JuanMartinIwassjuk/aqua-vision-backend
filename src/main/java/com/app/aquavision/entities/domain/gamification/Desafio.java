@@ -1,5 +1,6 @@
 package com.app.aquavision.entities.domain.gamification;
 
+import com.app.aquavision.entities.domain.Hogar;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
@@ -48,4 +49,10 @@ public class Desafio {
     public Long getId() {
         return id;
     }
+
+    public void actualizarProgreso(DesafioHogar desafioHogar, Hogar hogar){
+        //TODO: Implementar correctamente según cada desafio en su clase correspondiente
+    }
+
+
 }
