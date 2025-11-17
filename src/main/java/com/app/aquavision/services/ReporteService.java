@@ -629,10 +629,10 @@ private int calcularTagsActivos(List<AquaEventDTO> eventos) {
     List<Object[]> rows = medicionRepository.sumFlowGroupByDay(d, h);
 
     return rows.stream().map(r -> new ConsumoDiaDTO(
-            ((java.sql.Date) r[0]).toLocalDate(),                 // fecha
-            ((Number) r[1]).doubleValue(),      // total
-            0.0,                                 // promedio -> si lo necesitás
-            0.0                                  // máximo -> si lo necesitás
+            ((java.sql.Date) r[0]).toLocalDate(),                
+            ((Number) r[1]).doubleValue(),     
+            0.0,                                 
+            0.0                                  
     )).toList();
 }
 

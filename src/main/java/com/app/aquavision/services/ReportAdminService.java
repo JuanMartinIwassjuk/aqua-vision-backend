@@ -44,20 +44,43 @@ public class ReportAdminService {
     // =============================
     //     OBTENER EVENTOS REALES
     // =============================
-    public List<AquaEventDTO> getEventos(LocalDateTime desde,
-                                         LocalDateTime hasta,
-                                         List<Integer> tagIds) {
+public List<AquaEventDTO> getEventos(LocalDateTime desde,
+                                     LocalDateTime hasta,
+                                     List<Integer> tagIds) {
 
-        List<AquaEvento> eventos;
+    // DEBUG: log input
+    System.out.println("Service.getEventos called with desde=" + desde + " hasta=" + hasta + " tagIds=" + tagIds);
 
-        if (tagIds != null && !tagIds.isEmpty()) {
-            eventos = aquaEventoRepository.findEventosBetweenDatesAndTags(desde, hasta, tagIds);
-        } else {
-            eventos = aquaEventoRepository.findEventosBetweenDates(desde, hasta);
-        }
+    List<AquaEvento> eventos;
 
-        return eventos.stream().map(this::mapToDTO).toList();
+    if (tagIds != null && !tagIds.isEmpty()) {
+        eventos = aquaEventoRepository.findEventosBetweenDatesAndTags(desde, hasta, tagIds);
+    } else {
+        eventos = aquaEventoRepository.findEventosBetweenDates(desde, hasta);
     }
+
+    if (eventos == null) eventos = List.of();
+
+    // Filtrado defensivo: asegurarnos que las fechas de los eventos caen dentro del rango pedido
+    List<AquaEvento> eventosFiltrados = eventos.stream()
+            .filter(e -> {
+                if (e.getFechaInicio() == null) return false;
+                LocalDateTime f = e.getFechaInicio();
+                // si fechaInicio tiene zona distinta ya fue mapeada a LocalDateTime en la entidad
+                return !f.isBefore(desde) && !f.isAfter(hasta);
+            })
+            .toList();
+
+    // LOG: mostrar resumen de lo recibido vs filtrado
+    System.out.println("Service.getEventos: recibidos=" + eventos.size() + ", despuésFiltrado=" + eventosFiltrados.size());
+    if (!eventosFiltrados.isEmpty()) {
+        eventosFiltrados.stream().limit(10)
+                .forEach(ev -> System.out.println(" evt id=" + ev.getId() + " fechaInicio=" + ev.getFechaInicio() + " fechaFin=" + ev.getFechaFin()));
+    }
+
+    return eventosFiltrados.stream().map(this::mapToDTO).toList();
+}
+
 
     private AquaEventDTO mapToDTO(AquaEvento e) {
         AquaEventDTO dto = new AquaEventDTO();
