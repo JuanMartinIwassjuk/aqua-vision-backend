@@ -41,9 +41,7 @@ public class ReportAdminService {
 
     private static final double COSTO_POR_LITRO = 0.18;
 
-    // =============================
-    //     OBTENER EVENTOS REALES
-    // =============================
+
 public List<AquaEventDTO> getEventos(LocalDateTime desde,
                                      LocalDateTime hasta,
                                      List<Integer> tagIds) {
@@ -61,17 +59,17 @@ public List<AquaEventDTO> getEventos(LocalDateTime desde,
 
     if (eventos == null) eventos = List.of();
 
-    // Filtrado defensivo: asegurarnos que las fechas de los eventos caen dentro del rango pedido
+
     List<AquaEvento> eventosFiltrados = eventos.stream()
             .filter(e -> {
                 if (e.getFechaInicio() == null) return false;
                 LocalDateTime f = e.getFechaInicio();
-                // si fechaInicio tiene zona distinta ya fue mapeada a LocalDateTime en la entidad
+
                 return !f.isBefore(desde) && !f.isAfter(hasta);
             })
             .toList();
 
-    // LOG: mostrar resumen de lo recibido vs filtrado
+
     System.out.println("Service.getEventos: recibidos=" + eventos.size() + ", despuésFiltrado=" + eventosFiltrados.size());
     if (!eventosFiltrados.isEmpty()) {
         eventosFiltrados.stream().limit(10)

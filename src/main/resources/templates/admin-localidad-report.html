@@ -22,7 +22,7 @@
   <header>
     <h1>Reporte por Localidad — Administrador</h1>
     <div class="meta" th:if="${fechaDesde != null or fechaHasta != null}"
-         th:text="${'Periodo: ' + (fechaDesde != null ? fechaDesde : '') + ( (fechaDesde != null or fechaHasta != null) ? ' \u2192 ' : '' ) + (fechaHasta != null ? fechaHasta : '')}">
+         th:text="${'Periodo: ' + (fechaDesde != null ? fechaDesde : '') + ( (fechaDesde != null or fechaHasta != null) ? ' - ' : '' ) + (fechaHasta != null ? fechaHasta : '')}">
       Período
     </div>
     <div class="meta small" th:text="${'Generado: ' + (fechaGeneracion != null ? fechaGeneracion : '')}">Generado</div>
