@@ -95,7 +95,8 @@ public class ReporteService {
             );
             consumoTotalHogarDTO.setConsumoPico(
                     consumoTotalHogarDTO.getConsumosPorSector().stream()
-                            .mapToInt(ConsumoTotalSectorDTO::getConsumoPico)
+                            //.mapToInt(ConsumoTotalSectorDTO::getConsumoPico)
+                            .mapToDouble(ConsumoTotalSectorDTO::getConsumoPico)
                             .max()
                             .orElse(0)
             );
@@ -214,7 +215,8 @@ public byte[] generarPdfReporte(Long hogarId, LocalDateTime fechaDesde, LocalDat
     for (Sector s : hogar.getSectores()) {
         int consumo = s.totalConsumo();
         float promedio = s.promedioConsumo();
-        float pico = s.picoConsumo();
+        //float pico = s.picoConsumo();
+        Double pico = s.picoConsumo();
         double costo = consumo * costoPorLitro;
 
         sectores.add(new ReporteDiarioSectorDTO(

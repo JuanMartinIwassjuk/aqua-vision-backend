@@ -90,7 +90,8 @@ public class CuentaService {
                         .setUltimaMedicion(sector.getMediciones().stream().findFirst()
                                 .map(Medicion::getTimestamp)
                                 .orElse(null))
-                        .setConsumoActual(sector.getMediciones().stream().mapToInt(Medicion::getFlow).sum());
+                        //.setConsumoActual(sector.getMediciones().stream().mapToInt(Medicion::getFlow).sum());
+                        .setConsumoActual(sector.getMediciones().stream().mapToDouble(Medicion::getFlow).sum());
                 sensores.add(sensorDTO);
             }
         }

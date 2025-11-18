@@ -19,7 +19,8 @@ public class ConsumoTotalHogarDTO {
     //Consumos
     private int consumoTotal = 0;
     private float consumoPromedio = 0;
-    private float consumoPico = 0;
+    //private float consumoPico = 0;
+    private Double consumoPico = 0.0;
 
     private final List<ConsumoTotalSectorDTO> consumosPorSector = new ArrayList<>();
 
@@ -65,7 +66,10 @@ public class ConsumoTotalHogarDTO {
         return consumoPromedio;
     }
 
-    public Float getConsumoPico() {
+    /*public Float getConsumoPico() {
+        return consumoPico;
+    }*/
+    public Double getConsumoPico() {
         return consumoPico;
     }
 
@@ -73,7 +77,10 @@ public class ConsumoTotalHogarDTO {
         this.consumoPromedio = consumoPromedio;
     }
 
-    public void setConsumoPico(float consumoPico) {
+    /*public void setConsumoPico(float consumoPico) {
+        this.consumoPico = consumoPico;
+    }*/
+    public void setConsumoPico(Double consumoPico) {
         this.consumoPico = consumoPico;
     }
 

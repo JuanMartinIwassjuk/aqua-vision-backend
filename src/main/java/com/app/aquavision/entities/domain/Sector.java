@@ -133,8 +133,10 @@ public class Sector {
         return totalConsumo / mediciones.size();
     }
 
-    public int picoConsumo() {
-        int picoConsumo = 0;
+    //public int picoConsumo() {
+    public Double picoConsumo() {
+        //int picoConsumo = 0;
+        Double picoConsumo = 0.0;
 
         if (!mediciones.isEmpty()) {
             for (Medicion medicion : mediciones) {

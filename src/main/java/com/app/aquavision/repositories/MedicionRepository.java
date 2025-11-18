@@ -23,6 +23,19 @@ public interface MedicionRepository extends JpaRepository<Medicion, Long> {
             @Param("fechaHasta") LocalDateTime fechaHasta
     );
 
+    @Query("""
+        select m
+        from Medicion m
+        where m.sector.id = :sectorId
+          and m.timestamp between :fechaDesde and :fechaHasta
+        ORDER BY m.timestamp ASC 
+    """)
+    List<Medicion> findBySectorIdAndTimestampRange( // HACE LO MISMO QUE ARRIBA PERO DEVUELVE ORDENADO, 
+            @Param("sectorId") Long sectorId,       // POR LAS DUDAS DUPLICO POR SI SE LLAMA EN OTRO LADO Y SI LA ORDENO SE ROMPE
+            @Param("fechaDesde") LocalDateTime fechaDesde,
+            @Param("fechaHasta") LocalDateTime fechaHasta
+    );
+
         @Query("SELECT COALESCE(SUM(m.flow), 0) FROM Medicion m WHERE m.sector = :sector AND m.timestamp >= :start AND m.timestamp <= :end")
     Long sumFlowBySectorAndTimestampBetween(
         @Param("sector") Sector sector,

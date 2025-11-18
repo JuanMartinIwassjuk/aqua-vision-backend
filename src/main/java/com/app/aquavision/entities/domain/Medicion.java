@@ -20,7 +20,8 @@ public class Medicion {
     private Sector sector;
 
     @Column
-    private int flow;
+    //private int flow;
+    private Double flow;
 
     @Column
     private LocalDateTime timestamp;
@@ -30,10 +31,15 @@ public class Medicion {
         // Constructor por defecto
     }
 
-    public Medicion(int flow, LocalDateTime timestamp) {
+    /*public Medicion(int flow, LocalDateTime timestamp) {
+        this.flow = flow;
+        this.timestamp = timestamp;
+    }*/
+    public Medicion(Double flow, LocalDateTime timestamp) {
         this.flow = flow;
         this.timestamp = timestamp;
     }
+
     public Sector getSector() {
         return sector;
     }
@@ -41,13 +47,10 @@ public class Medicion {
         this.sector = sector;
     }
 
-    public int getFlow() {
-        return flow;
-    }
-
-    public void setFlow(int flow) {
-        this.flow = flow;
-    }
+    //public int getFlow() { return flow; }
+    public Double getFlow() { return flow; }
+    //public void setFlow(int flow) { this.flow = flow; }
+    public void setFlow(Double flow) { this.flow = flow; }
 
     public LocalDateTime getTimestamp() {
         return timestamp;

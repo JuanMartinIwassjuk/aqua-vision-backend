@@ -23,10 +23,10 @@ public class DomainTest {
     @BeforeEach
     public void init() {
 
-        Medicion medicion1 = new Medicion(100, LocalDateTime.of(2025, 1, 1, 10, 0, 0));
-        Medicion medicion2 = new Medicion(200, hoy);
-        Medicion medicion3 = new Medicion(150, LocalDateTime.of(2025, 1, 2, 10, 1, 0));
-        Medicion medicion4 = new Medicion(300, hoy);
+        Medicion medicion1 = new Medicion(100.0, LocalDateTime.of(2025, 1, 1, 10, 0, 0));
+        Medicion medicion2 = new Medicion(200.0, hoy);
+        Medicion medicion3 = new Medicion(150.0, LocalDateTime.of(2025, 1, 2, 10, 1, 0));
+        Medicion medicion4 = new Medicion(300.0, hoy);
 
         Medidor medidor1 = new Medidor(123456);
         Sector baño = new Sector("Baño", CategoriaSector.BAÑO, medidor1);

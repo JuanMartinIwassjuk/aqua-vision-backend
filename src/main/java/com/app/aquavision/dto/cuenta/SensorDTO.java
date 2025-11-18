@@ -8,7 +8,8 @@ public class SensorDTO {
     private String nombreSensor;
     private EstadoMedidor estadoActual;
     private LocalDateTime ultimaMedicion;
-    private int consumoActual;
+    //private int consumoActual;
+    private Double consumoActual;
     public SensorDTO() {
     }
     // Getters & setters
@@ -39,11 +40,18 @@ public class SensorDTO {
         return this;
     }
 
-    public int getConsumoActual() {
+    /*public int getConsumoActual() {
+        return consumoActual;
+    }*/
+    public Double getConsumoActual() {
         return consumoActual;
     }
 
-    public SensorDTO setConsumoActual(int consumoActual) {
+    /*public SensorDTO setConsumoActual(int consumoActual) {
+        this.consumoActual = consumoActual;
+        return this;
+    }*/
+    public SensorDTO setConsumoActual(Double consumoActual) {
         this.consumoActual = consumoActual;
         return this;
     }
