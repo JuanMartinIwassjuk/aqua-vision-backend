@@ -77,14 +77,13 @@ public class CuentaService {
 
     public List<SensorDTO> obtenerSensores(Long hogarId) {
         Hogar hogar = hogarService.findById(hogarId);
-        if (hogar == null) {
-            return null;
-        }
-// ✅ Recorrer los sectores del hogar y obtener sus medidores
+        if (hogar == null) { return null; }
+        // ✅ Recorrer los sectores del hogar y obtener sus medidores
         List<SensorDTO> sensores = new ArrayList<>();
         for (Sector sector : hogar.getSectores()) {
             if (sector.getMedidor() != null) {
                 SensorDTO sensorDTO = new SensorDTO()
+                        .setIdSector(sector.getId())
                         .setNombreSensor(sector.getNombre())
                         .setEstadoActual(sector.getMedidor().getEstado())
                         .setUltimaMedicion(sector.getMediciones().stream().findFirst()

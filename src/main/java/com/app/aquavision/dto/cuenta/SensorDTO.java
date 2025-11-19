@@ -5,6 +5,9 @@ import com.app.aquavision.entities.domain.EstadoMedidor;
 import java.time.LocalDateTime;
 
 public class SensorDTO {
+    
+    private Long idSector;
+
     private String nombreSensor;
     private EstadoMedidor estadoActual;
     private LocalDateTime ultimaMedicion;
@@ -13,6 +16,16 @@ public class SensorDTO {
     public SensorDTO() {
     }
     // Getters & setters
+    
+    public Long getIdSector() {
+        return idSector;
+    }
+
+    public SensorDTO setIdSector(Long idSector) {
+        this.idSector = idSector;
+        return this;
+    }
+    
     public String getNombreSensor() {
         return nombreSensor;
     }
