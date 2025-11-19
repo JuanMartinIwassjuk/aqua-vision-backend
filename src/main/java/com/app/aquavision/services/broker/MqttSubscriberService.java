@@ -83,6 +83,48 @@ public class MqttSubscriberService {
                     // -------- (1) EVENTOS DE ESTADO: online / offline --------
                     if (root.has("evt")) {
                         String evt = root.path("evt").asText();
+                        // Capturamos el sectorId. Nota: En el log lo tienes como String, lo convertimos a Long.
+                        Long sectorId = root.path("id_sector").asLong(0L); 
+
+                        if (sectorId == 0L) {
+                            logger.warn("Evento con evt pero sin id_sector válido. Ignorado.");
+                            return;
+                        }
+
+                        // Buscamos el Sector y, a través de él, el Medidor
+                        sectorRepository.findById(sectorId).ifPresentOrElse(sector -> {
+                            Medidor medidor = sector.getMedidor();
+
+                            if (medidor == null) {
+                                logger.error("❌ Sector ID {} existe pero NO está asociado a un Medidor. Ignorado.", sectorId);
+                                return;
+                            }
+
+                            // Usamos el número de serie del Medidor encontrado (para el tracker)
+                            int numeroSerie = medidor.getNumeroSerie();
+                            Tracker t = trackers.computeIfAbsent(numeroSerie, k -> new Tracker());
+
+                            if ("online".equalsIgnoreCase(evt)) {
+                                t.zeroStreak.set(0);
+                                setEstadoIfChanged(medidor, EstadoMedidor.IDLE);
+                                crearNotificacionCambioEstado(medidor, "El medidor se ha reconectado y está nuevamente en línea. Sector ID: " + sectorId, TipoNotificacion.INFORME);
+                                logger.info("🟢 Medidor {} ONLINE (Sector {})", numeroSerie, sectorId);
+                            } else if ("offline".equalsIgnoreCase(evt)) {
+                                t.zeroStreak.set(0);
+                                setEstadoIfChanged(medidor, EstadoMedidor.OFFLINE);
+                                crearNotificacionCambioEstado(medidor, "El medidor se ha desconectado y está fuera de línea. Sector ID: " + sectorId, TipoNotificacion.ALERTA);
+                                logger.info("🔴 Medidor {} OFFLINE (Sector {})", numeroSerie, sectorId);
+                            }
+
+                            medidorRepository.save(medidor);
+                        }, () -> logger.error("❌ Sector ID {} no encontrado para evento {}. Ignorado.", sectorId, evt));
+
+                        return; // ya procesado
+                    }
+                    
+                    // -------- (1) EVENTOS DE ESTADO: online / offline --------
+                    /*if (root.has("evt")) {
+                        String evt = root.path("evt").asText();
                         String deviceId = root.path("deviceId").asText(null);
 
                         if (deviceId == null || deviceId.isBlank()) {
@@ -113,10 +155,10 @@ public class MqttSubscriberService {
                         }, () -> logger.error("❌ Medidor numeroSerie {} no encontrado", numeroSerie));
 
                         return; // ya procesado
-                    }
+                    }*/
 
                     // -------- (2) MEDICIÓN NORMAL --------
-                    MedicionDTO dto = objectMapper.treeToValue(root, MedicionDTO.class);
+                    /*MedicionDTO dto = objectMapper.treeToValue(root, MedicionDTO.class);
                     // Si tu "numeroSerie" coincide con sectorId, usamos eso.
                     // Si no, mapeá acá sectorId -> numeroSerie como necesites.
                     int numeroSerie = dto.getSectorId().intValue();
@@ -145,7 +187,7 @@ public class MqttSubscriberService {
                     // Persistir medición sólo si flow > 0 (igual que antes)
                     int flowForSave = (int) root.path("flow").asDouble(0.0);
 
-                    if (flowForSave > 0) {
+                    if (flowForSave > 0.0) {
                         sectorRepository.findById(dto.getSectorId()).ifPresentOrElse(sector -> {
                             Medicion m = new Medicion();
                             m.setSector(sector);
@@ -156,7 +198,58 @@ public class MqttSubscriberService {
                         }, () -> logger.error("❌ Sector {} no existe. NO guardada.", dto.getSectorId()));
                     } else {
                         logger.info("➖ Flow=0: no se guarda medición (sólo presencia/estado).");
-                    }
+                    }*/
+
+                    // -------- (2) MEDICIÓN NORMAL --------
+                    MedicionDTO dto = objectMapper.treeToValue(root, MedicionDTO.class);
+                    double flow = root.path("flow").asDouble(0.0);
+                    Long sectorId = dto.getSectorId(); // Usamos el ID del Sector que viene del JSON
+
+                    // Lógica de Persistencia y Estado: Buscamos el Sector con el ID único
+                    sectorRepository.findById(sectorId).ifPresentOrElse(sector -> {
+                        // Es CRUCIAL que Sector esté relacionado con Medidor en la DB
+                        Medidor medidor = sector.getMedidor();
+                        
+                        if (medidor == null) {
+                            logger.error("❌ Sector {} existe pero NO está asociado a un Medidor. Ignorado.", sectorId);
+                            return;
+                        }
+                        
+                        int numeroSerie = medidor.getNumeroSerie(); // Obtenemos el numeroSerie del Medidor asociado
+                        Tracker t = trackers.computeIfAbsent(numeroSerie, k -> new Tracker()); // Usamos el numeroSerie para el Tracker de estado
+
+                        logger.info("📦 Medición: sectorId={}, medidorNS={}, flow={}, ts={}",
+                                sectorId, numeroSerie, flow, dto.getTimestamp());
+
+                        // --- Lógica de Estado (ON / IDLE / HIBERNATING) ---
+                        if (flow > 0.0) {
+                            t.zeroStreak.set(0);
+                            setEstadoIfChanged(medidor, EstadoMedidor.ON);
+                        } else {
+                            int streak = t.zeroStreak.incrementAndGet();
+                            EstadoMedidor nuevo = (streak >= ZERO_STREAK_TO_HIBERNATE)
+                                    ? EstadoMedidor.HIBERNATING
+                                    : EstadoMedidor.IDLE;
+                            setEstadoIfChanged(medidor, nuevo);
+                        }
+                        medidorRepository.save(medidor);
+
+                        // --- Lógica de Persistencia de la Medición ---
+                        // Persistir medición sólo si flow > 0.0
+                        if (flow > 0.0) {
+                            Medicion m = new Medicion();
+                            m.setSector(sector); // Asignamos el objeto Sector encontrado
+                            m.setFlow(flow); // Usamos el Double flow
+                            m.setTimestamp(dto.getTimestamp());
+                            medicionRepository.save(m);
+                            logger.info("✅ Medición guardada (sector ID: {})", sectorId);
+                        } else {
+                            logger.info("➖ Flow=0: no se guarda medición (sólo presencia/estado).");
+                        }
+
+                    }, () -> logger.error("❌ Sector ID {} no existe en la base de datos. NO guardada.", sectorId));
+                    // ------------------------------------------------------------------
+
 
                 } catch (Exception e) {
                     logger.error("❌ Error procesando mensaje: {}", e.getMessage(), e);
@@ -184,6 +277,8 @@ public class MqttSubscriberService {
      * Convierte un deviceId tipo "esp32-44E600A7DBCC" a int numeroSerie.
      * Si tu deviceId YA ES el numeroSerie, cambiá esto por Integer.parseInt(deviceId).
      */
+    /* TODO: DESCOMENTAR SI QUEREMOS TENER LOGICA PARA MATCHEAR POR NUMERO DE SERIE REAL, AHORA ESTA 
+    /* HARCODEADO EL 100000 + hogarId * 1000 + j. Se puede tener la MAC del esp y matchear contra eso
     private int parseDeviceId(String deviceId) {
         try {
             if (deviceId.startsWith("esp32-")) {
@@ -196,7 +291,8 @@ public class MqttSubscriberService {
             logger.warn("No se pudo parsear deviceId {} a numeroSerie, usando hashCode", deviceId);
             return Math.abs(deviceId.hashCode());
         }
-    }
+    }*/
+
     private void crearNotificacionCambioEstado(Medidor medidor, String mensaje, TipoNotificacion tipo) {
         try {
             Optional<Long> hogarOpt = sectorRepository.findHogarIdByNumeroSerie(medidor.getNumeroSerie());

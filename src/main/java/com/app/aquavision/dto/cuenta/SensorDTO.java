@@ -5,13 +5,27 @@ import com.app.aquavision.entities.domain.EstadoMedidor;
 import java.time.LocalDateTime;
 
 public class SensorDTO {
+    
+    private Long idSector;
+
     private String nombreSensor;
     private EstadoMedidor estadoActual;
     private LocalDateTime ultimaMedicion;
-    private int consumoActual;
+    //private int consumoActual;
+    private Double consumoActual;
     public SensorDTO() {
     }
     // Getters & setters
+    
+    public Long getIdSector() {
+        return idSector;
+    }
+
+    public SensorDTO setIdSector(Long idSector) {
+        this.idSector = idSector;
+        return this;
+    }
+    
     public String getNombreSensor() {
         return nombreSensor;
     }
@@ -39,11 +53,18 @@ public class SensorDTO {
         return this;
     }
 
-    public int getConsumoActual() {
+    /*public int getConsumoActual() {
+        return consumoActual;
+    }*/
+    public Double getConsumoActual() {
         return consumoActual;
     }
 
-    public SensorDTO setConsumoActual(int consumoActual) {
+    /*public SensorDTO setConsumoActual(int consumoActual) {
+        this.consumoActual = consumoActual;
+        return this;
+    }*/
+    public SensorDTO setConsumoActual(Double consumoActual) {
         this.consumoActual = consumoActual;
         return this;
     }

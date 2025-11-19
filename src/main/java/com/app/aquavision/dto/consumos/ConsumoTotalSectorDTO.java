@@ -14,7 +14,8 @@ public class ConsumoTotalSectorDTO {
     //Consumos
     private int consumoTotal = 0;
     private int consumoPromedio = 0;
-    private int consumoPico = 0;
+    //private int consumoPico = 0;
+    private Double consumoPico = 0.0;
 
     public ConsumoTotalSectorDTO(Sector sector) {
         //Se delega al controller traer al sector con las mediciones ya filtradas por fecha
@@ -52,7 +53,10 @@ public class ConsumoTotalSectorDTO {
         return consumoPromedio;
     }
 
-    public int getConsumoPico() {
+    /*public int getConsumoPico() {
+        return consumoPico;
+    }*/
+    public Double getConsumoPico() {
         return consumoPico;
     }
 

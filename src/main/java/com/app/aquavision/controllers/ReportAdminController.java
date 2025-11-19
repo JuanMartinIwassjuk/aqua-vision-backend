@@ -40,6 +40,7 @@ public ResponseEntity<List<ConsumoPeriodoDTO>> consumoPeriodo(
         @RequestParam String fechaInicio,
         @RequestParam String fechaFin) {
     try {
+        System.out.println("Request params - fechaInicio: " + fechaInicio + ", fechaFin: " + fechaFin);
 
         LocalDate desde = LocalDate.parse(fechaInicio);
         LocalDate hasta = LocalDate.parse(fechaFin);
@@ -74,6 +75,7 @@ public ResponseEntity<ResumenConsumoGlobalDTO> consumoResumen(
         @RequestParam String fechaInicio,
         @RequestParam String fechaFin) {
     try {
+        System.out.println("Request params - fechaInicio: " + fechaInicio + ", fechaFin: " + fechaFin);
         LocalDate desde = LocalDate.parse(fechaInicio);
         LocalDate hasta = LocalDate.parse(fechaFin);
 
@@ -89,6 +91,7 @@ public ResponseEntity<ResumenConsumoGlobalDTO> consumoResumen(
             @RequestParam String fechaInicio,
             @RequestParam String fechaFin) {
         try {
+            System.out.println("Request params - fechaInicio: " + fechaInicio + ", fechaFin: " + fechaFin);
             LocalDate desde = LocalDate.parse(fechaInicio);
             LocalDate hasta = LocalDate.parse(fechaFin);
 
@@ -114,6 +117,7 @@ public ResponseEntity<ResumenConsumoGlobalDTO> consumoResumen(
             @RequestParam String fechaFin,
             @RequestParam(required = false) List<Integer> tagIds
     ) {
+        System.out.println("Request params - fechaInicio: " + fechaInicio + ", fechaFin: " + fechaFin + ", tagIds: " + tagIds);
         LocalDateTime desde = LocalDate.parse(fechaInicio).atStartOfDay();
         LocalDateTime hasta = LocalDate.parse(fechaFin).atTime(LocalTime.MAX);
 
@@ -128,6 +132,7 @@ public ResponseEntity<ResumenConsumoGlobalDTO> consumoResumen(
             @RequestParam String fechaFin,
             @RequestParam(required = false) List<Integer> tagIds
     ) {
+        System.out.println("Request params - fechaInicio: " + fechaInicio + ", fechaFin: " + fechaFin + ", tagIds: " + tagIds);
         LocalDateTime desde = LocalDate.parse(fechaInicio).atStartOfDay();
         LocalDateTime hasta = LocalDate.parse(fechaFin).atTime(LocalTime.MAX);
 
@@ -143,6 +148,7 @@ public ResponseEntity<ResumenConsumoGlobalDTO> consumoResumen(
             @RequestParam String fechaFin,
             @RequestParam(required = false) List<Integer> tagIds
     ) {
+        System.out.println("Request params - fechaInicio: " + fechaInicio + ", fechaFin: " + fechaFin + ", tagIds: " + tagIds);
         LocalDateTime desde = LocalDate.parse(fechaInicio).atStartOfDay();
         LocalDateTime hasta = LocalDate.parse(fechaFin).atTime(LocalTime.MAX);
 
@@ -158,6 +164,7 @@ public ResponseEntity<ResumenConsumoGlobalDTO> consumoResumen(
             @RequestParam String fechaFin,
             @RequestParam(required = false) List<Integer> tagIds
     ) {
+        System.out.println("Request params - fechaInicio: " + fechaInicio + ", fechaFin: " + fechaFin + ", tagIds: " + tagIds);
         LocalDateTime desde = LocalDate.parse(fechaInicio).atStartOfDay();
         LocalDateTime hasta = LocalDate.parse(fechaFin).atTime(LocalTime.MAX);
 
@@ -185,6 +192,7 @@ public ResponseEntity<byte[]> descargarReporteEventosPdf(
         @RequestParam(required = false) List<Integer> tagIds // opcional
 ) {
     try {
+        System.out.println("Request params - fechaInicio: " + fechaInicio + ", fechaFin: " + fechaFin + ", tagIds: " + tagIds);
         LocalDate desde = LocalDate.parse(fechaInicio);
         LocalDate hasta = LocalDate.parse(fechaFin);
 
@@ -209,6 +217,7 @@ public ResponseEntity<byte[]> descargarReporteEventosPdf(
     public ResponseEntity<List<LocalidadSummaryDTO>> consumoPorLocalidad(
             @RequestParam String fechaInicio,
             @RequestParam String fechaFin) {
+        System.out.println("Request params - fechaInicio: " + fechaInicio + ", fechaFin: " + fechaFin);
         LocalDate desde = LocalDate.parse(fechaInicio);
         LocalDate hasta = LocalDate.parse(fechaFin);
         List<LocalidadSummaryDTO> resumen = reporteService.getConsumoPorLocalidad(desde.atStartOfDay(), hasta.atTime(LocalTime.MAX));
@@ -220,6 +229,7 @@ public ResponseEntity<byte[]> descargarReporteEventosPdf(
             @RequestParam String fechaInicio,
             @RequestParam String fechaFin) {
         try {
+            System.out.println("Request params - fechaInicio: " + fechaInicio + ", fechaFin: " + fechaFin);
             LocalDate desde = LocalDate.parse(fechaInicio);
             LocalDate hasta = LocalDate.parse(fechaFin);
             byte[] pdfBytes = reporteService.generarPdfReporteLocalidad(desde.atStartOfDay(), hasta.atTime(LocalTime.MAX));
@@ -241,6 +251,7 @@ public ResponseEntity<byte[]> descargarReporteEventosPdf(
 
       @GetMapping("/gamificacion/puntos-periodo")
     public ResponseEntity<List<PuntosDiaDTO>> puntosPeriodo(@RequestParam String fechaInicio, @RequestParam String fechaFin) {
+        System.out.println("Request params - fechaInicio: " + fechaInicio + ", fechaFin: " + fechaFin);
         LocalDate desde = LocalDate.parse(fechaInicio);
         LocalDate hasta = LocalDate.parse(fechaFin);
         return ResponseEntity.ok(reporteService.getPuntosPorPeriodo(desde, hasta));
@@ -248,6 +259,7 @@ public ResponseEntity<byte[]> descargarReporteEventosPdf(
 
     @GetMapping("/gamificacion/resumen")
     public ResponseEntity<ResumenGamificacionDTO> resumenGamificacion(@RequestParam String fechaInicio, @RequestParam String fechaFin) {
+        System.out.println("Request params - fechaInicio: " + fechaInicio + ", fechaFin: " + fechaFin);
         LocalDate desde = LocalDate.parse(fechaInicio);
         LocalDate hasta = LocalDate.parse(fechaFin);
         return ResponseEntity.ok(reporteService.getResumenGamificacion(desde, hasta));
@@ -255,6 +267,7 @@ public ResponseEntity<byte[]> descargarReporteEventosPdf(
 
     @GetMapping("/gamificacion/ranking-puntos")
     public ResponseEntity<List<HogarRankingDTO>> rankingPuntos(@RequestParam String fechaInicio, @RequestParam String fechaFin) {
+        System.out.println("Request params - fechaInicio: " + fechaInicio + ", fechaFin: " + fechaFin);
         LocalDate desde = LocalDate.parse(fechaInicio);
         LocalDate hasta = LocalDate.parse(fechaFin);
         return ResponseEntity.ok(reporteService.getRankingPuntos(desde, hasta));
@@ -262,6 +275,7 @@ public ResponseEntity<byte[]> descargarReporteEventosPdf(
 
     @GetMapping("/gamificacion/ranking-rachas")
     public ResponseEntity<List<HogarRankingDTO>> rankingRachas(@RequestParam String fechaInicio, @RequestParam String fechaFin) {
+        System.out.println("Request params - fechaInicio: " + fechaInicio + ", fechaFin: " + fechaFin);
         LocalDate desde = LocalDate.parse(fechaInicio);
         LocalDate hasta = LocalDate.parse(fechaFin);
         return ResponseEntity.ok(reporteService.getRankingRachas(desde, hasta));
@@ -280,6 +294,7 @@ public ResponseEntity<byte[]> descargarReporteEventosPdf(
     @GetMapping("/gamificacion/descargar-pdf")
     public ResponseEntity<byte[]> descargarReporteGamificacionPdf(@RequestParam String fechaInicio, @RequestParam String fechaFin) {
         try {
+            System.out.println("Request params - fechaInicio: " + fechaInicio + ", fechaFin: " + fechaFin);
             LocalDate desde = LocalDate.parse(fechaInicio);
             LocalDate hasta = LocalDate.parse(fechaFin);
             byte[] pdf = reporteService.generarPdfReporteGamificacion(desde, hasta);
