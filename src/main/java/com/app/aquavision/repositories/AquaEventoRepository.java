@@ -35,4 +35,6 @@ public interface AquaEventoRepository extends JpaRepository<AquaEvento, Long> {
     List<AquaEvento> findEventosBetweenDatesAndTags(@Param("desde") LocalDateTime desde,
                                                     @Param("hasta") LocalDateTime hasta,
                                                     @Param("tagIds") List<Integer> tagIds);
+
+    List<AquaEvento> findBySector_Hogar_Id(Long hogarId);
 }

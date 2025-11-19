@@ -31,7 +31,7 @@ public class AquaEventoController {
 
     @GetMapping
     public List<AquaEvento> list() {
-        return service.findAll();
+        return service.findEventsFromAuthenticatedUser();
     }
 
     @GetMapping("/hogar/{hogarId}")

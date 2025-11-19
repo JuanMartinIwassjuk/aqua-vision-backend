@@ -183,4 +183,16 @@ public class AquaEventoService {
         }
         return null;
     }
+
+
+
+    @Autowired
+    private UserService userService;
+
+    @Transactional
+    public List<AquaEvento> findEventsFromAuthenticatedUser() {
+        Long hogarId = userService.findHomeIdFromAuthenticatedUser();
+
+        return repository.findBySector_Hogar_Id(hogarId);
+    }
 }
