@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import com.app.aquavision.dto.admin.consumo.ConsumoDiaDTO;
 import com.app.aquavision.dto.admin.consumo.ConsumoPeriodoDTO;
 import com.app.aquavision.dto.admin.consumo.ResumenConsumoGlobalDTO;
+import com.app.aquavision.dto.admin.dashboard.ReportAdminDashboardDTO;
 import com.app.aquavision.dto.admin.eventos.AquaEventDTO;
 import com.app.aquavision.dto.admin.eventos.ResumenEventosDTO;
 import com.app.aquavision.dto.admin.eventos.TagRankingDTO;
@@ -21,6 +22,7 @@ import com.app.aquavision.dto.admin.localidad.LocalidadSummaryDTO;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -309,6 +311,27 @@ public ResponseEntity<byte[]> descargarReporteEventosPdf(
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+  @GetMapping("/dashboard")
+    public ResponseEntity<ReportAdminDashboardDTO> dashboard(
+            @RequestParam(value = "zone", required = false, defaultValue = "America/Argentina/Buenos_Aires") String zoneStr
+    ) {
+        ZoneId zone = ZoneId.of(zoneStr);
 
+        LocalDate hoy = LocalDate.now(zone);
+        LocalDate ayer = hoy.minusDays(1);
+
+        Double consumoHoy = reporteAdminService.getConsumoPromedioPorHogar(hoy, zone);
+        Double consumoAyer = reporteAdminService.getConsumoPromedioPorHogar(ayer, zone);
+        Long triviasHoy = reporteAdminService.getTotalPuntosReclamadosBetween(hoy, zone);
+        Long eventosHoy = reporteAdminService.countEventosByFechaCreacion(hoy, zone);
+
+        ReportAdminDashboardDTO dto = new ReportAdminDashboardDTO();
+        dto.setConsumoPromHoy(consumoHoy);
+        dto.setConsumoPromAyer(consumoAyer);
+        dto.setTrivias(triviasHoy);
+        dto.setEventos(eventosHoy);
+
+        return ResponseEntity.ok(dto);
+    }
 
 }

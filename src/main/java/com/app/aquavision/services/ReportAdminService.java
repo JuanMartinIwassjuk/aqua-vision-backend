@@ -6,6 +6,8 @@ import com.app.aquavision.dto.admin.eventos.ResumenEventosDTO;
 import com.app.aquavision.dto.admin.eventos.TagRankingDTO;
 import com.app.aquavision.entities.domain.gamification.AquaEvento;
 import com.app.aquavision.repositories.AquaEventoRepository;
+import com.app.aquavision.repositories.MedicionRepository;
+import com.app.aquavision.repositories.PuntosReclamadosRepository;
 import com.app.aquavision.repositories.TagEventoRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +20,9 @@ import org.thymeleaf.context.Context;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -226,4 +230,58 @@ public List<AquaEventDTO> getEventos(LocalDateTime desde,
             throw new RuntimeException("Error generando PDF eventos admin", e);
         }
     }
+
+    @Autowired
+    private MedicionRepository medicionRepository;
+
+    
+    @Autowired
+    private PuntosReclamadosRepository  puntosReclamadosRepository;
+
+
+   private static final ZoneId DEFAULT_ZONE = ZoneId.of("America/Argentina/Buenos_Aires");
+
+
+    public Double getConsumoPromedioPorHogar(LocalDate fecha, ZoneId zoneId) {
+        if (zoneId == null) zoneId = DEFAULT_ZONE;
+        LocalDateTime start = fecha.atStartOfDay(zoneId).toLocalDateTime();
+        LocalDateTime end = fecha.plusDays(1).atStartOfDay(zoneId).minusNanos(1).toLocalDateTime();
+
+        // consumoPorHogar devuelve List<Object[]> con {hogarId, nombre, localidad, SUM(flow)}
+        List<Object[]> rows = medicionRepository.consumoPorHogar(start, end);
+        if (rows == null || rows.isEmpty()) return 0.0;
+
+        double sumaTotal = 0.0;
+        int hogares = 0;
+        for (Object[] r : rows) {
+            // r[3] es SUM(m.flow)
+            Object sumObj = r[3];
+            double sum = 0.0;
+            if (sumObj instanceof Number) sum = ((Number) sumObj).doubleValue();
+            else if (sumObj != null) sum = Double.parseDouble(sumObj.toString());
+            sumaTotal += sum;
+            hogares++;
+        }
+        return hogares == 0 ? 0.0 : sumaTotal / hogares;
+    }
+
+
+    public Long getTotalPuntosReclamadosBetween(LocalDate fecha, ZoneId zoneId) {
+        if (zoneId == null) zoneId = DEFAULT_ZONE;
+        LocalDateTime start = fecha.atStartOfDay(zoneId).toLocalDateTime();
+        LocalDateTime end = fecha.plusDays(1).atStartOfDay(zoneId).minusNanos(1).toLocalDateTime();
+        Long total = puntosReclamadosRepository.sumPuntosBetween(start, end);
+        return total == null ? 0L : total;
+    }
+
+
+    public Long countEventosByFechaCreacion(LocalDate fecha, ZoneId zoneId) {
+        if (zoneId == null) zoneId = DEFAULT_ZONE;
+        LocalDateTime start = fecha.atStartOfDay(zoneId).toLocalDateTime();
+        LocalDateTime end = fecha.plusDays(1).atStartOfDay(zoneId).minusNanos(1).toLocalDateTime();
+        Long count = aquaEventoRepository.countByFechaCreacionBetween(start, end);
+        return count == null ? 0L : count;
+    }
+
+
 }

@@ -37,4 +37,11 @@ public interface AquaEventoRepository extends JpaRepository<AquaEvento, Long> {
                                                     @Param("tagIds") List<Integer> tagIds);
 
     List<AquaEvento> findBySector_Hogar_Id(Long hogarId);
+
+
+    @Query("SELECT COUNT(e) FROM AquaEvento e WHERE e.fechaInicio BETWEEN :desde AND :hasta")
+    Long countByFechaCreacionBetween(@Param("desde") LocalDateTime desde, @Param("hasta") LocalDateTime hasta);
+
+
+    
 }

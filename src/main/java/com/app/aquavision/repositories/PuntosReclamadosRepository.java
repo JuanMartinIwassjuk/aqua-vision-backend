@@ -31,4 +31,7 @@ public interface PuntosReclamadosRepository  extends JpaRepository<PuntosReclama
     
     @Query("SELECT p FROM PuntosReclamados p WHERE p.fecha BETWEEN :desde AND :hasta")
     List<PuntosReclamados> findByFechaBetween(LocalDateTime desde, LocalDateTime hasta);
+
+    @Query("SELECT COALESCE(SUM(p.puntos), 0) FROM PuntosReclamados p WHERE p.fecha BETWEEN :desde AND :hasta")
+    Long sumPuntosBetween(@Param("desde") LocalDateTime desde, @Param("hasta") LocalDateTime hasta);
 }
