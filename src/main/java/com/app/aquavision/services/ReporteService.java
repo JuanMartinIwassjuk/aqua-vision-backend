@@ -36,6 +36,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -143,6 +144,46 @@ public class ReporteService {
         consumosPorHoraHogarDTO.setConsumoTotal(consumoTotalDia);
 
         return consumosPorHoraHogarDTO;
+    }
+
+
+
+    private static final ZoneId ZONA_ARG = ZoneId.of("America/Argentina/Buenos_Aires");
+
+    // Método para todos los hogares
+    public ConsumosPorHoraHogarDTO consumosTodosHogaresPorHora(LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
+
+        // Llamo al repo que agrupa por hora
+        List<Object[]> resultados = medicionRepository.sumFlowGroupByHour(fechaDesde, fechaHasta);
+
+        // Map hora -> total
+        Map<Integer, Long> mapaHoraTotal = new HashMap<>();
+        for (Object[] row : resultados) {
+            Integer hora = (row[0] instanceof Integer) ? (Integer) row[0] : ((Number)row[0]).intValue();
+            Long total = (row[1] instanceof Long) ? (Long) row[1] : ((Number)row[1]).longValue();
+            mapaHoraTotal.put(hora, total);
+        }
+
+        // Reutilizo el DTO; uso hogarId 0L para indicar "todos"
+        ConsumosPorHoraHogarDTO dto = new ConsumosPorHoraHogarDTO(0L, fechaDesde, fechaHasta);
+
+        float consumoTotalDia = 0f;
+        for (int h = 0; h < 24; h++) {
+            Long totalHora = mapaHoraTotal.getOrDefault(h, 0L);
+            int consumoHoraInt;
+            // Si tu modelo espera flow sumado como int, casteo; sino adaptá tipo.
+            try {
+                consumoHoraInt = Math.toIntExact(totalHora);
+            } catch (ArithmeticException ex) {
+                // si excede int, lo limito (o cambiar DTO a long)
+                consumoHoraInt = Integer.MAX_VALUE;
+            }
+            dto.addConsumoPorHora(new ConsumoPorHoraDTO(h, consumoHoraInt));
+            consumoTotalDia += consumoHoraInt;
+        }
+        dto.setConsumoTotal(consumoTotalDia);
+
+        return dto;
     }
 
     public ConsumosPorHoraSectoresDTO consumosSectoresPorHora(Long hogar_id, LocalDateTime fechaDesde, LocalDateTime fechaHasta) {

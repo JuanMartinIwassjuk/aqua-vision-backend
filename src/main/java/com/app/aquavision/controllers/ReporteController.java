@@ -68,6 +68,22 @@ public class ReporteController {
         return ResponseEntity.ok(consumosPorHoraHogarDTO);
     }
 
+
+@GetMapping("/admin/consumo-dia-hora")   
+    public ResponseEntity<?> getReporteConsumoTodosHogaresPorHora(
+            @Parameter(description = "Dia en formato yyyy-MM-dd", example = "2025-08-01")
+            @RequestParam String dia)
+    {
+        logger.info("getReporteConsumoPorHoraPorDia - TODOS hogares, dia: {}", dia);
+
+        LocalDateTime diaInicio = LocalDate.parse(dia).atStartOfDay();
+        LocalDateTime diaFin = LocalDate.parse(dia).atTime(LocalTime.MAX);
+
+        ConsumosPorHoraHogarDTO consumos = reporteService.consumosTodosHogaresPorHora(diaInicio, diaFin);
+
+        return ResponseEntity.ok(consumos);
+    }
+
     @Operation(
             summary = "Obtener el consumo de un hogar por sector por hora de un dia",
             responses = {

@@ -92,5 +92,12 @@ List<Object[]> topMeses(
 );
 
 
-
+    @Query("SELECT HOUR(m.timestamp) AS hora, COALESCE(SUM(m.flow), 0) AS total " +
+           "FROM Medicion m " +
+           "WHERE m.timestamp BETWEEN :desde AND :hasta " +
+           "GROUP BY HOUR(m.timestamp) " +
+           "ORDER BY hora")
+    List<Object[]> sumFlowGroupByHour(
+            @Param("desde") LocalDateTime desde,
+            @Param("hasta") LocalDateTime hasta);
 }
