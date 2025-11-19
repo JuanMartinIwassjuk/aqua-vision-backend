@@ -15,6 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,17 @@ public class DataMock {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private final int cantidadHogares = 7;
+    private final int CANTIDAD_HOGARES = 7;
+
+    private final List<String> NOMBRE_HOGARES = List.of(
+            "AquaVision Team",
+            "Hogar de Erik Quispe",
+            "Hogar de Matias Planchuelo",
+            "Hogar de Matias Fernandez",
+            "Hogar de Juan Iwassjuk",
+            "Hogar de Agustin Evans",
+            "AquaVision Admin"
+    );
 
     private static final Logger logger = LoggerFactory.getLogger(DataMock.class);
 
@@ -70,17 +81,17 @@ public class DataMock {
         int medidorId = 1;
         Random random = new Random();
 
-        for (int hogarId = 1; hogarId <= cantidadHogares; hogarId++) {
+        for (int hogarId = 1; hogarId <= CANTIDAD_HOGARES; hogarId++) {
 
             int cantidadMiembros = random.nextInt(5) + 1;
-            int cantidadSectores = random.nextInt(3) + 1;
+            int cantidadSectores = 3; //Todos tiene 3 sectores
 
             //Insertar facturacion
             jdbcTemplate.update("INSERT INTO facturacion (plan_id, medio_de_pago) VALUES (?, ?);",
                     1, "TARJETA_CREDITO");
 
             jdbcTemplate.update("INSERT INTO Hogar (miembros, localidad, direccion, ambientes, tiene_patio, tiene_pileta, tipo_hogar, facturacion_id, email, racha_diaria, puntos_disponibles, nombre) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-                    cantidadMiembros, randomLocalidad(), "Medrano 191", 2, true, false, "CASA", hogarId, "hogar" + hogarId + "@example.com", 0, 10, "Hogar " + hogarId);
+                    cantidadMiembros, randomLocalidad(), "Medrano 191", 2, true, false, "CASA", hogarId, "hogar" + hogarId + "@example.com", 0, this.randomPuntos(), NOMBRE_HOGARES.get(hogarId - 1));
 
             //Insertar logros y medallas
             jdbcTemplate.update("INSERT INTO hogar_medallas (hogar_id, medalla_id) VALUES (?, ?);",
@@ -117,38 +128,57 @@ public class DataMock {
 
     private void insertarMediciones() {
 
-        logger.info("Insertando mediciones...");
+        logger.info("Iniciando la inserción de mediciones...");
 
         Random random = new Random();
 
-        List<Long> sectorIds = jdbcTemplate.query("SELECT id FROM Sector",
-                (rs, rowNum) -> rs.getLong("id"));
+        List<Long> sectorIds = jdbcTemplate.query("SELECT id FROM Sector", (rs, rowNum) -> rs.getLong("id"));
 
-        int totalMediciones = 15000;
+        // --- Rango de Fechas  ---
+        LocalDateTime startTime = LocalDateTime.of(2025, 9, 1, 0, 0); // 1 de Septiembre 00:00
+        LocalDateTime endTime = LocalDateTime.now();
+        //LocalDateTime endTime = LocalDateTime.of(2025, 11, 26, 19, 0); // 26 de Noviembre 19:00
+
+        long minutesInterval = 60; // CAMBIO CLAVE: Frecuencia de medición: cada 60 minutos (1 hora)
+
         int batchSize = 5000;
         List<Object[]> batch = new ArrayList<>(batchSize);
 
-        for (int i = 1; i <= totalMediciones; i++) {
-            int flow = random.nextInt(100);
-            LocalDateTime time = LocalDateTime.now().plusMonths(2); //Genera pasadas y futuras
-            Timestamp ts = Timestamp.valueOf(time.minusMinutes(random.nextInt(150000)));
-            //LocalDateTime.now().minusMinutes(random.nextInt(100000)));
-            Long sectorId = sectorIds.get(random.nextInt(sectorIds.size()));
+        LocalDateTime currentMeasurementTime = startTime;
+        int totalMedicionesInsertadas = 0;
 
-            batch.add(new Object[]{flow, ts, sectorId});
+        // 2. Bucle principal que itera sobre cada intervalo de 60 minutos
+        while (currentMeasurementTime.isBefore(endTime) || currentMeasurementTime.isEqual(endTime)) {
 
-            if (i % batchSize == 0) {
-                jdbcTemplate.batchUpdate(
-                        "INSERT INTO Medicion (flow, timestamp, sector_id) VALUES (?, ?, ?)", batch);
-                batch.clear();
-                logger.info("Insertadas {} mediciones", i);
+            // 3. Para cada intervalo, generar una medición para CADA sector
+            for (Long sectorId : sectorIds) {
+
+                Timestamp ts = Timestamp.valueOf(currentMeasurementTime);
+
+                // Generar Caudal (flow) con lógica realista y nueva escala
+                int flow = generateRealisticFlow(currentMeasurementTime, random);
+
+                batch.add(new Object[]{flow, ts, sectorId});
+                totalMedicionesInsertadas++;
+
+                // 4. Inserción por lotes
+                if (totalMedicionesInsertadas % batchSize == 0) {
+                    jdbcTemplate.batchUpdate("INSERT INTO Medicion (flow, timestamp, sector_id) VALUES (?, ?, ?)", batch);
+                    batch.clear();
+                    logger.info("Insertadas {} mediciones (lote)", totalMedicionesInsertadas);
+                }
             }
+
+            // Avanzar al siguiente intervalo de tiempo
+            currentMeasurementTime = currentMeasurementTime.plusMinutes(minutesInterval);
         }
 
+        // 5. Inserción final del lote restante
         if (!batch.isEmpty()) {
-            jdbcTemplate.batchUpdate(
-                    "INSERT INTO Medicion (flow, timestamp, sector_id) VALUES (?, ?, ?)", batch);
+            jdbcTemplate.batchUpdate("INSERT INTO Medicion (flow, timestamp, sector_id) VALUES (?, ?, ?)", batch);
         }
+
+        logger.info("Inserción finalizada. Total de {} mediciones insertadas.", totalMedicionesInsertadas);
     }
 
     private void insertarRecompensas() {
@@ -156,9 +186,11 @@ public class DataMock {
         logger.info("Insertando recompensas...");
 
         List<Map<String, Object>> recompensas = List.of(
-                Map.of("descripcion", "Descuento del 10% en medidor", "puntos", 50),
-                Map.of("descripcion", "Descuento del 20% en medidor", "puntos", 90),
-                Map.of("descripcion", "Descuento del 5% en mantenimiento", "puntos", 300)
+                Map.of("descripcion", "Descuento del 10% en medidor", "puntos", 1000),
+                Map.of("descripcion", "Descuento del 20% en medidor", "puntos", 1200),
+                Map.of("descripcion", "Descuento del 5% en mantenimiento", "puntos", 2000),
+                Map.of("descripcion", "Descuento del 15% en mantenimiento", "puntos", 2300),
+                Map.of("descripcion", "Descuento del 25% en plan premium anual", "puntos", 5000)
         );
 
         for (Map<String, Object> recompensa : recompensas) {
@@ -201,16 +233,27 @@ public class DataMock {
             jdbcTemplate.update(
                     "INSERT INTO desafio_hogar (hogar_id, desafio_id, progreso) VALUES (?, ?, ?)",
                     hogarId, 1, 50);
+            jdbcTemplate.update(
+                    "INSERT INTO desafio_hogar (hogar_id, desafio_id, progreso) VALUES (?, ?, ?)",
+                    hogarId, 2, 75);
+            jdbcTemplate.update(
+                    "INSERT INTO desafio_hogar (hogar_id, desafio_id, progreso) VALUES (?, ?, ?)",
+                    hogarId, 3, 100);
         }
     }
-
 
   private void insertarLogrosYMedallas() {
     logger.info("Insertando logros y medallas...");
 
+    //LOGROS
     jdbcTemplate.update("INSERT INTO Logro (nombre, descripcion) VALUES (?, ?)", "Registro", "Te registraste en AquaVision");
+    jdbcTemplate.update("INSERT INTO Logro (nombre, descripcion) VALUES (?, ?)", "Medidor", "Conectase un medidor en tu hogar");
+    jdbcTemplate.update("INSERT INTO Logro (nombre, descripcion) VALUES (?, ?)", "Top Ranking", "Lograste llegar al top de hogares");
 
+    //MEDALLAS
     jdbcTemplate.update("INSERT INTO Medalla (nombre, descripcion) VALUES (?, ?)", "Hogar sustentable", "Redujiste el consumo usando AquaVision");
+    jdbcTemplate.update("INSERT INTO Medalla (nombre, descripcion) VALUES (?, ?)", "Aqua Expert", "Completaste todos los desafíos");
+    jdbcTemplate.update("INSERT INTO Medalla (nombre, descripcion) VALUES (?, ?)", "Eco Warrior", "Has alcanzado 10000 puntos en AquaVision");
 
   }
 
@@ -221,11 +264,9 @@ public class DataMock {
       jdbcTemplate.update("INSERT INTO Plan (tipo_plan, costo_mensual) VALUES (?, ?)", "PREMIUM", 5000.0);
       jdbcTemplate.update("INSERT INTO Plan (tipo_plan, costo_mensual) VALUES (?, ?)", "FULL", 7000.0);
 
-
-
   }
 
-    private void insertarNotificaciones() {
+  private void insertarNotificaciones() {
         logger.info("Insertando notificaciones...");
 
         List<Long> hogaresIDs = jdbcTemplate.query(
@@ -269,15 +310,24 @@ public class DataMock {
     List<Long> sectoresIDs = jdbcTemplate.query("SELECT id FROM Sector",
               (rs, rowNum) -> rs.getLong("id"));
 
-    LocalDateTime hoy = LocalDateTime.now();
+    LocalDateTime hoy = LocalDateTime.now().minusHours(5);
+    Long eventoId = 1L;
 
     for (Long sectorId : sectoresIDs) {
         jdbcTemplate.update(
             "INSERT INTO aqua_evento (costo, litros_consumidos, fecha_inicio, fecha_fin, sector_id, descripcion, titulo, estado_evento) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                200, 3, hoy, hoy.plusMinutes(15), sectorId, "Evento de limpieza", "Limpieza", "FINALIZADO");
+                200, 3, hoy, hoy.plusHours(1), sectorId, "Evento de limpieza", "Limpieza", "FINALIZADO");
         jdbcTemplate.update(
                 "INSERT INTO evento_tags (evento_id, tag_id) VALUES (?, ?)",
-                sectorId, 1);
+                eventoId, 1);
+        eventoId++;
+        jdbcTemplate.update(
+                "INSERT INTO aqua_evento (costo, litros_consumidos, fecha_inicio, fecha_fin, sector_id, descripcion, titulo, estado_evento) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                300, 15, hoy.plusHours(2), hoy.plusHours(3), sectorId, "Evento de Lavado", "Lavado", "FINALIZADO");
+        jdbcTemplate.update(
+                "INSERT INTO evento_tags (evento_id, tag_id) VALUES (?, ?)",
+                eventoId, 8);
+        eventoId++;
     }
   }
 
@@ -293,7 +343,6 @@ public class DataMock {
       }
     }
   }
-
 
   private void insertPuntosReclamados() {
     logger.info("Insertando puntos reclamados...");
@@ -313,20 +362,20 @@ public class DataMock {
       }
   }
 
-
   private void insertarUsuarios() {
 
     logger.info("Insertando usuarios...");
 
     List<User> usuarios = new ArrayList<>();
-    usuarios.add(new User("matif", "test123", "Matias", "Fernandez", false));
-    usuarios.add(new User("matip", "test123", "Matias", "Planchuelo", false));
+    usuarios.add(new User("aquavisiondemo", "test123", "AquaVision", "Team", false));
     usuarios.add(new User("erik", "test123", "Erik", "Quispe", false));
+    usuarios.add(new User("matip", "test123", "Matias", "Planchuelo", false));
+    usuarios.add(new User("matif", "test123", "Matias", "Fernandez", false));
     usuarios.add(new User("juan", "test123", "Juan", "Iwassjuk", false));
     usuarios.add(new User("agus", "test123", "Agustin", "Evans", false));
-    usuarios.add(new User("aquavision", "test123", "Aqua", "Vision", true));
+    usuarios.add(new User("aquavision", "test123", "AquaVision", "Admin", true));
 
-    for (int i = 1; usuarios.size() < cantidadHogares; i++) {
+    for (int i = 1; usuarios.size() < CANTIDAD_HOGARES; i++) {
       usuarios.add(new User("user" + i, "test123", "User" + i, "User" + i, false));
     }
 
@@ -381,9 +430,66 @@ public class DataMock {
     };
   }
 
+  private int randomPuntos() {
+    return new Random().nextInt(1000);
+  }
+
   private boolean datosMockInsertados() {
     Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM Hogar", Integer.class);
     return count != null && count > 0;
   }
 
+    /**
+     * Genera un valor de caudal (flow) realista BASADO EN 300 LITROS/DIA POR HOGAR.
+     * El valor de retorno representa los LITROS CONSUMIDOS POR SECTOR en la hora de medición.
+     */
+    private int generateRealisticFlow(LocalDateTime time, Random random) {
+        int hour = time.getHour();
+        DayOfWeek day = time.getDayOfWeek();
+
+        // Se define el rango base de consumo [min, max] para la hora actual (en LITROS/HORA por SECTOR)
+        int minFlow;
+        int maxFlow;
+
+        // --- Definición de rangos para Días de Semana (Lunes a Viernes) ---
+        if (day != DayOfWeek.SATURDAY && day != DayOfWeek.SUNDAY) {
+            if (hour >= 6 && hour <= 8) { // Pico Mañana: Uso de BAÑO (ducha, inodoro)
+                minFlow = 5; maxFlow = 15;
+            } else if (hour >= 12 && hour <= 13) { // Pico Mediodía: Uso de COCINA
+                minFlow = 2; maxFlow = 8;
+            } else if (hour >= 19 && hour <= 21) { // Pico Noche: Uso de COCINA/LAVADERO (platos, ropa)
+                minFlow = 8; maxFlow = 20;
+            } else if (hour >= 9 && hour <= 18) { // Horas Intermedias
+                minFlow = 0; maxFlow = 3;
+            } else { // Noche Profunda/Madrugada
+                minFlow = 0; maxFlow = 1; // Mínimo o nulo
+            }
+        }
+        // --- Definición de rangos para Fin de Semana (Sábado y Domingo) ---
+        else {
+            if (hour >= 8 && hour <= 10) { // Pico Mañana
+                minFlow = 4; maxFlow = 12;
+            } else if (hour >= 14 && hour <= 16) { // Pico Tarde/Almuerzo
+                minFlow = 5; maxFlow = 15;
+            } else if (hour >= 19 && hour <= 22) { // Pico Noche (Máximo consumo del fin de semana)
+                minFlow = 10; maxFlow = 25;
+            } else if (hour >= 11 && hour <= 13 || hour >= 17 && hour <= 18) { // Horas Intermedias
+                minFlow = 3; maxFlow = 10;
+            } else { // Noche Profunda/Madrugada
+                minFlow = 0; maxFlow = 1;
+            }
+        }
+
+        // ... (Lógica de ruido y limitación)
+        if (minFlow > maxFlow) {
+            maxFlow = minFlow;
+        }
+
+        int baseFlow = random.nextInt(maxFlow - minFlow + 1) + minFlow;
+        int noise = random.nextInt(3) - 1; // Ruido: [-1, 0, 1]
+
+        // Limitar el resultado final (Máximo de 30 litros/hora por sector)
+        return Math.max(0, Math.min(30, baseFlow + noise));
+    }
 }
+
