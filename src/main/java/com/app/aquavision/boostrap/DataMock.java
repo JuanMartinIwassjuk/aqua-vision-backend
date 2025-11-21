@@ -231,15 +231,15 @@ public class DataMock {
 
         for (Long hogarId : hogaresIDs) {
             jdbcTemplate.update(
-                    "INSERT INTO desafio_hogar (hogar_id, desafio_id, progreso) VALUES (?, ?, ?)",
-                    hogarId, 1, 50);
+                    "INSERT INTO desafio_hogar (hogar_id, desafio_id, progreso, reclamado) VALUES (?, ?, ?, ?)",
+                    hogarId, 1, 50, 0);
             jdbcTemplate.update(
-                    "INSERT INTO desafio_hogar (hogar_id, desafio_id, progreso) VALUES (?, ?, ?)",
-                    hogarId, 2, 75);
+                    "INSERT INTO desafio_hogar (hogar_id, desafio_id, progreso, reclamado) VALUES (?, ?, ?, ?)",
+                    hogarId, 2, 75, 0);
             jdbcTemplate.update(
-                    "INSERT INTO desafio_hogar (hogar_id, desafio_id, progreso) VALUES (?, ?, ?)",
-                    hogarId, 3, 100);
-        }
+                    "INSERT INTO desafio_hogar (hogar_id, desafio_id, progreso, reclamado) VALUES (?, ?, ?, ?)",
+                    hogarId, 3, 100, 0);
+        } 
     }
 
   private void insertarLogrosYMedallas() {

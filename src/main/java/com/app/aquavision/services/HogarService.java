@@ -5,6 +5,7 @@ import com.app.aquavision.entities.domain.Hogar;
 import com.app.aquavision.entities.domain.Sector;
 import com.app.aquavision.entities.domain.gamification.*;
 import com.app.aquavision.entities.domain.notifications.Notificacion;
+import com.app.aquavision.repositories.DesafioHogarRepository;
 import com.app.aquavision.repositories.HogarRepository;
 import com.app.aquavision.repositories.PuntosReclamadosRepository;
 import com.app.aquavision.repositories.RecompensaRepository;
@@ -27,6 +28,9 @@ public class HogarService {
 
     @Autowired
     private PuntosReclamadosRepository puntosReclamadosRepository;
+
+    @Autowired
+    private DesafioHogarRepository desafioHogarRepository;
 
     @Transactional()
     public List<Hogar> findAll() {
@@ -181,6 +185,42 @@ public class HogarService {
 
         return hogar;
     }
+
+    
+    @Transactional
+    public void reclamarPuntosDesafio(Long hogarId, Long idDesafioHogar) {
+        
+        // VALIDACIONES //
+        
+        Hogar hogar = repository.findById(hogarId)
+                .orElseThrow(() -> new IllegalArgumentException("No se encontró el Hogar con el ID: " + hogarId));
+                
+        DesafioHogar desafioHogar = desafioHogarRepository.findById(idDesafioHogar)
+                .orElseThrow(() -> new IllegalArgumentException("No se encontró el Desafío HOGAR con el ID: " + idDesafioHogar));
+                
+        if (!desafioHogar.getHogar().getId().equals(hogarId)) {
+            throw new IllegalArgumentException("El desafío (ID: " + idDesafioHogar + ") no pertenece al Hogar (ID: " + hogarId + ").");
+        }
+        
+        if (desafioHogar.getProgreso() < 100) {
+            throw new IllegalStateException("El desafío '" + desafioHogar.getDesafio().getTitulo() + "' aún no está completado (Progreso: " + desafioHogar.getProgreso() + "%).");
+        }
+        
+        if (desafioHogar.isReclamado()) { 
+            throw new IllegalStateException("Los puntos de este desafío ya fueron reclamados anteriormente.");
+        }
+
+        // Obtiene recompensa y suma puntos
+        int puntosRecompensa = desafioHogar.getDesafio().getPuntos_recompensa();
+        hogar.sumarPuntosDisponibles(puntosRecompensa);
+
+        desafioHogar.setReclamado(true);
+        
+        repository.save(hogar);
+        desafioHogarRepository.save(desafioHogar);
+        
+    }
+    
 
     @Transactional
     public LocalDateTime getUltimoReclamoSegunMinijuego(Long hogarId, String minijuego, String escena) {
