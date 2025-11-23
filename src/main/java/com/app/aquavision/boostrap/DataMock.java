@@ -473,7 +473,15 @@ private void insertarPuntosReclamadosEnhanced() {
             // elegir un minijuego válido de entre los permitidos por la DB
             String minijuego = miniJuegoAllowed.get(random.nextInt(miniJuegoAllowed.size()));
 
-            String escena = generarEscenaAleatoria();
+            String escena = "";
+
+            if (!minijuego.equals("TRIVIA")) {
+                escena = generarEscenaAleatoria();
+            } else {
+                String[] dias = {"Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"};
+                int index = new java.util.Random().nextInt(dias.length);
+                escena = dias[index];
+            }
 
             jdbcTemplate.update(
                     "INSERT INTO puntos_reclamados (fecha, mini_juego, escena, puntos, hogar_id) VALUES (?, ?, ?, ?, ?)",
