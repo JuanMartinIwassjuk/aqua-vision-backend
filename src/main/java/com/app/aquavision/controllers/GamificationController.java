@@ -283,7 +283,9 @@ public class GamificationController {
             @PathVariable Long id,
             @RequestParam String minijuego,
             @RequestParam(required = false) String escena) {
-        return service.getUltimoReclamoSegunMinijuego(id, minijuego, escena);
+        LocalDateTime ultimaFechaPuntosReclamado = service.getUltimoReclamoSegunMinijuego(id, minijuego, escena);
+        logger.info("Ultima fecha reclamo para el minijuego:" + ultimaFechaPuntosReclamado);
+        return ultimaFechaPuntosReclamado;
     }
 
     @GetMapping("/{id}/desafios")
