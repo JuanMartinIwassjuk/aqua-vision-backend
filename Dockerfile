@@ -1,37 +1,43 @@
 # =====================
-# 1) Build Stage (Compilación a Nativo)
+# 1) Build Stage
 # =====================
-# Usar una imagen de GraalVM para la compilación nativa
-FROM ghcr.io/graalvm/jdk:21 AS builder
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
 # Crear directorio de trabajo
 WORKDIR /app
 
-# Copiar pom.xml y código fuente
+# Copiar pom.xml y descargar dependencias (para aprovechar cache)
 COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# Copiar el código fuente y compilar
 COPY src ./src
-
-# ⚠️ La línea clave: Compila la aplicación a un ejecutable nativo
-# Usa -Pnative para activar el perfil de compilación de Spring Boot
-RUN ./mvnw -Pnative clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 # =====================
-# 2) Runtime Stage (Lo más liviano posible)
+# 2) Runtime Stage (liviano y optimizado)
 # =====================
-# Usar una imagen base estática, sin JRE, es lo más ligero que existe
-FROM ghcr.io/distroless/static-debian12
-# Alternativa minimalista si 'static' da problemas: FROM alpine/glibc:latest
+FROM eclipse-temurin:21-jre-alpine
 
 # Definir directorio de trabajo
 WORKDIR /app
 
-# Copiar el ejecutable nativo desde el build (el nombre depende de tu artifactId)
-COPY --from=builder /app/target/app-name /app/app-name
+# Copiar el .jar desde el build
+COPY --from=builder /app/target/*.jar app.jar
 
 # Exponer el puerto
 EXPOSE 8080
 
 ENV TZ=America/Argentina/Buenos_Aires
 
-# Ejecutar el binario nativo directamente
-ENTRYPOINT ["/app/app-name", "--spring.profiles.active=prod"]
+# Configuración JVM para entornos livianos
+# - Usa SerialGC (menos threads, menos consumo)
+# - Limita el uso de RAM al 60% del contenedor
+# - Optimiza arranque y estabilidad en Render
+ENTRYPOINT ["java", \
+    "-XX:+UseContainerSupport", \
+    "-XX:MaxRAMPercentage=60.0", \
+    "-XX:+UseSerialGC", \
+    "-XX:+AlwaysPreTouch", \
+    "-jar", "app.jar", \
+    "--spring.profiles.active=prod"]
