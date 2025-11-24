@@ -145,8 +145,8 @@ public class HogarService {
     }
 
     @Transactional
-    public List<Object[]> getRanking() {
-        return repository.findAllByOrderByPuntajeDesc();
+    public List<Object[]> getRanking(Long hogarId) {
+        return repository.findAllBySameMembersAndOrderByPuntajeDesc(hogarId);
 
     }
 
@@ -261,4 +261,10 @@ public class HogarService {
         return null;
     }
 
+
+    @Transactional
+    public List<Object[]> getRankingGeneral() {
+        return repository.findRankingHogares();
+
+    }
 }

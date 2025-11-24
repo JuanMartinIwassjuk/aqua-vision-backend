@@ -190,7 +190,7 @@ public class GamificationController {
         return ResponseEntity.ok(recompensaList);
     }
 
-    @GetMapping("/ranking")
+    @GetMapping("/ranking/{hogarId}")
     @Operation(
             summary = "Obtener el ranking de hogares por puntos",
             responses = {
@@ -204,8 +204,11 @@ public class GamificationController {
                     )
             }
     )
-    public RankingDTO getRanking() {
-        return new RankingDTO(service.getRanking());
+    public RankingDTO getRanking(
+            @Parameter(description = "ID del hogar", example = "1")
+            @PathVariable Long hogarId
+    ) {
+        return new RankingDTO(service.getRanking(hogarId));
     }
 
     @GetMapping("/{id}/puntos")
@@ -390,6 +393,25 @@ public class GamificationController {
     public List<Medalla> getMedallas(@Parameter(description = "ID del hogar", example = "1") @PathVariable Long id) {
 
         return service.getMedallasHogar(id);
+    }
+
+
+    @GetMapping("/ranking/")
+    @Operation(
+            summary = "Obtener el ranking de general hogares por puntos",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Ranking obtenido correctamente",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(implementation = RankingDTO.class))
+                            )
+                    )
+            }
+    )
+    public RankingDTO getRankingGeneral() {
+        return new RankingDTO(service.getRankingGeneral(), true);
     }
 
 }
