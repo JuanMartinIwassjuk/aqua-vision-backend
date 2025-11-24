@@ -444,10 +444,10 @@ public class DataMock {
     private void insertarDatosEspecialDiaActual() {
         logger.info("Insertando datos especiales para el día actual (demo)...");
 
-        // 1) elegir hogar objetivo preferido: "Hogar de Juan Iwassjuk" si existe
+        // 1) elegir hogar objetivo preferido: "AquaVision Team" si existe
         Long hogarObjetivoId = null;
         try {
-            hogarObjetivoId = jdbcTemplate.queryForObject("SELECT id FROM Hogar WHERE nombre = ? LIMIT 1", Long.class, "Hogar de Juan Iwassjuk");
+            hogarObjetivoId = jdbcTemplate.queryForObject("SELECT id FROM Hogar WHERE nombre = ? LIMIT 1", Long.class, "AquaVision Team");
         } catch (Exception ex) {
             // ignore
         }
