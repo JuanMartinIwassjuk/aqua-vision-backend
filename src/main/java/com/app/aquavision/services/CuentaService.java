@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -86,9 +87,13 @@ public class CuentaService {
                         .setIdSector(sector.getId())
                         .setNombreSensor(sector.getNombre())
                         .setEstadoActual(sector.getMedidor().getEstado())
-                        .setUltimaMedicion(sector.getMediciones().stream().findFirst()
-                                .map(Medicion::getTimestamp)
-                                .orElse(null))
+                        .setUltimaMedicion(
+                                sector.getMediciones().stream()
+                                        .max(Comparator.comparing(Medicion::getTimestamp))
+                                        .map(Medicion::getTimestamp)
+                                        .orElse(null)
+                        )
+
                         //.setConsumoActual(sector.getMediciones().stream().mapToInt(Medicion::getFlow).sum());
                         .setConsumoActual(sector.getMediciones().stream().mapToDouble(Medicion::getFlow).sum());
                 sensores.add(sensorDTO);
