@@ -422,7 +422,23 @@ public class DataMock {
                 LocalDateTime fecha = LocalDateTime.now().minusDays(random.nextInt(180)).withHour(random.nextInt(24)).withMinute(random.nextInt(60)).withSecond(random.nextInt(60));
                 int puntos = generarPuntosReclamadosValor();
                 String minijuego = miniAllowed.get(random.nextInt(miniAllowed.size()));
-                String escena = generarEscenaAleatoria();
+
+            String escena;
+            if (!minijuego.equalsIgnoreCase("TRIVIA")) {
+        
+                escena = generarEscenaAleatoria();
+            } else {
+            
+                String[] dias = {"Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"};
+                int idx = random.nextInt(dias.length);
+                escena = dias[idx];
+            }
+
+            // VALIDACIÓN FINAL DE SEGURIDAD (imposible quedar null)
+            if (escena == null || escena.isBlank()) {
+                escena = "Lunes"; // fallback seguro
+            }
+
 
                 jdbcTemplate.update("INSERT INTO puntos_reclamados (fecha, mini_juego, escena, puntos, hogar_id) VALUES (?, ?, ?, ?, ?)",
                         fecha, minijuego, escena, puntos, hogarId);
@@ -637,11 +653,9 @@ if (!batch.isEmpty()) {
         // eliminar notificaciones previas del hogar demo para evitar duplicados
         jdbcTemplate.update("DELETE FROM Notificacion WHERE hogar_id = ? AND fecha_envio >= ? AND fecha_envio < ?", hogarObjetivoId, inicioDia, inicioDia.plusDays(1));
 
-        jdbcTemplate.update("INSERT INTO Notificacion (hogar_id, mensaje, fecha_envio, titulo, leido, tipo) VALUES (?, ?, ?, ?, ?, ?)",
-                hogarObjetivoId, "Tendencia de consumo que podría superar tu límite mensual", tTendencia, "Tendencia de consumo", false, TipoNotificacion.ALERTA.name());
 
         jdbcTemplate.update("INSERT INTO Notificacion (hogar_id, mensaje, fecha_envio, titulo, leido, tipo) VALUES (?, ?, ?, ?, ?, ?)",
-                hogarObjetivoId, "Notificación de predicción: posible sobrepaso del objetivo del mes", tPrediccion, "Predicción disponible", false, TipoNotificacion.ALERTA.name());
+                hogarObjetivoId, "Notificación de predicción: posible sobrepaso del objetivo del mes", tPrediccion, "Predicción disponible", false, TipoNotificacion.INFORME.name());
 
         jdbcTemplate.update("INSERT INTO Notificacion (hogar_id, mensaje, fecha_envio, titulo, leido, tipo) VALUES (?, ?, ?, ?, ?, ?)",
                 hogarObjetivoId, "Juegos pendientes del día: tenés trivias por jugar", tJuegos, "Juegos pendientes", false, TipoNotificacion.INFORME.name());
@@ -652,8 +666,8 @@ if (!batch.isEmpty()) {
                 hogarObjetivoId, "Pico inusual detectado en Patio", tPico, "Pico inusual detectado", false, TipoNotificacion.ALERTA.name());
 
         // Notificación de creación de actividad a las 14:15 (según tu requerimiento)
-        jdbcTemplate.update("INSERT INTO Notificacion (hogar_id, mensaje, fecha_envio, titulo, leido, tipo) VALUES (?, ?, ?, ?, ?, ?)",
-                hogarObjetivoId, "Registro de actividad: 'Lavado de auto' creado por el usuario", tActividad, "Actividad registrada", false, TipoNotificacion.INFORME.name());
+        //jdbcTemplate.update("INSERT INTO Notificacion (hogar_id, mensaje, fecha_envio, titulo, leido, tipo) VALUES (?, ?, ?, ?, ?, ?)",
+              //  hogarObjetivoId, "Registro de actividad: 'Lavado de auto' creado por el usuario", tActividad, "Actividad registrada", false, TipoNotificacion.INFORME.name());
 
         logger.info("Notificaciones especiales insertadas para hogar {} en horarios fijos (demo).", hogarObjetivoId);
 
