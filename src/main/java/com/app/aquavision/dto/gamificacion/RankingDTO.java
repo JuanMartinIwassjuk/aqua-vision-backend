@@ -11,18 +11,59 @@ public class RankingDTO {
     public RankingDTO () {
     }
 
-    public RankingDTO (List<Object[]> hogaresConMediciones) {
+    public RankingDTO(List<Object[]> hogaresConMediciones) {
         int i = 0;
+
         for (Object[] row : hogaresConMediciones) {
-            Hogar hogar = (Hogar) row[0];
-            Long totalPuntos = (Long) row[1];
-            String nombreHogar  = hogar.getNombre();
-            if(totalPuntos == null){
-                totalPuntos = 0L;
+
+            Long hogarId = (Long) row[0];
+            String nombreHogar = (String) row[1];
+            Integer miembros = (Integer) row[2];
+            String totalPuntos = row[3].toString();
+            String juegoMasJugado = (String) row[4];
+
+            if (totalPuntos == null) {
+                totalPuntos = String.valueOf(0L);
             }
+
             i++;
-            this.hogares.add(new HogarRankingDTO(nombreHogar,totalPuntos.intValue(), i));
+
+            this.hogares.add(
+                    new HogarRankingDTO(
+                            nombreHogar,
+                            totalPuntos,
+                            i,
+                            juegoMasJugado
+                    )
+            );
         }
     }
 
+    public RankingDTO(List<Object[]> rankingGeneral, boolean isFullRanking) {
+        int i = 0;
+
+        for (Object[] row : rankingGeneral) {
+            Long hogarId = (Long) row[0];
+            String nombreHogar = (String) row[1];
+            String localidad = (String) row[2];
+            Integer miembros = (Integer) row[3];
+            Integer cantidadSectores = ((Number) row[4]).intValue();
+            String totalPuntos = row[5] != null ? row[5].toString() : "0";
+            String juegoMasJugado = (String) row[6];
+
+
+            i++;
+
+            this.hogares.add(
+                    new HogarRankingDTO(
+                            nombreHogar,
+                            totalPuntos,
+                            i,
+                            juegoMasJugado,
+                            localidad,
+                            cantidadSectores
+                    )
+            );
+        }
+    }
 }

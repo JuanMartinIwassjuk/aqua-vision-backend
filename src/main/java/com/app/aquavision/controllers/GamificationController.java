@@ -190,7 +190,7 @@ public class GamificationController {
         return ResponseEntity.ok(recompensaList);
     }
 
-    @GetMapping("/ranking")
+    @GetMapping("/ranking/{hogarId}")
     @Operation(
             summary = "Obtener el ranking de hogares por puntos",
             responses = {
@@ -204,8 +204,11 @@ public class GamificationController {
                     )
             }
     )
-    public RankingDTO getRanking() {
-        return new RankingDTO(service.getRanking());
+    public RankingDTO getRanking(
+            @Parameter(description = "ID del hogar", example = "1")
+            @PathVariable Long hogarId
+    ) {
+        return new RankingDTO(service.getRanking(hogarId));
     }
 
     @GetMapping("/{id}/puntos")
@@ -283,7 +286,9 @@ public class GamificationController {
             @PathVariable Long id,
             @RequestParam String minijuego,
             @RequestParam(required = false) String escena) {
-        return service.getUltimoReclamoSegunMinijuego(id, minijuego, escena);
+        LocalDateTime ultimaFechaPuntosReclamado = service.getUltimoReclamoSegunMinijuego(id, minijuego, escena);
+        logger.info("Ultima fecha reclamo para el minijuego:" + ultimaFechaPuntosReclamado);
+        return ultimaFechaPuntosReclamado;
     }
 
     @GetMapping("/{id}/desafios")
@@ -311,6 +316,38 @@ public class GamificationController {
 
         return new DesafiosHogarDTO(id,desafios);
     }
+
+
+        @PostMapping("/{hogarId}/desafios/{idDesafioHogar}/reclamar")
+        @Operation(
+                summary = "Reclama los puntos de un desafío completado y lo marca como reclamado.",
+                responses = {
+                        @ApiResponse(responseCode = "200", description = "Puntos reclamados correctamente"),
+                        @ApiResponse(responseCode = "400", description = "Solicitud inválida (Desafío no completado o ya reclamado)"),
+                        @ApiResponse(responseCode = "404", description = "Hogar o Desafío no encontrado")
+                }
+        )
+        public ResponseEntity<?> reclamarPuntosDesafio(
+                @PathVariable Long hogarId,
+                @PathVariable Long idDesafioHogar) { 
+    
+                try {
+                        service.reclamarPuntosDesafio(hogarId, idDesafioHogar);
+         
+                        return ResponseEntity.ok().body("Puntos de desafío reclamados y estado actualizado.");
+         
+                } catch (IllegalArgumentException e) {
+                        // 404 not found: Maneja errores de IDs no encontrados (Hogar o DesafíoHogar)
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+                } catch (IllegalStateException e) {
+                        // 400 bad request: Maneja errores de estado, como: "Desafío no completado" o "Ya reclamado"
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+                } catch (Exception e) {
+                        // 500 internal server error: otro error
+                        logger.warning("Error inesperado al reclamar puntos de desafío:" + e.getMessage());
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor al procesar el reclamo.");
+                }
+        }
 
     @GetMapping("/{id}/logros")
     @Operation(
@@ -356,6 +393,25 @@ public class GamificationController {
     public List<Medalla> getMedallas(@Parameter(description = "ID del hogar", example = "1") @PathVariable Long id) {
 
         return service.getMedallasHogar(id);
+    }
+
+
+    @GetMapping("/ranking/")
+    @Operation(
+            summary = "Obtener el ranking de general hogares por puntos",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Ranking obtenido correctamente",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(implementation = RankingDTO.class))
+                            )
+                    )
+            }
+    )
+    public RankingDTO getRankingGeneral() {
+        return new RankingDTO(service.getRankingGeneral(), true);
     }
 
 }
