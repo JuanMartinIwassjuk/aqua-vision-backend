@@ -185,66 +185,56 @@ public class ProyeccionService {
             Map<Integer, Double> consumoHistoricoMap,
             List<ProyeccionPuntosDTO> puntos
     ) {
-        List<String> hallazgos = new ArrayList<>();
+        List<String> out = new ArrayList<>();
         LocalDate hoy = LocalDate.now();
 
-        // 🔹 Filtramos solo días reales (hasta el día actual inclusive)
-        List<ProyeccionPuntosDTO> puntosReales = puntos.stream()
+        // Días reales
+        List<ProyeccionPuntosDTO> reales = puntos.stream()
                 .filter(p -> p.getDia() <= hoy.getDayOfMonth())
                 .collect(Collectors.toList());
 
-        // 🔹 Cálculo del consumo real hasta hoy
-        double consumoTotalReal = puntosReales.stream()
+        double consumoReal = reales.stream()
                 .mapToDouble(p -> p.getConsumoActual() != null ? p.getConsumoActual() : 0.0)
                 .sum();
 
-        // 🔹 Cálculo del consumo total proyectado (todo el mes)
-        double consumoTotalEstimado = puntos.stream()
+        double consumoEstimado = puntos.stream()
                 .mapToDouble(p -> p.getConsumoProyectado() != null ? p.getConsumoProyectado() : 0.0)
                 .sum();
 
-        // 🔹 Gasto total estimado (basado en la proyección completa del mes)
-        double gastoTotalEstimado = consumoTotalEstimado * precioPorUnidad;
+        double gastoEstimado = consumoEstimado * precioPorUnidad;
 
-        // 🔹 Total histórico comparable (solo hasta hoy)
-        double consumoHistoricoHastaHoy = consumoHistoricoMap.entrySet().stream()
-                .filter(e -> e.getKey() <= hoy.getDayOfMonth())
-                .mapToDouble(Map.Entry::getValue)
-                .sum();
-
-        // 1️⃣ Tendencia general (basada en los últimos 7 días reales)
-        List<Double> consumos = puntosReales.stream()
+        // Tendencia general
+        List<Double> consumos = reales.stream()
                 .map(p -> p.getConsumoActual() != null ? p.getConsumoActual() : 0.0)
                 .collect(Collectors.toList());
 
-        String tendenciaGeneral = "estable";
+        String estado = "estable";
         if (consumos.size() > 3) {
             int ventana = Math.min(7, consumos.size());
-            double promedioInicio = consumos.subList(0, consumos.size() - ventana)
-                    .stream().mapToDouble(Double::doubleValue).average().orElse(0);
-            double promedioFinal = consumos.subList(consumos.size() - ventana, consumos.size())
+
+            double inicio = consumos.subList(0, consumos.size() - ventana)
                     .stream().mapToDouble(Double::doubleValue).average().orElse(0);
 
-            if (promedioFinal > promedioInicio * 1.10) tendenciaGeneral = "creciente";
-            else if (promedioFinal < promedioInicio * 0.90) tendenciaGeneral = "decreciente";
+            double fin = consumos.subList(consumos.size() - ventana, consumos.size())
+                    .stream().mapToDouble(Double::doubleValue).average().orElse(0);
+
+            if (fin > inicio * 1.10) estado = "creciente";
+            else if (fin < inicio * 0.90) estado = "decreciente";
         }
 
-        switch (tendenciaGeneral) {
-            case "creciente" ->
-                    hallazgos.add("📈 El consumo muestra una tendencia creciente en los últimos días.");
-            case "decreciente" ->
-                    hallazgos.add("📉 El consumo presenta una tendencia descendente, reflejando un uso más eficiente.");
-            default ->
-                    hallazgos.add("⚖️ El consumo se mantiene estable sin grandes variaciones recientes.");
-        }
+        // --- Dashboard compacto ---
+        out.add("Estado: " + estado);
+        out.add(String.format("Consumo actual: %.2f L", consumoReal));
+        out.add(String.format("Proyección mensual: %.2f L", consumoEstimado));
+        out.add(String.format("Gasto estimado: $%.2f", gastoEstimado));
 
-        // 2️⃣ Día de mayor consumo real
+        // Mayor consumo
         consumoActualMap.entrySet().stream()
                 .filter(e -> e.getKey() <= hoy.getDayOfMonth())
                 .max(Comparator.comparing(Map.Entry::getValue))
-                .ifPresent(e -> hallazgos.add("💦 El día " + e.getKey() + " fue el de mayor consumo del mes hasta ahora."));
+                .ifPresent(e -> out.add("Pico de consumo: día " + e.getKey()));
 
-        // 3️⃣ Día de mayor ahorro relativo (solo días reales)
+        // Mayor ahorro
         consumoActualMap.entrySet().stream()
                 .filter(e -> e.getKey() <= hoy.getDayOfMonth())
                 .filter(e -> consumoHistoricoMap.containsKey(e.getKey()))
@@ -252,24 +242,10 @@ public class ProyeccionService {
                 .min(Comparator.comparing(e -> e.getValue() / consumoHistoricoMap.get(e.getKey())))
                 .ifPresent(e -> {
                     double ahorro = 100 * (1 - e.getValue() / consumoHistoricoMap.get(e.getKey()));
-                    hallazgos.add(String.format("💧 El día %d logró el mayor ahorro: %.1f%% menos que el histórico.", e.getKey(), ahorro));
+                    out.add(String.format("Ahorro destacado: día %d (%.0f%% menos)", e.getKey(), ahorro));
                 });
 
-        // 4️⃣ Totales y estimaciones
-        hallazgos.add(String.format("📊 Consumo total hasta hoy: %.2f litros.", consumoTotalReal));
-        hallazgos.add(String.format("🔮 Consumo estimado total del mes: %.2f litros.", consumoTotalEstimado));
-        hallazgos.add(String.format("💲 Gasto total estimado del mes: $%.2f.", gastoTotalEstimado));
-
-        // 5️⃣ Evaluación general respecto al histórico
-        if (consumoTotalReal > consumoHistoricoHastaHoy * 1.1) {
-            hallazgos.add("⚠️ El consumo acumulado supera al histórico del mismo período. Revisá posibles fugas o hábitos de uso.");
-        } else if (consumoTotalReal < consumoHistoricoHastaHoy * 0.9) {
-            hallazgos.add("✅ El consumo se mantiene por debajo del histórico, excelente eficiencia en el uso del agua.");
-        } else {
-            hallazgos.add("ℹ️ El consumo se mantiene dentro del rango normal respecto al histórico.");
-        }
-
-        return hallazgos;
+        return out;
     }
 
 
