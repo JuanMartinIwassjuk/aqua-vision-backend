@@ -139,7 +139,7 @@ public class DataMock {
             String localidad = LOCALIDADES.get((hogarId - 1) % LOCALIDADES.size());
 
             jdbcTemplate.update("INSERT INTO Hogar (miembros, localidad, direccion, ambientes, tiene_patio, tiene_pileta, tipo_hogar, facturacion_id, email, racha_diaria, puntos_disponibles, nombre) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-                    cantidadMiembros, localidad, "Medrano 191", 2, (!esAdmin && random.nextBoolean()), (!esAdmin && random.nextBoolean()), "CASA", hogarId, "hogar" + hogarId + "@example.com", rachaDiaria, puntosDisponibles, NOMBRE_HOGARES.get(hogarId - 1));
+                    cantidadMiembros, localidad, "Medrano 191", 2, (!esAdmin && random.nextBoolean()), (!esAdmin && random.nextBoolean()), "CASA", hogarId, "hogar" + hogarId + "@example.com", rachaDiaria, (puntosDisponibles / 10), NOMBRE_HOGARES.get(hogarId - 1));
 
             // Si es admin: NO crear sectores ni medidores (queda sin nada)
             if (esAdmin) {
@@ -443,7 +443,7 @@ public class DataMock {
                 jdbcTemplate.update("INSERT INTO puntos_reclamados (fecha, mini_juego, escena, puntos, hogar_id) VALUES (?, ?, ?, ?, ?)",
                         fecha, minijuego, escena, puntos, hogarId);
 
-                jdbcTemplate.update("UPDATE Hogar SET puntos_disponibles = puntos_disponibles + ? WHERE id = ?", puntos, hogarId);
+                jdbcTemplate.update("UPDATE Hogar SET puntos_disponibles = puntos_disponibles + ? WHERE id = ?", (puntos / 10), hogarId);
             }
         }
     }
@@ -684,7 +684,7 @@ if (!batch.isEmpty()) {
 
             jdbcTemplate.update("INSERT INTO puntos_reclamados (fecha, mini_juego, escena, puntos, hogar_id) VALUES (?, ?, ?, ?, ?)",
                     fecha, minijuego, escena, puntos, hogarObjetivoId);
-            jdbcTemplate.update("UPDATE Hogar SET puntos_disponibles = puntos_disponibles + ? WHERE id = ?", puntos, hogarObjetivoId);
+            jdbcTemplate.update("UPDATE Hogar SET puntos_disponibles = puntos_disponibles + ? WHERE id = ?", (puntos / 10), hogarObjetivoId);
         }
 
         logger.info("Datos especiales para demo insertados: eventos hoy, notificaciones y puntos reclamados para hogar {}", hogarObjetivoId);
