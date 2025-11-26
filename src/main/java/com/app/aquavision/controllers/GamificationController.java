@@ -287,7 +287,7 @@ public class GamificationController {
             @RequestParam String minijuego,
             @RequestParam(required = false) String escena) {
         LocalDateTime ultimaFechaPuntosReclamado = service.getUltimoReclamoSegunMinijuego(id, minijuego, escena);
-        logger.info("Ultima fecha reclamo para el minijuego:" + ultimaFechaPuntosReclamado);
+        //logger.info("Ultima fecha reclamo para el minijuego:" + ultimaFechaPuntosReclamado);
         return ultimaFechaPuntosReclamado;
     }
 

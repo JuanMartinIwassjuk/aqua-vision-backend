@@ -65,6 +65,10 @@ public class DataMock {
         insertarPlanes();
 
         insertarHogares();
+
+        insertarRoles();
+        insertarUsuarios();
+
         insertarMediciones(); // inserta histórico hasta ahora (sin admin)
 
         insertarRecompensas();
@@ -76,13 +80,11 @@ public class DataMock {
         insertarNotificacionesBaseline(); // ahora no inserta consumo mensual registrado
 
         insertarEventosHistoricos6Meses(); // eventos de los últimos 6 meses con tags
-        insertarPuntosReclamados6Meses(); // puntos reclamados distribuidos 6 meses
+        //insertarPuntosReclamados6Meses(); // puntos reclamados distribuidos 6 meses
 
         // Datos especiales para el día actual (demo):
         insertarDatosEspecialDiaActual();
 
-        insertarRoles();
-        insertarUsuarios();
 
         logger.info("Datos mock insertados correctamente");
     }
@@ -221,7 +223,7 @@ public class DataMock {
         LocalDateTime startTime = LocalDateTime.of(2025, 9, 1, 0, 0);
         LocalDateTime endTime = LocalDateTime.now();
 
-        long minutesInterval = 60; // cada hora
+        long minutesInterval = 120; // cada 2 horas
         int batchSize = 5000;
         List<Object[]> batch = new ArrayList<>(batchSize);
 
