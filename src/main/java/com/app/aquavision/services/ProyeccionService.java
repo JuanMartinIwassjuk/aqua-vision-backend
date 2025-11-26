@@ -201,7 +201,6 @@ public class ProyeccionService {
                 .mapToDouble(p -> p.getConsumoProyectado() != null ? p.getConsumoProyectado() : 0.0)
                 .sum();
 
-        double gastoEstimado = consumoEstimado * precioPorUnidad;
 
         // Tendencia general
         List<Double> consumos = reales.stream()
@@ -226,7 +225,7 @@ public class ProyeccionService {
         out.add("Estado: " + estado);
         out.add(String.format("Consumo actual: %.2f L", consumoReal));
         out.add(String.format("Proyección mensual: %.2f L", consumoEstimado));
-        out.add(String.format("Gasto estimado: $%.2f", gastoEstimado));
+
 
         // Mayor consumo
         consumoActualMap.entrySet().stream()
