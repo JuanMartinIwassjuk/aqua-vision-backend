@@ -84,7 +84,7 @@ public class MqttSubscriberService {
                     if (root.has("evt")) {
                         String evt = root.path("evt").asText();
                         // Capturamos el sectorId. Nota: En el log lo tienes como String, lo convertimos a Long.
-                        Long sectorId = root.path("id_sector").asLong(0L); 
+                        Long sectorId = root.path("id_sector").asLong(0L);
 
                         if (sectorId == 0L) {
                             logger.warn("Evento con evt pero sin id_sector válido. Ignorado.");
@@ -107,12 +107,12 @@ public class MqttSubscriberService {
                             if ("online".equalsIgnoreCase(evt)) {
                                 t.zeroStreak.set(0);
                                 setEstadoIfChanged(medidor, EstadoMedidor.IDLE);
-                                crearNotificacionCambioEstado(medidor, "El medidor se ha reconectado y está nuevamente en línea. Sector ID: " + sectorId, TipoNotificacion.INFORME);
+                                crearNotificacionCambioEstado(medidor, "El medidor se ha reconectado y está nuevamente en línea. Sector : " + sector.getNombre(), TipoNotificacion.INFORME);
                                 logger.info("🟢 Medidor {} ONLINE (Sector {})", numeroSerie, sectorId);
                             } else if ("offline".equalsIgnoreCase(evt)) {
                                 t.zeroStreak.set(0);
                                 setEstadoIfChanged(medidor, EstadoMedidor.OFFLINE);
-                                crearNotificacionCambioEstado(medidor, "El medidor se ha desconectado y está fuera de línea. Sector ID: " + sectorId, TipoNotificacion.ALERTA);
+                                crearNotificacionCambioEstado(medidor, "El medidor se ha desconectado y está fuera de línea. Sector : " + sector.getNombre(), TipoNotificacion.ALERTA);
                                 logger.info("🔴 Medidor {} OFFLINE (Sector {})", numeroSerie, sectorId);
                             }
 
@@ -121,7 +121,7 @@ public class MqttSubscriberService {
 
                         return; // ya procesado
                     }
-                    
+
                     // -------- (1) EVENTOS DE ESTADO: online / offline --------
                     /*if (root.has("evt")) {
                         String evt = root.path("evt").asText();
@@ -209,12 +209,12 @@ public class MqttSubscriberService {
                     sectorRepository.findById(sectorId).ifPresentOrElse(sector -> {
                         // Es CRUCIAL que Sector esté relacionado con Medidor en la DB
                         Medidor medidor = sector.getMedidor();
-                        
+
                         if (medidor == null) {
                             logger.error("❌ Sector {} existe pero NO está asociado a un Medidor. Ignorado.", sectorId);
                             return;
                         }
-                        
+
                         int numeroSerie = medidor.getNumeroSerie(); // Obtenemos el numeroSerie del Medidor asociado
                         Tracker t = trackers.computeIfAbsent(numeroSerie, k -> new Tracker()); // Usamos el numeroSerie para el Tracker de estado
 

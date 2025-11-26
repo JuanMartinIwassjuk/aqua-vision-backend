@@ -2,9 +2,7 @@ package com.app.aquavision.boostrap;
 
 import com.app.aquavision.entities.User;
 import com.app.aquavision.entities.domain.EstadoMedidor;
-
 import com.app.aquavision.entities.domain.notifications.TipoNotificacion;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,16 +12,13 @@ import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
 import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 @Component
 @Order(1)
@@ -664,6 +659,22 @@ if (!batch.isEmpty()) {
         // Notificación del pico exactamente a las 14:00
         jdbcTemplate.update("INSERT INTO Notificacion (hogar_id, mensaje, fecha_envio, titulo, leido, tipo) VALUES (?, ?, ?, ?, ?, ?)",
                 hogarObjetivoId, "Pico inusual detectado en Patio", tPico, "Pico inusual detectado", false, TipoNotificacion.ALERTA.name());
+
+        jdbcTemplate.update("INSERT INTO Notificacion (hogar_id, mensaje, fecha_envio, titulo, leido, tipo) VALUES (?, ?, ?, ?, ?, ?)",
+                hogarObjetivoId,
+                "El sector Patio presenta un aumento inusual en su consumo respecto al promedio del día.",
+                tTendencia,
+                "Aumento inusual en Patio",
+                false,
+                TipoNotificacion.INFORME.name());
+
+        jdbcTemplate.update("INSERT INTO Notificacion (hogar_id, mensaje, fecha_envio, titulo, leido, tipo) VALUES (?, ?, ?, ?, ?, ?)",
+                hogarObjetivoId,
+                "Advertencia: tu ritmo actual de consumo podría superar el umbral mensual estimado.",
+                tTendencia,
+                "Tendencia creciente detectada",
+                false,
+                TipoNotificacion.INFORME.name());
 
         // Notificación de creación de actividad a las 14:15 (según tu requerimiento)
         //jdbcTemplate.update("INSERT INTO Notificacion (hogar_id, mensaje, fecha_envio, titulo, leido, tipo) VALUES (?, ?, ?, ?, ?, ?)",
